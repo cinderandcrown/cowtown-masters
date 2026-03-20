@@ -1,5 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Trophy } from 'lucide-react';
 
@@ -121,7 +122,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
               {i + 1}
             </span>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-foreground truncate">{entry.participant_name}</p>
+              <Link to={`/participant/${encodeURIComponent(entry.participant_name)}`} onClick={(e) => e.stopPropagation()} className="text-sm font-semibold text-foreground hover:text-accent truncate transition">{entry.participant_name}</Link>
               <p className="text-[10px] text-muted-foreground truncate">
                 {entry.golferA?.name || 'TBD'} &amp; {entry.golferB?.name || 'TBD'}
               </p>
