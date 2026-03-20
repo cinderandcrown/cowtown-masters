@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import PoolLayout from '@/components/layout/PoolLayout';
 import Leaderboard from '@/components/pool/Leaderboard';
 import GolfersTab from '@/components/pool/GolfersTab';
-import DraftTab from '@/components/pool/DraftTab';
+import DrawTab from '@/components/pool/DrawTab';
 import HistoryTab from '@/components/pool/HistoryTab';
 import RulesTab from '@/components/pool/RulesTab';
 import TeamsTab from '@/components/pool/TeamsTab';
@@ -18,7 +18,7 @@ export default function PoolDashboard() {
     <PoolLayout activeTab={activeTab} onChange={setActiveTab}>
       {activeTab === 'leaderboard' && <Leaderboard poolId={poolId} onSelectEntry={setSelectedEntry} />}
       {activeTab === 'golfers' && <GolfersTab poolId={poolId} />}
-      {activeTab === 'draft' && <DraftTab poolId={poolId} />}
+      {activeTab === 'draw' && <DrawTab poolId={poolId} />}
       {activeTab === 'teams' && <TeamsTab poolId={poolId} />}
       {activeTab === 'history' && <HistoryTab poolId={poolId} />}
       {activeTab === 'rules' && <RulesTab poolId={poolId} />}

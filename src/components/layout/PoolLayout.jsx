@@ -6,7 +6,7 @@ const TABS = [
   { id: 'leaderboard', label: 'Board', icon: '🏆' },
   { id: 'teams', label: 'Teams', icon: '👥' },
   { id: 'golfers', label: 'Golfers', icon: '⛳' },
-  { id: 'draft', label: 'Draft', icon: '🎩' },
+  { id: 'draw', label: 'Draw', icon: '🎩' },
   { id: 'history', label: 'History', icon: '📊' },
   { id: 'rules', label: 'Rules', icon: '📋' },
 ];
