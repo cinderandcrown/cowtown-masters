@@ -1,5 +1,5 @@
 import React from 'react';
-import { GreenJacketIcon } from '@/components/icons/GreenJacketIcon';
+import { Trophy } from 'lucide-react';
 
 const HISTORY = {
   2025: { winner: 'Clay Coiller', score: -15, golferA: 'Ludvig Åberg', golferB: 'Patrick Reed', entries: 23 },
@@ -24,16 +24,16 @@ export default function HistoryTab() {
       {Object.entries(HISTORY)
         .sort((a, b) => b[0] - a[0])
         .map(([year, data]) => (
-          <div key={year} className="bg-white rounded-lg p-4 border border-accent/30 shadow-sm hover:shadow-md transition">
+          <div key={year} className="bg-card rounded-lg p-4 border border-border shadow-sm hover:shadow-md transition">
             <div className="flex items-start gap-3">
               <div className="bg-gradient-to-br from-primary to-secondary rounded-lg px-3 py-1">
                 <span className="text-accent font-black text-xl">{year}</span>
               </div>
               <div className="flex-1">
                 <div className="flex items-start gap-2">
-                  <GreenJacketIcon size={28} />
+                  <Trophy className="w-6 h-6 text-accent flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-lg font-bold text-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    <p className="text-lg font-bold text-card-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
                       {data.winner}
                     </p>
                     <p className="text-xs text-muted-foreground">{data.golferA} + {data.golferB}</p>
