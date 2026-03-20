@@ -1,15 +1,14 @@
 import React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-
-import { User } from 'lucide-react';
+import { Trophy, Users, Flag, Shuffle, History, BookOpen, User } from 'lucide-react';
 
 const TABS = [
-  { id: 'leaderboard', label: 'Board', icon: '🏆' },
-  { id: 'teams', label: 'Teams', icon: '👥' },
-  { id: 'golfers', label: 'Golfers', icon: '⛳' },
-  { id: 'draw', label: 'Draw', icon: '🎩' },
-  { id: 'history', label: 'History', icon: '📊' },
-  { id: 'rules', label: 'Rules', icon: '📋' },
+  { id: 'leaderboard', label: 'Board', Icon: Trophy },
+  { id: 'teams', label: 'Teams', Icon: Users },
+  { id: 'golfers', label: 'Golfers', Icon: Flag },
+  { id: 'draw', label: 'Draw', Icon: Shuffle },
+  { id: 'history', label: 'History', Icon: History },
+  { id: 'rules', label: 'Rules', Icon: BookOpen },
 ];
 
 export function PoolHeader() {
@@ -56,14 +55,14 @@ export function PoolBottomNav({ activeTab, onChange }) {
           <button
             key={tab.id}
             onClick={() => onChange(tab.id)}
-            className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-all ${
+            className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-all ${
               activeTab === tab.id
-                ? 'text-accent scale-110'
-                : 'text-primary-foreground/60 hover:text-primary-foreground/80'
+                ? 'text-accent'
+                : 'text-primary-foreground/50 hover:text-primary-foreground/70'
             }`}
           >
-            <span className="text-lg">{tab.icon}</span>
-            <span className="text-[10px] font-semibold tracking-wider uppercase">{tab.label}</span>
+            <tab.Icon className={`w-5 h-5 ${activeTab === tab.id ? 'stroke-[2.5]' : 'stroke-[1.5]'}`} />
+            <span className={`text-[9px] tracking-widest uppercase ${activeTab === tab.id ? 'font-bold' : 'font-medium'}`}>{tab.label}</span>
           </button>
         ))}
       </div>
