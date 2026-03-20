@@ -51,8 +51,8 @@ export default function Home() {
     <div className="relative min-h-screen bg-gradient-to-b from-background to-muted flex flex-col items-center justify-center px-4 pb-12">
       {/* Account Link */}
       <div className="absolute top-4 right-4 z-10">
-        <Link to="/account" className="p-2 rounded-lg bg-card border border-primary/20 hover:bg-muted transition">
-          <Settings className="w-5 h-5 text-primary" />
+        <Link to="/account" className="p-2 rounded-full hover:bg-muted/50 transition">
+          <Settings className="w-5 h-5 text-muted-foreground" />
         </Link>
       </div>
 
