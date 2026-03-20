@@ -4,7 +4,7 @@ import { Trophy } from 'lucide-react';
 const HISTORY = {
   2025: { winner: 'Clay Coiller', score: -15, golferA: 'Ludvig Åberg', golferB: 'Patrick Reed', entries: 23 },
   2024: { winner: 'Will H.', score: -5, golferA: 'Ludvig Åberg', golferB: 'Byeong Hun An', entries: 32 },
-  2022: { winner: 'TBD', score: 0, golferA: 'N/A', golferB: 'N/A', entries: 27 },
+  2022: { winner: 'N. Will', score: -4, golferA: 'Scottie Scheffler', golferB: 'Webb Simpson', entries: 27 },
 };
 
 const formatScore = (s) => (s === 0 ? 'E' : s > 0 ? `+${s}` : `${s}`);
