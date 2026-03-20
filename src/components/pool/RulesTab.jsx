@@ -51,7 +51,7 @@ export default function RulesTab() {
       {RULES.map((rule, i) => (
         <div
           key={i}
-          className="bg-white rounded-lg p-4 border border-primary/10 hover:border-primary/30 hover:shadow-sm transition flex gap-3"
+          className="bg-card rounded-lg p-4 border border-border hover:border-primary/30 hover:shadow-sm transition flex gap-3"
         >
           <span className="text-3xl flex-shrink-0 filter drop-shadow">{rule.icon}</span>
           <div>
