@@ -1,12 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GreenJacketIcon } from '@/components/icons/GreenJacketIcon';
-
-const POOL_ENTRIES = [
-  { id: '1', name: 'Clay Coiller', golferA: 'Ludvig Åberg', scoreA: -6, golferB: 'Patrick Reed', scoreB: -9, total: -15 },
-  { id: '2', name: 'Sanders Johnston', golferA: 'Jon Rahm', scoreA: -3, golferB: 'Sungjae Im', scoreB: -7, total: -10 },
-  { id: '3', name: 'Charlie Brown', golferA: 'Patrick Cantlay', scoreA: 2, golferB: 'Justin Rose', scoreB: -11, total: -9 },
-  { id: '4', name: 'Adam Teppe', golferA: 'Rory McIlroy', scoreA: -11, golferB: 'Dustin Johnson', scoreB: 3, total: -8 },
-];
+import { useLivePoolEntries } from '@/hooks/useLivePoolEntries';
 
 const formatScore = (s) => (s === 0 ? 'E' : s > 0 ? `+${s}` : `${s}`);
 const scoreColor = (s) => {
@@ -15,8 +9,24 @@ const scoreColor = (s) => {
   return 'text-accent';
 };
 
-export default function Leaderboard({ onSelectEntry }) {
-  const sorted = [...POOL_ENTRIES].sort((a, b) => a.total - b.total);
+export default function Leaderboard({ poolId, onSelectEntry }) {
+  const { data: entries = [], isLoading } = useLivePoolEntries(poolId);
+  const [pulseId, setPulseId] = useState(null);
+
+  // Pulse animation on score update
+  useEffect(() => {
+    if (entries.length > 0 && entries[0].id) {
+      setPulseId(entries[0].id);
+      const timer = setTimeout(() => setPulseId(null), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [entries]);
+
+  if (isLoading) {
+    return <div className="px-3 pt-3 pb-6 text-center text-muted-foreground">Loading leaderboard...</div>;
+  }
+
+  const sorted = entries;
 
   return (
     <div className="px-3 pt-3 pb-6">
