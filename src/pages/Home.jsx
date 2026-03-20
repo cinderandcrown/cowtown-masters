@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export default function Home() {
+
   const navigate = useNavigate();
   const [showCreatePool, setShowCreatePool] = useState(false);
   const [showJoinPool, setShowJoinPool] = useState(false);
