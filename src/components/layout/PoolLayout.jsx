@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { GreenJacketIcon } from '@/components/icons/GreenJacketIcon';
+
 import { User } from 'lucide-react';
 
 const TABS = [
@@ -20,7 +20,7 @@ export function PoolHeader() {
     <header className="sticky top-0 z-40 bg-gradient-to-r from-secondary to-primary border-b-2 border-accent px-4 py-3 md:py-4">
       <div className="max-w-md mx-auto flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <GreenJacketIcon size={32} />
+          <img src="https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/1752bc3ba_CowtownMastersLogo.png" alt="Cowtown Masters" className="w-8 h-8 object-contain" />
           <div>
             <h1 className="text-xl font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
               COWTOWN MASTERS
