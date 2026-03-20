@@ -96,3 +96,26 @@
 * {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Mobile-native: prevent text selection on interactive elements */
+button, nav, header, [role="navigation"], [role="button"], .select-none {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Ensure main content remains selectable */
+article, .selectable, main p, main span {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Safe area padding for notch devices */
+body {
+  padding-top: env(safe-area-inset-top, 0);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Overscroll behavior for pull-to-refresh */
+html, body {
+  overscroll-behavior-y: contain;
+}

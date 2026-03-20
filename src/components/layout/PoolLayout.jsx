@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { GreenJacketIcon } from '@/components/icons/GreenJacketIcon';
+import { User } from 'lucide-react';
 
 const TABS = [
   { id: 'leaderboard', label: 'Board', icon: '🏆' },
@@ -27,7 +28,7 @@ export function PoolHeader() {
             <p className="text-xs tracking-widest text-accent uppercase">A Tradition Unlike Any Other</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => navigate(`/pool/${poolId}/admin`)}
             className="text-xs font-bold text-accent bg-accent/10 rounded-lg px-2 py-1 border border-accent/30 hover:bg-accent/20 transition"
@@ -38,6 +39,9 @@ export function PoolHeader() {
             <span className="text-xs font-bold tracking-widest text-accent uppercase">LIVE</span>
             <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
           </div>
+          <Link to="/account" className="p-1.5 hover:bg-white/10 rounded-lg transition">
+            <User className="w-4 h-4 text-primary-foreground" />
+          </Link>
         </div>
       </div>
     </header>
