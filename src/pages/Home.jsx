@@ -59,7 +59,7 @@ export default function Home() {
       {/* Hero */}
       <div className="text-center mb-10 mt-8">
         <div className="mb-4 flex justify-center">
-          <img src="https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/c40331752_CowtownMasters.png" alt="Cowtown Masters" className="w-36 h-36" />
+          <img src="https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/538f38fca_generated_image.png" alt="Cowtown Masters" className="w-36 h-36 object-contain" />
         </div>
         <h1 className="text-4xl md:text-5xl font-bold text-primary mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
           COWTOWN MASTERS
