@@ -88,19 +88,19 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
             onClick={() => onSelectEntry(entry)}
             className={`grid grid-cols-[32px_1fr_60px_60px_56px] gap-2 px-3 py-2.5 border-b border-primary/5 cursor-pointer hover:bg-accent/5 transition ${
               i === 0 ? 'bg-accent/10' : i < 3 ? 'bg-primary/5' : ''
-            }`}
+            } ${pulseId === entry.id ? 'ring-1 ring-accent' : ''}`}
           >
             <span className={`font-black text-center ${i === 0 ? 'text-accent' : 'text-muted-foreground'}`}>
               {i === 0 ? '🏆' : i + 1}
             </span>
             <div>
-              <p className="text-sm font-semibold text-foreground">{entry.name}</p>
-              <p className="text-xs text-muted-foreground">{entry.golferA} · {entry.golferB}</p>
+              <p className="text-sm font-semibold text-foreground">{entry.participant_name}</p>
+              <p className="text-xs text-muted-foreground">Group A & B</p>
             </div>
-            <span className={`text-center font-bold text-sm ${scoreColor(entry.scoreA)}`}>{formatScore(entry.scoreA)}</span>
-            <span className={`text-center font-bold text-sm ${scoreColor(entry.scoreB)}`}>{formatScore(entry.scoreB)}</span>
-            <span className={`text-center font-black text-lg ${scoreColor(entry.total)} bg-accent/10 rounded px-1`}>
-              {formatScore(entry.total)}
+            <span className={`text-center font-bold text-sm ${scoreColor(entry.score_a)}`}>{formatScore(entry.score_a)}</span>
+            <span className={`text-center font-bold text-sm ${scoreColor(entry.score_b)}`}>{formatScore(entry.score_b)}</span>
+            <span className={`text-center font-black text-lg ${scoreColor(entry.total_score)} bg-accent/10 rounded px-1`}>
+              {formatScore(entry.total_score)}
             </span>
           </div>
         ))}
