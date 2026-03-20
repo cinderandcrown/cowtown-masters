@@ -9,7 +9,7 @@ import HistoryTab from '@/components/pool/HistoryTab';
 import RulesTab from '@/components/pool/RulesTab';
 import TeamsTab from '@/components/pool/TeamsTab';
 import EntryDetailModal from '@/components/pool/EntryDetailModal';
-import usePullToRefresh from '@/hooks/usePullToRefresh';
+import usePullToRefresh from '@/hooks/usePullToRefresh.jsx';
 
 export default function PoolDashboard() {
   const { poolId } = useParams();
