@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Home from '@/pages/Home';
 import PoolDashboard from '@/pages/PoolDashboard';
+import GolferProfile from '@/pages/GolferProfile';
 // Add page imports here
 
 const AuthenticatedApp = () => {
