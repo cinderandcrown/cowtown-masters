@@ -1,105 +1,136 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 import { GreenJacketIcon } from '@/components/icons/GreenJacketIcon';
-import { useLivePoolEntries } from '@/hooks/useLivePoolEntries';
 
-const formatScore = (s) => (s === 0 ? 'E' : s > 0 ? `+${s}` : `${s}`);
+const formatScore = (s) => (s == null ? '–' : s === 0 ? 'E' : s > 0 ? `+${s}` : `${s}`);
 const scoreColor = (s) => {
+  if (s == null) return 'text-muted-foreground';
   if (s < 0) return 'text-red-600';
-  if (s > 0) return 'text-primary';
+  if (s > 0) return 'text-foreground';
   return 'text-accent';
 };
 
 export default function Leaderboard({ poolId, onSelectEntry }) {
-  const { data: entries = [], isLoading } = useLivePoolEntries(poolId);
-  const [pulseId, setPulseId] = useState(null);
+  const { data: entries = [], isLoading: loadingEntries } = useQuery({
+    queryKey: ['poolEntries', poolId],
+    queryFn: () => base44.entities.PoolEntry.filter({ pool_id: poolId }),
+    enabled: !!poolId,
+  });
 
-  // Pulse animation on score update
-  useEffect(() => {
-    if (entries.length > 0 && entries[0].id) {
-      setPulseId(entries[0].id);
-      const timer = setTimeout(() => setPulseId(null), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [entries]);
+  const { data: golfers = [], isLoading: loadingGolfers } = useQuery({
+    queryKey: ['poolGolfers', poolId],
+    queryFn: () => base44.entities.Golfer.filter({ pool_id: poolId }),
+    enabled: !!poolId,
+    refetchInterval: 60000,
+  });
+
+  const isLoading = loadingEntries || loadingGolfers;
 
   if (isLoading) {
     return <div className="px-3 pt-3 pb-6 text-center text-muted-foreground">Loading leaderboard...</div>;
   }
 
-  const sorted = entries;
+  // Build golfer map
+  const golferMap = {};
+  for (const g of golfers) golferMap[g.id] = g;
+
+  // Enrich entries with golfer data
+  const standings = entries.map((entry) => {
+    const gA = entry.golfer_a_id ? golferMap[entry.golfer_a_id] : null;
+    const gB = entry.golfer_b_id ? golferMap[entry.golfer_b_id] : null;
+    const scoreA = gA?.score_to_par || 0;
+    const scoreB = gB?.score_to_par || 0;
+    return {
+      ...entry,
+      golferA: gA,
+      golferB: gB,
+      score_a: scoreA,
+      score_b: scoreB,
+      total_score: scoreA + scoreB,
+    };
+  }).sort((a, b) => a.total_score - b.total_score);
 
   return (
     <div className="px-3 pt-3 pb-6">
-      {/* Leader Card */}
-      {sorted.length > 0 && (
-        <div className={`bg-gradient-to-br from-secondary to-primary rounded-xl p-4 mb-4 border border-accent/30 shadow-lg transition-all ${
-          pulseId === sorted[0].id ? 'ring-2 ring-accent' : ''
-        }`}>
+      {/* Leader Hero */}
+      {standings.length > 0 && (
+        <div className="bg-gradient-to-br from-secondary to-primary rounded-xl p-4 mb-4 border border-accent/30 shadow-lg">
           <div className="flex items-start gap-3 mb-3">
             <GreenJacketIcon size={32} />
             <div className="flex-1">
-              <p className="text-xs font-bold tracking-widest text-accent uppercase">🏆 Leader</p>
-              <h2 className="text-2xl font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
-                {sorted[0].participant_name}
+              <p className="text-[10px] font-bold tracking-widest text-accent uppercase">🏆 Pool Leader</p>
+              <h2 className="text-xl font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
+                {standings[0].participant_name}
               </h2>
             </div>
-            <div className="text-right">
-              <div className={`text-3xl font-black ${scoreColor(sorted[0].total_score)}`}>
-                {formatScore(sorted[0].total_score)}
-              </div>
+            <div className={`text-3xl font-black tabular-nums ${standings[0].total_score < 0 ? 'text-red-400' : standings[0].total_score > 0 ? 'text-primary-foreground' : 'text-accent'}`}>
+              {formatScore(standings[0].total_score)}
             </div>
           </div>
-
           <div className="grid grid-cols-2 gap-2">
             <div className="bg-white/10 rounded-lg p-2 border border-white/10">
-              <p className="text-xs font-bold text-accent tracking-widest">GROUP A</p>
-              <p className="text-sm font-semibold text-primary-foreground truncate">Golfer A</p>
-              <p className={`text-lg font-bold ${scoreColor(sorted[0].score_a)}`}>{formatScore(sorted[0].score_a)}</p>
+              <p className="text-[10px] font-bold text-accent tracking-widest">GROUP A</p>
+              <p className="text-sm font-semibold text-primary-foreground truncate">{standings[0].golferA?.name || 'TBD'}</p>
+              <p className={`text-lg font-bold tabular-nums ${standings[0].score_a < 0 ? 'text-red-400' : 'text-primary-foreground'}`}>{formatScore(standings[0].score_a)}</p>
             </div>
             <div className="bg-white/10 rounded-lg p-2 border border-white/10">
-              <p className="text-xs font-bold text-accent tracking-widest">GROUP B</p>
-              <p className="text-sm font-semibold text-primary-foreground truncate">Golfer B</p>
-              <p className={`text-lg font-bold ${scoreColor(sorted[0].score_b)}`}>{formatScore(sorted[0].score_b)}</p>
+              <p className="text-[10px] font-bold text-accent tracking-widest">GROUP B</p>
+              <p className="text-sm font-semibold text-primary-foreground truncate">{standings[0].golferB?.name || 'TBD'}</p>
+              <p className={`text-lg font-bold tabular-nums ${standings[0].score_b < 0 ? 'text-red-400' : 'text-primary-foreground'}`}>{formatScore(standings[0].score_b)}</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Leaderboard Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-primary/10 overflow-hidden">
-        <div className="bg-gradient-to-r from-primary to-secondary px-3 py-2">
+      {/* Pool Standings Table */}
+      <div className="bg-card rounded-xl shadow-sm border border-primary/10 overflow-hidden">
+        <div className="bg-gradient-to-r from-primary to-secondary px-3 py-2 flex items-center justify-between">
           <span className="text-sm font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
             Pool Standings
           </span>
-          <span className="float-right text-xs text-accent font-semibold">{sorted.length} ENTRIES</span>
+          <span className="text-[10px] text-accent font-semibold">{standings.length} ENTRIES</span>
         </div>
 
-        <div className="grid grid-cols-[32px_1fr_60px_60px_56px] gap-2 px-3 py-2 border-b border-primary/10 bg-primary/5 text-xs font-bold text-primary uppercase tracking-wider">
-          <span>#</span>
-          <span>Name</span>
-          <span className="text-center">GRP A</span>
-          <span className="text-center">GRP B</span>
+        {/* Header */}
+        <div className="grid grid-cols-[28px_1fr_72px_72px_52px] gap-1 px-3 py-1.5 border-b border-primary/10 bg-primary/5 text-[10px] font-bold text-primary uppercase tracking-wider">
+          <span className="text-center">POS</span>
+          <span>Player</span>
+          <span className="text-center">Grp A</span>
+          <span className="text-center">Grp B</span>
           <span className="text-center">TOT</span>
         </div>
 
-        {sorted.map((entry, i) => (
+        {/* Rows */}
+        {standings.length === 0 && (
+          <div className="py-8 text-center text-muted-foreground text-sm">
+            <p>No entries yet</p>
+            <p className="text-xs mt-1">Add participants in the Admin panel</p>
+          </div>
+        )}
+
+        {standings.map((entry, i) => (
           <div
             key={entry.id}
             onClick={() => onSelectEntry(entry)}
-            className={`grid grid-cols-[32px_1fr_60px_60px_56px] gap-2 px-3 py-2.5 border-b border-primary/5 cursor-pointer hover:bg-accent/5 transition ${
+            className={`grid grid-cols-[28px_1fr_72px_72px_52px] gap-1 px-3 py-2 border-b border-primary/5 cursor-pointer hover:bg-accent/5 transition ${
               i === 0 ? 'bg-accent/10' : i < 3 ? 'bg-primary/5' : ''
-            } ${pulseId === entry.id ? 'ring-1 ring-accent' : ''}`}
+            }`}
           >
-            <span className={`font-black text-center ${i === 0 ? 'text-accent' : 'text-muted-foreground'}`}>
-              {i === 0 ? '🏆' : i + 1}
+            <span className={`text-center text-xs font-black ${i === 0 ? 'text-accent' : i < 3 ? 'text-primary' : 'text-muted-foreground'}`}>
+              {i + 1}
             </span>
-            <div>
-              <p className="text-sm font-semibold text-foreground">{entry.participant_name}</p>
-              <p className="text-xs text-muted-foreground">Group A & B</p>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-foreground truncate">{entry.participant_name}</p>
+              <div className="flex gap-1 text-[10px] text-muted-foreground truncate">
+                <span>{entry.golferA?.name || 'TBD'}</span>
+                <span>·</span>
+                <span>{entry.golferB?.name || 'TBD'}</span>
+              </div>
             </div>
-            <span className={`text-center font-bold text-sm ${scoreColor(entry.score_a)}`}>{formatScore(entry.score_a)}</span>
-            <span className={`text-center font-bold text-sm ${scoreColor(entry.score_b)}`}>{formatScore(entry.score_b)}</span>
-            <span className={`text-center font-black text-lg ${scoreColor(entry.total_score)} bg-accent/10 rounded px-1`}>
+            <span className={`text-center font-bold text-xs tabular-nums self-center ${scoreColor(entry.score_a)}`}>{formatScore(entry.score_a)}</span>
+            <span className={`text-center font-bold text-xs tabular-nums self-center ${scoreColor(entry.score_b)}`}>{formatScore(entry.score_b)}</span>
+            <span className={`text-center font-black text-sm tabular-nums self-center ${scoreColor(entry.total_score)}`}>
               {formatScore(entry.total_score)}
             </span>
           </div>
