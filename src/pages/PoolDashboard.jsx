@@ -15,11 +15,11 @@ export default function PoolDashboard() {
 
   return (
     <PoolLayout activeTab={activeTab} onChange={setActiveTab}>
-      {activeTab === 'leaderboard' && <Leaderboard onSelectEntry={setSelectedEntry} />}
-      {activeTab === 'golfers' && <GolfersTab />}
-      {activeTab === 'draft' && <DraftTab />}
-      {activeTab === 'history' && <HistoryTab />}
-      {activeTab === 'rules' && <RulesTab />}
+      {activeTab === 'leaderboard' && <Leaderboard poolId={poolId} onSelectEntry={setSelectedEntry} />}
+      {activeTab === 'golfers' && <GolfersTab poolId={poolId} />}
+      {activeTab === 'draft' && <DraftTab poolId={poolId} />}
+      {activeTab === 'history' && <HistoryTab poolId={poolId} />}
+      {activeTab === 'rules' && <RulesTab poolId={poolId} />}
 
       <EntryDetailModal entry={selectedEntry} open={!!selectedEntry} onOpenChange={(open) => !open && setSelectedEntry(null)} />
     </PoolLayout>
