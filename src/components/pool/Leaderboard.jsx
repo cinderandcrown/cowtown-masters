@@ -31,35 +31,39 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
   return (
     <div className="px-3 pt-3 pb-6">
       {/* Leader Card */}
-      <div className="bg-gradient-to-br from-secondary to-primary rounded-xl p-4 mb-4 border border-accent/30 shadow-lg">
-        <div className="flex items-start gap-3 mb-3">
-          <GreenJacketIcon size={32} />
-          <div className="flex-1">
-            <p className="text-xs font-bold tracking-widest text-accent uppercase">2025 Champion</p>
-            <h2 className="text-2xl font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
-              {sorted[0].name}
-            </h2>
+      {sorted.length > 0 && (
+        <div className={`bg-gradient-to-br from-secondary to-primary rounded-xl p-4 mb-4 border border-accent/30 shadow-lg transition-all ${
+          pulseId === sorted[0].id ? 'ring-2 ring-accent' : ''
+        }`}>
+          <div className="flex items-start gap-3 mb-3">
+            <GreenJacketIcon size={32} />
+            <div className="flex-1">
+              <p className="text-xs font-bold tracking-widest text-accent uppercase">🏆 Leader</p>
+              <h2 className="text-2xl font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
+                {sorted[0].participant_name}
+              </h2>
+            </div>
+            <div className="text-right">
+              <div className={`text-3xl font-black ${scoreColor(sorted[0].total_score)}`}>
+                {formatScore(sorted[0].total_score)}
+              </div>
+            </div>
           </div>
-          <div className="text-right">
-            <div className={`text-3xl font-black ${scoreColor(sorted[0].total)}`}>
-              {formatScore(sorted[0].total)}
+
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-white/10 rounded-lg p-2 border border-white/10">
+              <p className="text-xs font-bold text-accent tracking-widest">GROUP A</p>
+              <p className="text-sm font-semibold text-primary-foreground truncate">Golfer A</p>
+              <p className={`text-lg font-bold ${scoreColor(sorted[0].score_a)}`}>{formatScore(sorted[0].score_a)}</p>
+            </div>
+            <div className="bg-white/10 rounded-lg p-2 border border-white/10">
+              <p className="text-xs font-bold text-accent tracking-widest">GROUP B</p>
+              <p className="text-sm font-semibold text-primary-foreground truncate">Golfer B</p>
+              <p className={`text-lg font-bold ${scoreColor(sorted[0].score_b)}`}>{formatScore(sorted[0].score_b)}</p>
             </div>
           </div>
         </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          <div className="bg-white/10 rounded-lg p-2 border border-white/10">
-            <p className="text-xs font-bold text-accent tracking-widest">GROUP A</p>
-            <p className="text-sm font-semibold text-primary-foreground">{sorted[0].golferA}</p>
-            <p className={`text-lg font-bold ${scoreColor(sorted[0].scoreA)}`}>{formatScore(sorted[0].scoreA)}</p>
-          </div>
-          <div className="bg-white/10 rounded-lg p-2 border border-white/10">
-            <p className="text-xs font-bold text-accent tracking-widest">GROUP B</p>
-            <p className="text-sm font-semibold text-primary-foreground">{sorted[0].golferB}</p>
-            <p className={`text-lg font-bold ${scoreColor(sorted[0].scoreB)}`}>{formatScore(sorted[0].scoreB)}</p>
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Leaderboard Table */}
       <div className="bg-white rounded-xl shadow-sm border border-primary/10 overflow-hidden">
