@@ -35,6 +35,8 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/pool/:poolId" element={<PoolDashboard />} />
       {/* Add your page Route elements here */}
       <Route path="*" element={<PageNotFound />} />
     </Routes>
