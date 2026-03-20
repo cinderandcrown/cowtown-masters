@@ -3,13 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
-const GOLFER_SCORES = [
-  { id: '1', name: 'Justin Rose', total: -11, r1: -7, r2: -1, r3: 3, r4: -6, scores: [65, 71, 75, 66], group: 'B' },
-  { id: '2', name: 'Rory McIlroy', total: -11, r1: 0, r2: -6, r3: -6, r4: 1, scores: [72, 66, 66, 73], group: 'A' },
-  { id: '3', name: 'Patrick Reed', total: -9, r1: -1, r2: -2, r3: -3, r4: -3, scores: [71, 70, 69, 69], group: 'B' },
-  { id: '4', name: 'Scottie Scheffler', total: -8, r1: -4, r2: -1, r3: 0, r4: -3, scores: [68, 71, 72, 69], group: 'A' },
-];
-
 const formatScore = (s) => (s === 0 ? 'E' : s > 0 ? `+${s}` : `${s}`);
 const scoreColor = (s) => {
   if (s < 0) return 'text-red-600';
