@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import PoolLayout from '@/components/layout/PoolLayout';
 import Leaderboard from '@/components/pool/Leaderboard';
 import GolfersTab from '@/components/pool/GolfersTab';
-import DrawTab from '@/components/pool/DrawTab';
+import DrawTab from '@/components/pool/DrawTab.jsx';
 import HistoryTab from '@/components/pool/HistoryTab';
 import RulesTab from '@/components/pool/RulesTab';
 import TeamsTab from '@/components/pool/TeamsTab';
