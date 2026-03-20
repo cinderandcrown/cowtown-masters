@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 
 const GOLFER_SCORES = [
   { id: '1', name: 'Justin Rose', total: -11, r1: -7, r2: -1, r3: 3, r4: -6, scores: [65, 71, 75, 66], group: 'B' },
