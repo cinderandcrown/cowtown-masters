@@ -62,9 +62,10 @@ export default function GolfersTab({ poolId }) {
         {sorted.map((g, i) => (
           <div
             key={g.id}
-            className={`grid grid-cols-[28px_1fr_repeat(4,36px)_44px] gap-1 px-3 py-2 rounded-lg border ${
+            onClick={() => navigate(`/golfer/${g.id}`)}
+            className={`grid grid-cols-[28px_1fr_repeat(4,36px)_44px] gap-1 px-3 py-2 rounded-lg border cursor-pointer ${
               i < 3
-                ? `bg-accent/10 border-accent/30`
+                ? `bg-accent/10 border-accent/30 hover:shadow-md`
                 : 'bg-white border-primary/10 hover:bg-primary/5'
             } transition`}
           >
