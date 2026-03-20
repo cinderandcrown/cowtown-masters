@@ -52,14 +52,14 @@ export default function Home() {
       {/* Account Link */}
       <div className="absolute top-4 right-4 z-10">
         <Link to="/account" className="p-2 rounded-lg bg-card border border-primary/20 hover:bg-muted transition">
-          <GreenJacketIcon size={24} />
+          <Settings className="w-5 h-5 text-primary" />
         </Link>
       </div>
 
       {/* Hero */}
       <div className="text-center mb-10 mt-8">
         <div className="mb-4 flex justify-center">
-          <GreenJacketIcon size={80} />
+          <img src="https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/c40331752_CowtownMasters.png" alt="Cowtown Masters" className="w-24 h-24 rounded-2xl" />
         </div>
         <h1 className="text-4xl md:text-5xl font-bold text-primary mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
           COWTOWN MASTERS
