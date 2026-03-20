@@ -52,7 +52,7 @@ export default function Home() {
       {/* Account Link */}
       <div className="absolute top-4 right-4 z-10">
         <Link to="/account" className="p-2 rounded-lg bg-card border border-primary/20 hover:bg-muted transition">
-          <Settings className="w-5 h-5 text-primary" />
+          <GreenJacketIcon size={24} />
         </Link>
       </div>
 
