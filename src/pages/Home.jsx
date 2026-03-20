@@ -6,7 +6,7 @@ import { GreenJacketIcon } from '@/components/icons/GreenJacketIcon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Settings } from 'lucide-react';
+
 
 export default function Home() {
   const navigate = useNavigate();
