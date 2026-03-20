@@ -19,7 +19,7 @@ const RULES = [
   {
     icon: '⛳',
     title: 'Scoring',
-    desc: 'Your total score = Group A golfer's final score to par + Group B golfer's final score to par. Lowest combined score wins.',
+    desc: "Your total score = Group A golfer's final score to par + Group B golfer's final score to par. Lowest combined score wins.",
   },
   {
     icon: '✂️',
