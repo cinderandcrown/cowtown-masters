@@ -6,6 +6,7 @@ import { GreenJacketIcon } from '@/components/icons/GreenJacketIcon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Settings } from 'lucide-react';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -48,6 +49,13 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted flex flex-col items-center justify-center px-4 pb-12">
+      {/* Account Link */}
+      <div className="absolute top-4 right-4 z-10">
+        <Link to="/account" className="p-2 rounded-lg bg-card border border-primary/20 hover:bg-muted transition">
+          <Settings className="w-5 h-5 text-primary" />
+        </Link>
+      </div>
+
       {/* Hero */}
       <div className="text-center mb-10 mt-8">
         <div className="mb-4 flex justify-center">
