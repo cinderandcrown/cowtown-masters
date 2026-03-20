@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 import { GreenJacketIcon } from '@/components/icons/GreenJacketIcon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +14,11 @@ export default function Home() {
   const [inviteCode, setInviteCode] = useState('');
   const [poolName, setPoolName] = useState('');
   const [poolYear, setPoolYear] = useState(new Date().getFullYear());
+
+  const { data: pools = [] } = useQuery({
+    queryKey: ['pools'],
+    queryFn: () => base44.entities.Pool.list(),
+  });
 
   const handleCreatePool = () => {
     if (poolName.trim()) {
@@ -66,6 +73,30 @@ export default function Home() {
           <p className="text-xs text-muted-foreground">Favorites vs longshots</p>
         </div>
       </div>
+
+      {/* Active Pools */}
+      {pools.length > 0 && (
+        <div className="w-full max-w-md mb-6 space-y-2">
+          <h3 className="text-sm font-bold text-primary tracking-widest uppercase text-center mb-3">Active Pools</h3>
+          {pools.map((pool) => (
+            <Link
+              key={pool.id}
+              to={`/pool/${pool.id}`}
+              className="flex items-center justify-between bg-white rounded-lg p-4 border border-primary/20 shadow-sm hover:shadow-md hover:border-primary/40 transition"
+            >
+              <div>
+                <p className="font-bold text-foreground">{pool.name}</p>
+                <p className="text-xs text-muted-foreground">{pool.year} · Code: {pool.invite_code}</p>
+              </div>
+              <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                pool.status === 'live' ? 'bg-red-100 text-red-700' : pool.status === 'draft' ? 'bg-accent/20 text-accent' : 'bg-primary/10 text-primary'
+              }`}>
+                {pool.status?.toUpperCase()}
+              </span>
+            </Link>
+          ))}
+        </div>
+      )}
 
       {/* CTA Buttons */}
       <div className="flex flex-col gap-3 w-full max-w-md">
