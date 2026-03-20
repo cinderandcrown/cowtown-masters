@@ -27,6 +27,10 @@ export default function GolfersTab({ poolId }) {
     .filter((g) => filter === 'all' || g.group === filter)
     .sort((a, b) => (a.score_to_par || 0) - (b.score_to_par || 0));
 
+  if (isLoading) {
+    return <div className="px-3 pt-3 pb-6 text-center text-muted-foreground">Loading golfers...</div>;
+  }
+
   return (
     <div className="px-3 pt-3 pb-6">
       {/* Filter Pills */}
