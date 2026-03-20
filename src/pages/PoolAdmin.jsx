@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Users, UserPlus, Trophy } from 'lucide-react';
-import AdminGolferList from '@/components/admin/AdminGolferList';
+import AdminGolferList from '@/components/admin/AdminGolferList.jsx';
 import AdminEntryList from '@/components/admin/AdminEntryList';
 import AddGolferForm from '@/components/admin/AddGolferForm';
 import AddEntryForm from '@/components/admin/AddEntryForm';
