@@ -78,13 +78,13 @@ export default function GolfersTab({ poolId }) {
                 GRP {g.group}
               </span>
             </div>
-            {[g.r1, g.r2, g.r3, g.r4].map((r, j) => (
+            {[g.round_1, g.round_2, g.round_3, g.round_4].map((r, j) => (
               <span key={j} className={`text-center font-semibold text-xs ${scoreColor(r)}`}>
                 {formatScore(r)}
               </span>
             ))}
-            <span className={`text-center font-black text-sm ${scoreColor(g.total)} bg-accent/10 rounded px-1`}>
-              {formatScore(g.total)}
+            <span className={`text-center font-black text-sm ${scoreColor(g.score_to_par)} bg-accent/10 rounded px-1`}>
+              {formatScore(g.score_to_par)}
             </span>
           </div>
         ))}
