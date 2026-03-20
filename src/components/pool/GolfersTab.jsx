@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { assignGroups } from '@/lib/groupUtils';
 
 const formatScore = (s) => (s === 0 ? 'E' : s > 0 ? `+${s}` : `${s}`);
 const scoreColor = (s) => {
@@ -14,14 +15,22 @@ export default function GolfersTab({ poolId }) {
   const navigate = useNavigate();
   const [filter, setFilter] = useState('all');
 
-  const { data: golfers = [], isLoading } = useQuery({
+  const { data: rawGolfers = [], isLoading } = useQuery({
     queryKey: ['poolGolfers', poolId],
     queryFn: async () => {
-      const all = await base44.asServiceRole.entities.Golfer.list();
-      return all.filter((g) => g.pool_id === poolId);
+      const all = await base44.entities.Golfer.filter({ pool_id: poolId });
+      return all;
     },
     enabled: !!poolId,
   });
+
+  const { data: entries = [] } = useQuery({
+    queryKey: ['poolEntries', poolId],
+    queryFn: () => base44.entities.PoolEntry.filter({ pool_id: poolId }),
+    enabled: !!poolId,
+  });
+
+  const golfers = assignGroups(rawGolfers, entries.length);
 
   const sorted = golfers
     .filter((g) => filter === 'all' || g.group === filter)

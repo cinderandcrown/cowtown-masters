@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { assignGroups } from '@/lib/groupUtils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Trash2, Pencil, X, Check } from 'lucide-react';
@@ -10,17 +11,19 @@ export default function AdminGolferList({ poolId }) {
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({});
 
-  const { data: golfers = [], isLoading } = useQuery({
+  const { data: rawGolfers = [], isLoading } = useQuery({
     queryKey: ['adminGolfers', poolId],
-    queryFn: async () => {
-      const all = await base44.entities.Golfer.filter({ pool_id: poolId });
-      return all.sort((a, b) => {
-        if (a.group !== b.group) return a.group < b.group ? -1 : 1;
-        return (a.score_to_par || 0) - (b.score_to_par || 0);
-      });
-    },
+    queryFn: () => base44.entities.Golfer.filter({ pool_id: poolId }),
     enabled: !!poolId,
   });
+
+  const { data: entries = [] } = useQuery({
+    queryKey: ['poolEntries', poolId],
+    queryFn: () => base44.entities.PoolEntry.filter({ pool_id: poolId }),
+    enabled: !!poolId,
+  });
+
+  const golfers = assignGroups(rawGolfers, entries.length);
 
   const updateGolfer = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Golfer.update(id, data),
@@ -98,6 +101,9 @@ export default function AdminGolferList({ poolId }) {
 
   return (
     <div className="space-y-4">
+      <p className="text-xs text-muted-foreground text-center">
+        Groups are dynamic: Top {entries.length || 0} golfer{entries.length !== 1 ? 's' : ''} by odds → Group A, rest → Group B
+      </p>
       {renderGroup('GROUP A — Favorites', groupA, 'text-primary')}
       {renderGroup('GROUP B — Longshots', groupB, 'text-accent')}
     </div>

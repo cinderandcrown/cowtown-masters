@@ -3,14 +3,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function AddGolferForm({ poolId }) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
-  const [group, setGroup] = useState('A');
   const [odds, setOdds] = useState('');
   const [ranking, setRanking] = useState('');
 
@@ -31,7 +29,7 @@ export default function AddGolferForm({ poolId }) {
     createGolfer.mutate({
       pool_id: poolId,
       name: name.trim(),
-      group,
+      group: 'A',
       betting_odds: odds || undefined,
       world_ranking: ranking ? Number(ranking) : undefined,
       score_to_par: 0,
@@ -58,19 +56,7 @@ export default function AddGolferForm({ poolId }) {
             <label className="text-xs font-semibold text-muted-foreground">Golfer Name *</label>
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g., Scottie Scheffler" className="mt-1" />
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground">Group *</label>
-              <Select value={group} onValueChange={setGroup}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="A">Group A</SelectItem>
-                  <SelectItem value="B">Group B</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-semibold text-muted-foreground">Odds</label>
               <Input value={odds} onChange={(e) => setOdds(e.target.value)} placeholder="+1400" className="mt-1" />
@@ -80,6 +66,7 @@ export default function AddGolferForm({ poolId }) {
               <Input type="number" value={ranking} onChange={(e) => setRanking(e.target.value)} placeholder="1" className="mt-1" />
             </div>
           </div>
+          <p className="text-xs text-muted-foreground">Group is assigned automatically based on odds and participant count.</p>
           <Button type="submit" disabled={createGolfer.isPending} className="w-full bg-primary hover:bg-primary/90 text-white">
             {createGolfer.isPending ? 'Adding...' : 'Add Golfer'}
           </Button>
