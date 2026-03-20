@@ -6,6 +6,7 @@ import GolfersTab from '@/components/pool/GolfersTab';
 import DraftTab from '@/components/pool/DraftTab';
 import HistoryTab from '@/components/pool/HistoryTab';
 import RulesTab from '@/components/pool/RulesTab';
+import TeamsTab from '@/components/pool/TeamsTab';
 import EntryDetailModal from '@/components/pool/EntryDetailModal';
 
 export default function PoolDashboard() {
@@ -18,6 +19,7 @@ export default function PoolDashboard() {
       {activeTab === 'leaderboard' && <Leaderboard poolId={poolId} onSelectEntry={setSelectedEntry} />}
       {activeTab === 'golfers' && <GolfersTab poolId={poolId} />}
       {activeTab === 'draft' && <DraftTab poolId={poolId} />}
+      {activeTab === 'teams' && <TeamsTab poolId={poolId} />}
       {activeTab === 'history' && <HistoryTab poolId={poolId} />}
       {activeTab === 'rules' && <RulesTab poolId={poolId} />}
 

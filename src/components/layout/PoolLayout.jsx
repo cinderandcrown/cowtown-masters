@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { GreenJacketIcon } from '@/components/icons/GreenJacketIcon';
 
 const TABS = [
-  { id: 'leaderboard', label: 'Leaderboard', icon: '🏆' },
+  { id: 'leaderboard', label: 'Board', icon: '🏆' },
+  { id: 'teams', label: 'Teams', icon: '👥' },
   { id: 'golfers', label: 'Golfers', icon: '⛳' },
   { id: 'draft', label: 'Draft', icon: '🎩' },
   { id: 'history', label: 'History', icon: '📊' },
