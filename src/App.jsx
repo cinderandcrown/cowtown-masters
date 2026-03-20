@@ -8,6 +8,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Home from '@/pages/Home';
 import PoolDashboard from '@/pages/PoolDashboard';
 import GolferProfile from '@/pages/GolferProfile';
+import PoolAdmin from '@/pages/PoolAdmin';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -39,6 +40,7 @@ const AuthenticatedApp = () => {
       <Route path="/" element={<Home />} />
       <Route path="/pool/:poolId" element={<PoolDashboard />} />
       <Route path="/golfer/:golferId" element={<GolferProfile />} />
+      <Route path="/pool/:poolId/admin" element={<PoolAdmin />} />
       {/* Add your page Route elements here */}
       <Route path="*" element={<PageNotFound />} />
     </Routes>
