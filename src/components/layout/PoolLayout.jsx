@@ -52,14 +52,14 @@ export function PoolBottomNav({ activeTab, onChange }) {
           <button
             key={tab.id}
             onClick={() => onChange(tab.id)}
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
+            className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-all ${
               activeTab === tab.id
                 ? 'text-accent scale-110'
                 : 'text-primary-foreground/60 hover:text-primary-foreground/80'
             }`}
           >
-            <span className="text-xl">{tab.icon}</span>
-            <span className="text-xs font-semibold tracking-wider uppercase">{tab.label}</span>
+            <span className="text-lg">{tab.icon}</span>
+            <span className="text-[10px] font-semibold tracking-wider uppercase">{tab.label}</span>
           </button>
         ))}
       </div>
