@@ -1,11 +1,13 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Trophy } from 'lucide-react';
+import { POOL_HISTORY } from '@/lib/poolHistoryData';
 
-const HISTORY = {
-  2025: { winner: 'Clay Coiller', score: -15, golferA: 'Ludvig Åberg', golferB: 'Patrick Reed', entries: 23 },
-  2024: { winner: 'Will H.', score: -5, golferA: 'Ludvig Åberg', golferB: 'Byeong Hun An', entries: 32 },
-  2022: { winner: 'N. Will', score: -4, golferA: 'Scottie Scheffler', golferB: 'Webb Simpson', entries: 27 },
-};
+const HISTORY = {};
+for (const [year, data] of Object.entries(POOL_HISTORY)) {
+  const winner = data.standings[0];
+  HISTORY[year] = { winner: data.winner, score: data.winningScore, golferA: winner?.golferA, golferB: winner?.golferB, entries: data.entries };
+}
 
 const formatScore = (s) => (s === 0 ? 'E' : s > 0 ? `+${s}` : `${s}`);
 const scoreColor = (s) => {
@@ -33,9 +35,9 @@ export default function HistoryTab() {
                 <div className="flex items-start gap-2">
                   <Trophy className="w-6 h-6 text-accent flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-lg font-bold text-card-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    <Link to={`/participant/${encodeURIComponent(data.winner)}`} className="text-lg font-bold text-card-foreground hover:text-accent transition" style={{ fontFamily: "'Playfair Display', serif" }}>
                       {data.winner}
-                    </p>
+                    </Link>
                     <p className="text-xs text-muted-foreground">{data.golferA} + {data.golferB}</p>
                   </div>
                 </div>

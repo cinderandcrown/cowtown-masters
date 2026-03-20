@@ -6,6 +6,7 @@ import PoolDashboard from '@/pages/PoolDashboard';
 import GolferProfile from '@/pages/GolferProfile';
 import PoolAdmin from '@/pages/PoolAdmin';
 import AccountSettings from '@/pages/AccountSettings';
+import ParticipantProfile from '@/pages/ParticipantProfile';
 import PageNotFound from '@/lib/PageNotFound';
 
 const pageVariants = {
@@ -35,6 +36,7 @@ export default function AnimatedRoutes() {
           <Route path="/pool/:poolId" element={<PoolDashboard />} />
           <Route path="/golfer/:golferId" element={<GolferProfile />} />
           <Route path="/pool/:poolId/admin" element={<PoolAdmin />} />
+          <Route path="/participant/:name" element={<ParticipantProfile />} />
           <Route path="/account" element={<AccountSettings />} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>
