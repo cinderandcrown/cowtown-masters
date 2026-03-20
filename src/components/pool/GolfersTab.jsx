@@ -17,11 +17,22 @@ const scoreColor = (s) => {
   return 'text-accent';
 };
 
-export default function GolfersTab() {
+export default function GolfersTab({ poolId }) {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState('all');
-  const sorted = GOLFER_SCORES
+
+  const { data: golfers = [], isLoading } = useQuery({
+    queryKey: ['poolGolfers', poolId],
+    queryFn: async () => {
+      const all = await base44.asServiceRole.entities.Golfer.list();
+      return all.filter((g) => g.pool_id === poolId);
+    },
+    enabled: !!poolId,
+  });
+
+  const sorted = golfers
     .filter((g) => filter === 'all' || g.group === filter)
-    .sort((a, b) => a.total - b.total);
+    .sort((a, b) => (a.score_to_par || 0) - (b.score_to_par || 0));
 
   return (
     <div className="px-3 pt-3 pb-6">
