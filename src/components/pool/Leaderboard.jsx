@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { GreenJacketIcon } from '@/components/icons/GreenJacketIcon';
+import { Trophy } from 'lucide-react';
 
 const formatScore = (s) => (s == null ? '–' : s === 0 ? 'E' : s > 0 ? `+${s}` : `${s}`);
 const scoreColor = (s) => {
@@ -57,7 +57,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
       {standings.length > 0 && (
         <div className="bg-gradient-to-br from-secondary to-primary rounded-xl p-4 mb-4 border border-accent/30 shadow-lg">
           <div className="flex items-start gap-3 mb-3">
-            <GreenJacketIcon size={32} />
+            <Trophy className="w-7 h-7 text-accent flex-shrink-0" />
             <div className="flex-1">
               <p className="text-[10px] font-bold tracking-widest text-accent uppercase">🏆 Pool Leader</p>
               <h2 className="text-xl font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
@@ -93,12 +93,12 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
         </div>
 
         {/* Header */}
-        <div className="grid grid-cols-[28px_1fr_72px_72px_52px] gap-1 px-3 py-1.5 border-b border-primary/10 bg-primary/5 text-[10px] font-bold text-primary uppercase tracking-wider">
-          <span className="text-center">POS</span>
+        <div className="grid grid-cols-[32px_1fr_56px_56px_52px] gap-1 px-3 py-1.5 border-b border-primary/10 bg-primary/5 text-[10px] font-bold text-primary uppercase tracking-wider">
+          <span className="text-center">#</span>
           <span>Player</span>
-          <span className="text-center">Grp A</span>
-          <span className="text-center">Grp B</span>
-          <span className="text-center">TOT</span>
+          <span className="text-center">A</span>
+          <span className="text-center">B</span>
+          <span className="text-center">Tot</span>
         </div>
 
         {/* Rows */}
@@ -113,7 +113,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
           <div
             key={entry.id}
             onClick={() => onSelectEntry(entry)}
-            className={`grid grid-cols-[28px_1fr_72px_72px_52px] gap-1 px-3 py-2 border-b border-primary/5 cursor-pointer hover:bg-accent/5 transition ${
+            className={`grid grid-cols-[32px_1fr_56px_56px_52px] gap-1 px-3 py-2 border-b border-primary/5 cursor-pointer hover:bg-accent/5 transition ${
               i === 0 ? 'bg-accent/10' : i < 3 ? 'bg-primary/5' : ''
             }`}
           >
@@ -122,11 +122,9 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
             </span>
             <div className="min-w-0">
               <p className="text-sm font-semibold text-foreground truncate">{entry.participant_name}</p>
-              <div className="flex gap-1 text-[10px] text-muted-foreground truncate">
-                <span>{entry.golferA?.name || 'TBD'}</span>
-                <span>·</span>
-                <span>{entry.golferB?.name || 'TBD'}</span>
-              </div>
+              <p className="text-[10px] text-muted-foreground truncate">
+                {entry.golferA?.name || 'TBD'} &amp; {entry.golferB?.name || 'TBD'}
+              </p>
             </div>
             <span className={`text-center font-bold text-xs tabular-nums self-center ${scoreColor(entry.score_a)}`}>{formatScore(entry.score_a)}</span>
             <span className={`text-center font-bold text-xs tabular-nums self-center ${scoreColor(entry.score_b)}`}>{formatScore(entry.score_b)}</span>
