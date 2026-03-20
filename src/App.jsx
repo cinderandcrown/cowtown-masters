@@ -38,6 +38,7 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/pool/:poolId" element={<PoolDashboard />} />
+      <Route path="/golfer/:golferId" element={<GolferProfile />} />
       {/* Add your page Route elements here */}
       <Route path="*" element={<PageNotFound />} />
     </Routes>
