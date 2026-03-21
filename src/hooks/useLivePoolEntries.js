@@ -7,45 +7,32 @@ export function useLivePoolEntries(poolId) {
     queryFn: async () => {
       if (!poolId) return [];
 
-      // Get all entries for this pool
-      const entries = await base44.entities.PoolEntry.filter({ pool_id: poolId });
+      // Fetch entries and all golfers in parallel (2 requests instead of N+1)
+      const [entries, golfers] = await Promise.all([
+        base44.entities.PoolEntry.filter({ pool_id: poolId }),
+        base44.entities.Golfer.filter({ pool_id: poolId }),
+      ]);
 
-      // Calculate current scores from linked golfers
-      const enrichedEntries = await Promise.all(
-        entries.map(async (entry) => {
-          let scoreA = 0, scoreB = 0;
+      // Build a lookup map for O(1) golfer access
+      const golferMap = {};
+      for (const g of golfers) golferMap[g.id] = g;
 
-          if (entry.golfer_a_id) {
-            try {
-              const golferA = await base44.entities.Golfer.get(entry.golfer_a_id);
-              scoreA = golferA.score_to_par || 0;
-            } catch (e) {
-              console.error('Error fetching golfer A:', e);
-            }
-          }
-
-          if (entry.golfer_b_id) {
-            try {
-              const golferB = await base44.entities.Golfer.get(entry.golfer_b_id);
-              scoreB = golferB.score_to_par || 0;
-            } catch (e) {
-              console.error('Error fetching golfer B:', e);
-            }
-          }
-
-          return {
-            ...entry,
-            score_a: scoreA,
-            score_b: scoreB,
-            total_score: scoreA + scoreB,
-          };
-        })
-      );
+      // Enrich entries with scores from the golfer map
+      const enrichedEntries = entries.map((entry) => {
+        const scoreA = entry.golfer_a_id ? (golferMap[entry.golfer_a_id]?.score_to_par || 0) : 0;
+        const scoreB = entry.golfer_b_id ? (golferMap[entry.golfer_b_id]?.score_to_par || 0) : 0;
+        return {
+          ...entry,
+          score_a: scoreA,
+          score_b: scoreB,
+          total_score: scoreA + scoreB,
+        };
+      });
 
       // Sort by total score (lowest wins)
       return enrichedEntries.sort((a, b) => a.total_score - b.total_score);
     },
-    refetchInterval: 60000, // Refetch every 60 seconds
+    refetchInterval: 60000,
     enabled: !!poolId,
   });
 }
