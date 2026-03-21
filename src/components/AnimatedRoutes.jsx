@@ -6,7 +6,7 @@ import PoolDashboard from '@/pages/PoolDashboard';
 import GolferProfile from '@/pages/GolferProfile';
 import PoolAdmin from '@/pages/PoolAdmin';
 import AccountSettings from '@/pages/AccountSettings';
-import ParticipantProfile from '@/pages/ParticipantProfile.jsx';
+import ParticipantProfile from '@/pages/ParticipantProfile';
 import PageNotFound from '@/lib/PageNotFound';
 
 const pageVariants = {
