@@ -1,12 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Trash2, User, Users } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Trash2, User, Users, Pencil, Check, X, Plus } from 'lucide-react';
 import { parseTeamEmails } from '@/lib/scoreUtils';
 
 export default function AdminEntryList({ poolId }) {
   const queryClient = useQueryClient();
+
+  const [editingId, setEditingId] = useState(null);
+  const [editValues, setEditValues] = useState({ participant_name: '', team_name: '', emails: [] });
+  const [emailInput, setEmailInput] = useState('');
 
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ['adminEntries', poolId],
@@ -18,6 +23,62 @@ export default function AdminEntryList({ poolId }) {
     mutationFn: (id) => base44.entities.PoolEntry.delete(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['adminEntries', poolId] }),
   });
+
+  const updateEntry = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.PoolEntry.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminEntries', poolId] });
+      queryClient.invalidateQueries({ queryKey: ['poolEntries', poolId] });
+      setEditingId(null);
+      setEmailInput('');
+    },
+  });
+
+  const startEdit = (entry) => {
+    setEditingId(entry.id);
+    setEditValues({
+      participant_name: entry.participant_name || '',
+      team_name: entry.team_name || '',
+      emails: parseTeamEmails(entry.user_id),
+    });
+    setEmailInput('');
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEmailInput('');
+  };
+
+  const saveEdit = (id) => {
+    if (!editValues.participant_name.trim()) return;
+    updateEntry.mutate({
+      id,
+      data: {
+        participant_name: editValues.participant_name.trim(),
+        team_name: editValues.team_name.trim() || '',
+        user_id: editValues.emails.length > 0 ? editValues.emails.join(',') : 'manual',
+      },
+    });
+  };
+
+  const addEditEmail = () => {
+    const trimmed = emailInput.trim();
+    if (trimmed && !editValues.emails.includes(trimmed)) {
+      setEditValues({ ...editValues, emails: [...editValues.emails, trimmed] });
+      setEmailInput('');
+    }
+  };
+
+  const removeEditEmail = (email) => {
+    setEditValues({ ...editValues, emails: editValues.emails.filter(e => e !== email) });
+  };
+
+  const handleEditEmailKeyDown = (e) => {
+    if ((e.key === 'Enter' || e.key === ',') && emailInput.trim()) {
+      e.preventDefault();
+      addEditEmail();
+    }
+  };
 
   if (isLoading) {
     return <div className="text-center text-muted-foreground py-8 text-sm">Loading participants...</div>;
@@ -40,6 +101,77 @@ export default function AdminEntryList({ poolId }) {
       {entries.map((entry, i) => {
         const teamEmails = parseTeamEmails(entry.user_id);
         const isTeam = teamEmails.length > 1;
+        const isEditing = editingId === entry.id;
+
+        if (isEditing) {
+          return (
+            <div key={entry.id} className="bg-white rounded-lg px-3 py-3 border border-accent/30 animate-fade-in-up">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-bold text-accent tracking-widest uppercase">Editing</span>
+                <div className="flex gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => saveEdit(entry.id)}
+                    disabled={updateEntry.isPending}
+                  >
+                    <Check className="w-4 h-4 text-green-600" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={cancelEdit}>
+                    <X className="w-4 h-4 text-muted-foreground" />
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div>
+                  <label className="text-[10px] font-semibold text-muted-foreground mb-0.5 block">Name</label>
+                  <Input
+                    value={editValues.participant_name}
+                    onChange={(e) => setEditValues({ ...editValues, participant_name: e.target.value })}
+                    className="h-8 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-semibold text-muted-foreground mb-0.5 block">Team Name</label>
+                  <Input
+                    value={editValues.team_name}
+                    onChange={(e) => setEditValues({ ...editValues, team_name: e.target.value })}
+                    className="h-8 text-sm"
+                    placeholder="Optional"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-semibold text-muted-foreground mb-0.5 block">Emails</label>
+                  <div className="flex gap-1">
+                    <Input
+                      value={emailInput}
+                      onChange={(e) => setEmailInput(e.target.value)}
+                      onKeyDown={handleEditEmailKeyDown}
+                      placeholder="Add email, press Enter"
+                      className="h-8 text-sm flex-1"
+                    />
+                    <Button type="button" onClick={addEditEmail} variant="outline" size="sm" className="h-8 px-2">
+                      <Plus className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  {editValues.emails.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {editValues.emails.map((email) => (
+                        <span key={email} className="inline-flex items-center gap-1 bg-primary/10 text-primary text-[10px] font-medium px-1.5 py-0.5 rounded-full border border-primary/20">
+                          {email}
+                          <button type="button" onClick={() => removeEditEmail(email)} className="hover:text-destructive">
+                            <X className="w-2.5 h-2.5" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        }
 
         return (
           <div key={entry.id} className="bg-white rounded-lg px-3 py-2.5 border border-primary/10">
@@ -70,13 +202,16 @@ export default function AdminEntryList({ poolId }) {
                   </div>
                 )}
               </div>
-              <div className="text-right mr-2 flex-shrink-0">
+              <div className="text-right mr-1 flex-shrink-0">
                 <span className={`text-sm font-bold ${
                   (entry.total_score || 0) < 0 ? 'text-red-600' : (entry.total_score || 0) > 0 ? 'text-primary' : 'text-accent'
                 }`}>
                   {(entry.total_score || 0) === 0 ? 'E' : (entry.total_score > 0 ? '+' : '') + entry.total_score}
                 </span>
               </div>
+              <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => startEdit(entry)}>
+                <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
+              </Button>
               <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => deleteEntry.mutate(entry.id)}>
                 <Trash2 className="w-3.5 h-3.5 text-destructive" />
               </Button>
