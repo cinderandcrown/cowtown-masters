@@ -15,7 +15,7 @@ function GolferCard({ golfer, group }) {
   }
 
   return (
-    <div className="bg-white rounded-lg p-3 border border-primary/10 shadow-sm">
+    <div className={`bg-white rounded-lg p-3 shadow-sm ${group === 'A' ? 'border-l-4 border-l-primary border border-primary/10' : 'border-l-4 border-l-accent border border-accent/15'}`}>
       <div className="flex items-center justify-between mb-1">
         <span className={`text-xs font-bold tracking-widest ${group === 'A' ? 'text-primary' : 'text-accent'}`}>
           GRP {group}
@@ -53,8 +53,8 @@ function TeamCard({ entry, golferA, golferB, rank }) {
   const totalScore = (golferA?.score_to_par || 0) + (golferB?.score_to_par || 0);
 
   return (
-    <div className={`rounded-xl border shadow-sm overflow-hidden ${
-      rank === 1 ? 'border-accent/40 bg-accent/5' : rank <= 3 ? 'border-primary/20 bg-primary/5' : 'border-primary/10 bg-white'
+    <div className={`rounded-xl border shadow-sm overflow-hidden transition-all ${
+      rank === 1 ? 'border-accent/40 bg-accent/5 shadow-accent/20 shadow-md' : rank <= 3 ? 'border-primary/20 bg-primary/5' : 'border-primary/10 bg-white hover:shadow-md'
     }`}>
       {/* Team Header */}
       <div className={`flex items-center justify-between px-4 py-3 ${
@@ -112,7 +112,23 @@ export default function TeamsTab({ poolId }) {
   });
 
   if (loadingEntries || loadingGolfers) {
-    return <div className="px-3 pt-3 pb-6 text-center text-muted-foreground">Loading teams...</div>;
+    return (
+      <div className="px-3 pt-3 pb-6 space-y-3">
+        <div className="text-center mb-2">
+          <div className="h-6 w-40 mx-auto bg-primary/10 rounded animate-pulse" />
+          <div className="h-3 w-48 mx-auto mt-2 bg-primary/5 rounded animate-pulse" />
+        </div>
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="rounded-xl border border-primary/10 overflow-hidden">
+            <div className="h-16 bg-primary/5 animate-pulse" />
+            <div className="p-3 grid grid-cols-2 gap-2">
+              <div className="h-24 rounded-lg bg-muted/50 animate-pulse" />
+              <div className="h-24 rounded-lg bg-muted/50 animate-pulse" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   }
 
   // Build golfer lookup by ID
@@ -146,13 +162,14 @@ export default function TeamsTab({ poolId }) {
       )}
 
       {teams.map((team, i) => (
-        <TeamCard
-          key={team.entry.id}
-          entry={team.entry}
-          golferA={team.golferA}
-          golferB={team.golferB}
-          rank={i + 1}
-        />
+        <div key={team.entry.id} className="animate-fade-in-up" style={{ animationDelay: `${i * 80}ms` }}>
+          <TeamCard
+            entry={team.entry}
+            golferA={team.golferA}
+            golferB={team.golferB}
+            rank={i + 1}
+          />
+        </div>
       ))}
     </div>
   );

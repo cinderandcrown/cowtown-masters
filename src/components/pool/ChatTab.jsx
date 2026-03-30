@@ -122,11 +122,12 @@ export default function ChatTab({ poolId }) {
           {participantNames.length === 0 && (
             <p className="text-sm text-destructive text-center">No participants yet. Add entries in the Admin panel first.</p>
           )}
-          {participantNames.map((name) => (
+          {participantNames.map((name, i) => (
             <button
               key={name}
               onClick={() => selectIdentity(name)}
-              className="w-full text-left px-4 py-3 rounded-lg border border-primary/10 hover:bg-primary/5 hover:border-primary/30 transition font-semibold text-sm"
+              className="animate-fade-in-up w-full text-left px-4 py-3 rounded-lg border border-primary/10 hover:bg-primary/5 hover:border-primary/30 hover:scale-[1.01] hover:shadow-sm transition-all font-semibold text-sm"
+              style={{ animationDelay: `${i * 50}ms` }}
             >
               {name}
             </button>
@@ -162,12 +163,18 @@ export default function ChatTab({ poolId }) {
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-2 space-y-2">
         {isLoading && (
-          <div className="text-center text-muted-foreground text-sm py-8">Loading messages...</div>
+          <div className="text-center py-8 space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className={`flex ${i % 2 === 0 ? 'justify-start' : 'justify-end'}`}>
+                <div className="w-3/5 h-12 rounded-2xl bg-primary/5 animate-pulse" style={{ animationDelay: `${i * 100}ms` }} />
+              </div>
+            ))}
+          </div>
         )}
 
         {!isLoading && messages.length === 0 && (
-          <div className="text-center py-12">
-            <MessageCircle className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+          <div className="text-center py-12 animate-fade-in-up">
+            <MessageCircle className="w-12 h-12 text-muted-foreground/20 mx-auto mb-3 animate-pulse" />
             <p className="text-sm font-semibold text-muted-foreground">No smack talk yet</p>
             <p className="text-xs text-muted-foreground mt-1">Be the first to fire a shot</p>
           </div>
@@ -188,7 +195,7 @@ export default function ChatTab({ poolId }) {
           }
 
           return (
-            <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+            <div key={msg.id} className={`flex ${isMe ? 'justify-end animate-slide-in-right' : 'justify-start animate-slide-in-left'}`}>
               <div className={`max-w-[80%] ${isMe ? 'items-end' : 'items-start'}`}>
                 {!isMe && (
                   <p className="text-[10px] font-bold text-primary ml-2 mb-0.5">{msg.user_name}</p>
@@ -234,7 +241,7 @@ export default function ChatTab({ poolId }) {
 
       {/* Input Bar */}
       <div className="px-3 pb-3 pt-1">
-        <form onSubmit={handleSend} className="flex items-center gap-2 bg-white rounded-xl border border-primary/10 px-2 py-1.5 shadow-sm">
+        <form onSubmit={handleSend} className="flex items-center gap-2 bg-white rounded-xl border border-primary/10 px-2 py-1.5 shadow-sm focus-within:border-primary/30 focus-within:shadow-md focus-within:shadow-primary/10 transition-all">
           <button
             type="button"
             onClick={() => setShowMentionPicker(!showMentionPicker)}

@@ -3,7 +3,51 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Trophy, RefreshCw } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { formatScore, scoreColor, enrichEntries, assignPositions } from '@/lib/scoreUtils';
+
+function LeaderboardSkeleton() {
+  return (
+    <div className="px-3 pt-3 pb-6">
+      {/* Prize pot skeleton */}
+      <Skeleton className="h-10 w-full rounded-lg mb-3" />
+      {/* Hero card skeleton */}
+      <div className="bg-gradient-to-br from-secondary to-primary rounded-xl p-4 mb-4 border border-accent/30">
+        <div className="flex items-start gap-3 mb-3">
+          <Skeleton className="w-7 h-7 rounded bg-white/10" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-3 w-20 bg-white/10" />
+            <Skeleton className="h-6 w-40 bg-white/10" />
+          </div>
+          <Skeleton className="h-9 w-14 rounded bg-white/10" />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <Skeleton className="h-16 rounded-lg bg-white/10" />
+          <Skeleton className="h-16 rounded-lg bg-white/10" />
+        </div>
+      </div>
+      {/* Table skeleton */}
+      <div className="bg-card rounded-xl border border-primary/10 overflow-hidden">
+        <Skeleton className="h-9 w-full" />
+        <Skeleton className="h-7 w-full" />
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="px-3 py-2 border-b border-primary/5">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-5 w-8 rounded" />
+              <div className="flex-1 space-y-1.5">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-24" />
+              </div>
+              <Skeleton className="h-4 w-10" />
+              <Skeleton className="h-4 w-10" />
+              <Skeleton className="h-5 w-10" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Leaderboard({ poolId, onSelectEntry }) {
   const { data: pool } = useQuery({
@@ -29,7 +73,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
   const isLoading = loadingEntries || loadingGolfers;
 
   if (isLoading) {
-    return <div className="px-3 pt-3 pb-6 text-center text-muted-foreground">Loading leaderboard...</div>;
+    return <LeaderboardSkeleton />;
   }
 
   const standings = assignPositions(enrichEntries(entries, golfers));
@@ -51,21 +95,26 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
     <div className="px-3 pt-3 pb-6">
       {/* Prize Pot Banner */}
       {totalPot > 0 && (
-        <div className="flex items-center justify-between bg-accent/10 rounded-lg px-3 py-2 mb-3 border border-accent/30">
-          <span className="text-xs font-bold text-accent tracking-widest uppercase">Prize Pot</span>
-          <div className="flex items-center gap-3 text-xs font-semibold">
-            <span className="text-foreground">${totalPot}</span>
-            <span className="text-muted-foreground">1st ${Math.round(totalPot * (payout.first || 60) / 100)}</span>
-            <span className="text-muted-foreground">2nd ${Math.round(totalPot * (payout.second || 25) / 100)}</span>
-            <span className="text-muted-foreground">3rd ${Math.round(totalPot * (payout.third || 15) / 100)}</span>
+        <div className="animate-fade-in-up flex items-center justify-between bg-gradient-to-r from-accent/15 via-accent/10 to-accent/15 rounded-xl px-3 py-2.5 mb-3 border border-accent/30 relative overflow-hidden">
+          <div className="absolute inset-0 animate-shimmer pointer-events-none" />
+          <div className="flex items-center gap-2 relative">
+            <Trophy className="w-4 h-4 text-accent" />
+            <span className="text-[10px] font-black text-accent tracking-widest uppercase">Prize Pot</span>
+          </div>
+          <div className="flex items-center gap-2.5 text-xs font-bold relative">
+            <span className="text-accent text-sm font-black">${totalPot}</span>
+            <span className="text-muted-foreground/80 text-[10px]">1st ${Math.round(totalPot * (payout.first || 60) / 100)}</span>
+            <span className="text-muted-foreground/60 text-[10px]">2nd ${Math.round(totalPot * (payout.second || 25) / 100)}</span>
+            <span className="text-muted-foreground/60 text-[10px]">3rd ${Math.round(totalPot * (payout.third || 15) / 100)}</span>
           </div>
         </div>
       )}
 
       {/* Leader Hero */}
       {standings.length > 0 && (
-        <div className="bg-gradient-to-br from-secondary to-primary rounded-xl p-4 mb-4 border border-accent/30 shadow-lg">
-          <div className="flex items-start gap-3 mb-3">
+        <div className="animate-fade-in-up bg-gradient-to-br from-secondary to-primary rounded-xl p-4 mb-4 border border-accent/30 shadow-lg shadow-primary/20 relative overflow-hidden">
+          <div className="absolute inset-0 animate-shimmer pointer-events-none" />
+          <div className="flex items-start gap-3 mb-3 relative">
             <Trophy className="w-7 h-7 text-accent flex-shrink-0" />
             <div className="flex-1">
               <p className="text-[10px] font-bold tracking-widest text-accent uppercase">Pool Leader</p>
@@ -80,7 +129,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
               {formatScore(standings[0].total_score)}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 relative">
             <div className="bg-white/10 rounded-lg p-2 border border-white/10">
               <p className="text-[10px] font-bold text-accent tracking-widest">GROUP A</p>
               <p className="text-sm font-semibold text-primary-foreground truncate">{standings[0].golferA?.name || 'TBD'}</p>
@@ -128,13 +177,22 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
             <div
               key={entry.id}
               onClick={() => onSelectEntry({ ...entry, _rank: entry.rank, _totalEntries: standings.length })}
-              className={`grid grid-cols-[36px_1fr_56px_56px_52px] gap-1 px-3 py-2 border-b border-primary/5 cursor-pointer hover:bg-accent/5 transition ${
+              className={`animate-fade-in-up grid grid-cols-[36px_1fr_56px_56px_52px] gap-1 px-3 py-2 border-b border-primary/5 cursor-pointer hover:bg-accent/5 hover:shadow-sm transition-all ${
                 entry.rank === 1 ? 'bg-accent/10' : entry.rank <= 3 ? 'bg-primary/5' : ''
               }`}
+              style={{ animationDelay: `${Math.min(i * 50, 500)}ms` }}
             >
-              <span className={`text-center text-xs font-black ${entry.rank === 1 ? 'text-accent' : entry.rank <= 3 ? 'text-primary' : 'text-muted-foreground'}`}>
-                {entry.displayRank}
-              </span>
+              {entry.rank <= 3 ? (
+                <span className={`flex items-center justify-center text-xs font-black rounded-full w-7 h-7 mx-auto ${
+                  entry.rank === 1 ? 'bg-accent text-white' : entry.rank === 2 ? 'bg-gray-300 text-gray-700' : 'bg-amber-600/80 text-white'
+                }`}>
+                  {entry.displayRank}
+                </span>
+              ) : (
+                <span className="text-center text-xs font-black text-muted-foreground self-center">
+                  {entry.displayRank}
+                </span>
+              )}
               <div className="min-w-0">
                 <div className="flex items-center gap-1">
                   <Link to={`/participant/${encodeURIComponent(entry.participant_name)}`} onClick={(e) => e.stopPropagation()} className="text-sm font-semibold text-foreground hover:text-accent truncate transition">{entry.participant_name}</Link>
@@ -148,9 +206,9 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
                   <p className="text-[9px] text-accent/70 truncate">{entry.team_name}</p>
                 )}
               </div>
-              <span className={`text-center font-bold text-xs tabular-nums self-center ${scoreColor(entry.score_a)}`}>{formatScore(entry.score_a)}</span>
-              <span className={`text-center font-bold text-xs tabular-nums self-center ${scoreColor(entry.score_b)}`}>{formatScore(entry.score_b)}</span>
-              <span className={`text-center font-black text-sm tabular-nums self-center ${scoreColor(entry.total_score)}`}>
+              <span className={`text-center font-bold text-xs tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.score_a)} ${entry.score_a < 0 ? 'bg-red-50' : ''}`}>{formatScore(entry.score_a)}</span>
+              <span className={`text-center font-bold text-xs tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.score_b)} ${entry.score_b < 0 ? 'bg-red-50' : ''}`}>{formatScore(entry.score_b)}</span>
+              <span className={`text-center font-black text-sm tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.total_score)} ${entry.total_score < 0 ? 'bg-red-50' : ''}`}>
                 {formatScore(entry.total_score)}
               </span>
             </div>
@@ -160,9 +218,10 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
 
       {/* Last Updated */}
       {lastUpdated && (
-        <div className="flex items-center justify-center gap-2 mt-3 text-[10px] text-muted-foreground">
+        <div className="animate-fade-in-up flex items-center justify-center gap-2 mt-3 text-[10px] text-muted-foreground/70">
           <RefreshCw className="w-3 h-3" />
           <span>Scores updated {timeAgoLabel}</span>
+          <span className="w-1 h-1 rounded-full bg-green-500" />
         </div>
       )}
     </div>

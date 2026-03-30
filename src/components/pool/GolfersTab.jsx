@@ -2,14 +2,40 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { assignGroups } from '@/lib/groupUtils';
+import { Skeleton } from '@/components/ui/skeleton';
+import { formatScore, scoreColor } from '@/lib/scoreUtils';
 
-const formatScore = (s) => (s == null ? '–' : s === 0 ? 'E' : s > 0 ? `+${s}` : `${s}`);
-const scoreColor = (s) => {
-  if (s == null) return 'text-muted-foreground';
-  if (s < 0) return 'text-red-600';
-  if (s > 0) return 'text-foreground';
-  return 'text-accent';
-};
+function GolfersSkeleton() {
+  return (
+    <div className="px-3 pt-3 pb-6">
+      <Skeleton className="h-9 w-full rounded-t-xl" />
+      <div className="flex gap-2 bg-card border-x border-primary/10 px-3 py-2">
+        <Skeleton className="h-7 w-14 rounded-full" />
+        <Skeleton className="h-7 w-20 rounded-full" />
+        <Skeleton className="h-7 w-20 rounded-full" />
+      </div>
+      <Skeleton className="h-7 w-full" />
+      <div className="bg-card rounded-b-xl border-x border-b border-primary/10 overflow-hidden">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="px-3 py-1.5 border-b border-primary/5">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-7" />
+              <div className="flex-1 space-y-1">
+                <Skeleton className="h-3.5 w-28" />
+                <Skeleton className="h-2.5 w-16" />
+              </div>
+              <Skeleton className="h-3.5 w-6" />
+              <Skeleton className="h-3.5 w-6" />
+              <Skeleton className="h-3.5 w-6" />
+              <Skeleton className="h-3.5 w-6" />
+              <Skeleton className="h-4 w-8" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function GolfersTab({ poolId }) {
   const [filter, setFilter] = useState('all');
@@ -33,7 +59,7 @@ export default function GolfersTab({ poolId }) {
     .sort((a, b) => (a.score_to_par || 0) - (b.score_to_par || 0));
 
   if (isLoading) {
-    return <div className="px-3 pt-3 pb-6 text-center text-muted-foreground">Loading golfers...</div>;
+    return <GolfersSkeleton />;
   }
 
   // Position calculation
@@ -65,9 +91,9 @@ export default function GolfersTab({ poolId }) {
           <button
             key={f.value}
             onClick={() => setFilter(f.value)}
-            className={`px-3 py-1 rounded-full text-xs font-semibold transition ${
+            className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
               filter === f.value
-                ? 'bg-primary text-white'
+                ? 'bg-primary text-white shadow-md shadow-primary/30'
                 : 'bg-muted text-muted-foreground hover:bg-primary/10'
             }`}
           >
@@ -95,19 +121,29 @@ export default function GolfersTab({ poolId }) {
         {withPosition.map((g, i) => {
           const isCut = g.status === 'cut';
           const isWD = g.status === 'withdrawn' || g.status === 'disqualified';
+          const isTop5 = !isCut && !isWD && g.displayPos <= 5;
 
           return (
             <div
               key={g.id}
-              className={`grid grid-cols-[28px_1fr_36px_36px_36px_36px_44px] gap-1 px-3 py-1.5 border-b border-primary/5 ${
-                isCut || isWD ? 'opacity-50' : i < 3 ? 'bg-accent/5' : ''
-              }`}
+              className={`animate-fade-in-up grid grid-cols-[28px_1fr_36px_36px_36px_36px_44px] gap-1 px-3 py-1.5 border-b border-primary/5 transition-all hover:bg-accent/5 ${
+                isCut || isWD ? 'opacity-40' : i < 3 ? 'bg-accent/5' : ''
+              } ${!isCut && !isWD && i < 3 ? 'border-l-2 border-l-accent' : 'border-l-2 border-l-transparent'}`}
+              style={{ animationDelay: `${Math.min(i * 40, 600)}ms` }}
             >
-              <span className={`text-center text-xs font-black tabular-nums ${i < 3 ? 'text-accent' : 'text-muted-foreground'}`}>
-                {isCut ? 'CUT' : isWD ? 'WD' : (g.displayPos === (withPosition[i - 1]?.displayPos) ? '' : g.displayPos)}
-              </span>
+              {isTop5 && g.displayPos !== (withPosition[i - 1]?.displayPos) ? (
+                <span className={`flex items-center justify-center text-[10px] font-black rounded-full w-5 h-5 mx-auto ${
+                  g.displayPos === 1 ? 'bg-accent text-white' : 'bg-primary/10 text-primary'
+                }`}>
+                  {g.displayPos}
+                </span>
+              ) : (
+                <span className={`text-center text-xs font-black tabular-nums ${i < 3 ? 'text-accent' : 'text-muted-foreground'}`}>
+                  {isCut ? 'CUT' : isWD ? 'WD' : (g.displayPos === (withPosition[i - 1]?.displayPos) ? '' : g.displayPos)}
+                </span>
+              )}
               <div className="min-w-0">
-                <p className="text-xs font-semibold text-foreground truncate">{g.name}</p>
+                <p className={`text-xs font-semibold text-foreground truncate ${isCut || isWD ? 'line-through' : ''}`}>{g.name}</p>
                 <div className="flex items-center gap-1">
                   <span className={`text-[9px] font-bold tracking-wider ${g.group === 'A' ? 'text-primary' : 'text-accent'}`}>
                     GRP {g.group}
@@ -120,7 +156,7 @@ export default function GolfersTab({ poolId }) {
                   {formatScore(r)}
                 </span>
               ))}
-              <span className={`text-center font-black text-sm tabular-nums ${scoreColor(g.score_to_par)}`}>
+              <span className={`text-center font-black text-sm tabular-nums rounded px-0.5 ${scoreColor(g.score_to_par)} ${(g.score_to_par || 0) < 0 ? 'bg-red-50' : ''}`}>
                 {formatScore(g.score_to_par)}
               </span>
             </div>
