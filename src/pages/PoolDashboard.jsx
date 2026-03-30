@@ -5,6 +5,7 @@ import PoolLayout from '@/components/layout/PoolLayout';
 import Leaderboard from '@/components/pool/Leaderboard.jsx';
 import GolfersTab from '@/components/pool/GolfersTab.jsx';
 import DrawTab from '@/components/pool/DrawTab.jsx';
+import ChatTab from '@/components/pool/ChatTab.jsx';
 import HistoryTab from '@/components/pool/HistoryTab';
 import RulesTab from '@/components/pool/RulesTab';
 import TeamsTab from '@/components/pool/TeamsTab';
@@ -31,12 +32,19 @@ export default function PoolDashboard() {
         {activeTab === 'leaderboard' && <Leaderboard poolId={poolId} onSelectEntry={setSelectedEntry} />}
         {activeTab === 'golfers' && <GolfersTab poolId={poolId} />}
         {activeTab === 'draw' && <DrawTab poolId={poolId} />}
+        {activeTab === 'chat' && <ChatTab poolId={poolId} />}
         {activeTab === 'teams' && <TeamsTab poolId={poolId} />}
         {activeTab === 'history' && <HistoryTab poolId={poolId} />}
         {activeTab === 'rules' && <RulesTab poolId={poolId} />}
       </div>
 
-      <EntryDetailModal entry={selectedEntry} open={!!selectedEntry} onOpenChange={(open) => !open && setSelectedEntry(null)} />
+      <EntryDetailModal
+        entry={selectedEntry}
+        open={!!selectedEntry}
+        onOpenChange={(open) => !open && setSelectedEntry(null)}
+        rank={selectedEntry?._rank}
+        totalEntries={selectedEntry?._totalEntries}
+      />
     </PoolLayout>
   );
 }

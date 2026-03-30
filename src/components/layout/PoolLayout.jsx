@@ -1,13 +1,13 @@
 import React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Trophy, Users, Flag, Shuffle, History, BookOpen, User } from 'lucide-react';
+import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, User } from 'lucide-react';
 
 const TABS = [
   { id: 'leaderboard', label: 'Board', Icon: Trophy },
   { id: 'teams', label: 'Teams', Icon: Users },
   { id: 'golfers', label: 'Golfers', Icon: Flag },
   { id: 'draw', label: 'Draw', Icon: Shuffle },
-  { id: 'history', label: 'History', Icon: History },
+  { id: 'chat', label: 'Talk', Icon: MessageCircle },
   { id: 'rules', label: 'Rules', Icon: BookOpen },
 ];
 

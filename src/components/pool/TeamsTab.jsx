@@ -3,14 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { assignGroups } from '@/lib/groupUtils';
 import { GreenJacketIcon } from '@/components/icons/GreenJacketIcon';
-
-const formatScore = (s) => (s == null ? '–' : s === 0 ? 'E' : s > 0 ? `+${s}` : `${s}`);
-const scoreColor = (s) => {
-  if (s == null) return 'text-muted-foreground';
-  if (s < 0) return 'text-red-600';
-  if (s > 0) return 'text-primary';
-  return 'text-accent';
-};
+import { Users } from 'lucide-react';
+import { formatScore, scoreColor, parseTeamEmails } from '@/lib/scoreUtils';
 
 function GolferCard({ golfer, group }) {
   if (!golfer) {
@@ -75,6 +69,20 @@ function TeamCard({ entry, golferA, golferB, rank }) {
             <p className={`font-bold ${rank === 1 ? 'text-primary-foreground text-lg' : 'text-foreground'}`}>
               {entry.participant_name}
             </p>
+            {entry.team_name && (
+              <p className={`text-xs ${rank === 1 ? 'text-accent/70' : 'text-accent'}`}>{entry.team_name}</p>
+            )}
+            {(() => {
+              const teamEmails = parseTeamEmails(entry.user_id);
+              return teamEmails.length > 1 ? (
+                <div className="flex items-center gap-1 mt-0.5">
+                  <Users className={`w-3 h-3 ${rank === 1 ? 'text-accent/50' : 'text-muted-foreground'}`} />
+                  <span className={`text-[10px] ${rank === 1 ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
+                    {teamEmails.length} members
+                  </span>
+                </div>
+              ) : null;
+            })()}
           </div>
         </div>
         <div className={`text-2xl font-black ${rank === 1 ? scoreColor(totalScore) : scoreColor(totalScore)} bg-accent/10 rounded-lg px-3 py-1`}>
