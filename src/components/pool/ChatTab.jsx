@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Send, MessageCircle, AtSign, X } from 'lucide-react';
 
 const IDENTITY_KEY = (poolId) => `cowtown_chat_identity_${poolId}`;

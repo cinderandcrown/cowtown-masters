@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Trophy, RefreshCw } from 'lucide-react';
-import { formatScore, scoreColor, enrichEntries, assignPositions, parseTeamEmails } from '@/lib/scoreUtils';
+import { formatScore, scoreColor, enrichEntries, assignPositions } from '@/lib/scoreUtils';
 
 export default function Leaderboard({ poolId, onSelectEntry }) {
   const { data: pool } = useQuery({

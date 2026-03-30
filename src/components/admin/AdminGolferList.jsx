@@ -39,6 +39,7 @@ export default function AdminGolferList({ poolId }) {
   const startEdit = (golfer) => {
     setEditingId(golfer.id);
     setEditData({
+      betting_odds: golfer.betting_odds || '',
       score_to_par: golfer.score_to_par || 0,
       round_1: golfer.round_1,
       round_2: golfer.round_2,
@@ -56,6 +57,7 @@ export default function AdminGolferList({ poolId }) {
       id,
       data: {
         ...editData,
+        betting_odds: editData.betting_odds || '',
         round_1: editData.round_1 != null ? Number(editData.round_1) : null,
         round_2: editData.round_2 != null ? Number(editData.round_2) : null,
         round_3: editData.round_3 != null ? Number(editData.round_3) : null,
@@ -117,6 +119,15 @@ export default function AdminGolferList({ poolId }) {
                           />
                         </div>
                       ))}
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-semibold text-muted-foreground">Betting Odds</label>
+                      <Input
+                        value={editData.betting_odds}
+                        onChange={(e) => setEditData({ ...editData, betting_odds: e.target.value })}
+                        className="h-7 text-xs"
+                        placeholder="+1400"
+                      />
                     </div>
                     <div>
                       <label className="text-[10px] font-semibold text-muted-foreground">Status</label>

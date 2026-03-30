@@ -43,7 +43,7 @@ export default function DrawTab({ poolId }) {
   const groupA = golfers.filter(g => g.group === 'A');
   const groupB = golfers.filter(g => g.group === 'B');
 
-  const alreadyDrawn = entries.some(e => e.golfer_a_id && e.golfer_b_id);
+  const alreadyDrawn = entries.length > 0 && entries.every(e => e.golfer_a_id && e.golfer_b_id);
 
   const saveMutation = useMutation({
     mutationFn: async (pairs) => {
@@ -73,8 +73,8 @@ export default function DrawTab({ poolId }) {
       for (const entry of entries) {
         if (entry.golfer_a_id || entry.golfer_b_id) {
           await base44.entities.PoolEntry.update(entry.id, {
-            golfer_a_id: null,
-            golfer_b_id: null,
+            golfer_a_id: '',
+            golfer_b_id: '',
           });
         }
       }
@@ -82,7 +82,7 @@ export default function DrawTab({ poolId }) {
         if (g.is_drafted) {
           await base44.entities.Golfer.update(g.id, {
             is_drafted: false,
-            drafted_by: null,
+            drafted_by: '',
           });
         }
       }
@@ -143,10 +143,17 @@ export default function DrawTab({ poolId }) {
     Object.values(manualPicks).map(p => p.golferBId).filter(Boolean)
   );
 
+  // Also exclude golfers already drafted in DB (from partial draws)
+  const dbDraftedIds = new Set(rawGolfers.filter(g => g.is_drafted).map(g => g.id));
+
   const availableGroupA = (entryId) =>
-    groupA.filter(g => !usedGolferAIds.has(g.id) || manualPicks[entryId]?.golferAId === g.id);
+    groupA.filter(g =>
+      (!usedGolferAIds.has(g.id) && !dbDraftedIds.has(g.id)) || manualPicks[entryId]?.golferAId === g.id
+    );
   const availableGroupB = (entryId) =>
-    groupB.filter(g => !usedGolferBIds.has(g.id) || manualPicks[entryId]?.golferBId === g.id);
+    groupB.filter(g =>
+      (!usedGolferBIds.has(g.id) && !dbDraftedIds.has(g.id)) || manualPicks[entryId]?.golferBId === g.id
+    );
 
   const updateManualPick = (entryId, field, value) => {
     setManualPicks(prev => ({

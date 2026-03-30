@@ -54,7 +54,7 @@ export default function AddEntryForm({ poolId }) {
   };
 
   const handleEmailKeyDown = (e) => {
-    if (e.key === 'Enter' || e.key === ',') {
+    if ((e.key === 'Enter' || e.key === ',') && emailInput.trim()) {
       e.preventDefault();
       addEmail();
     }
@@ -120,7 +120,7 @@ export default function AddEntryForm({ poolId }) {
                 onChange={(e) => setEmailInput(e.target.value)}
                 onKeyDown={handleEmailKeyDown}
                 placeholder="Add email, press Enter"
-                type="email"
+                type="text"
                 className="flex-1"
               />
               <Button type="button" onClick={addEmail} variant="outline" size="sm" className="px-3">

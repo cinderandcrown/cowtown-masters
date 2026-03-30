@@ -21,6 +21,7 @@ export default function PoolDashboard() {
   const handleRefresh = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ['poolEntries', poolId] });
     await queryClient.invalidateQueries({ queryKey: ['poolGolfers', poolId] });
+    await queryClient.invalidateQueries({ queryKey: ['chatMessages', poolId] });
   }, [queryClient, poolId]);
 
   const { pullProps, PullIndicator } = usePullToRefresh(handleRefresh);

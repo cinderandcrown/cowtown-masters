@@ -2,7 +2,6 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { assignGroups } from '@/lib/groupUtils';
-import { GreenJacketIcon } from '@/components/icons/GreenJacketIcon';
 import { Users } from 'lucide-react';
 import { formatScore, scoreColor, parseTeamEmails } from '@/lib/scoreUtils';
 

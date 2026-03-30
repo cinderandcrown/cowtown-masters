@@ -57,8 +57,6 @@ export default function PoolSettingsCard({ pool, poolId }) {
   };
 
   const handleSave = () => {
-    const payoutSum = Number(editValues.payout_first) + Number(editValues.payout_second) + Number(editValues.payout_third);
-
     updatePool.mutate({
       name: editValues.name,
       year: Number(editValues.year),

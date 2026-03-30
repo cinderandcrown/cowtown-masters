@@ -4,7 +4,7 @@ import { enrichEntries, assignPositions } from '@/lib/scoreUtils';
 
 export function useLivePoolEntries(poolId) {
   return useQuery({
-    queryKey: ['poolEntries', poolId],
+    queryKey: ['livePoolEntries', poolId],
     queryFn: async () => {
       if (!poolId) return [];
 
