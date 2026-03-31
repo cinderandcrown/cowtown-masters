@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Trash2, User, Users, Pencil, Check, X, Plus } from 'lucide-react';
+import { Trash2, User, Users, Pencil, Check, X, Plus, KeyRound } from 'lucide-react';
 import { parseTeamEmails } from '@/lib/scoreUtils';
 
 export default function AdminEntryList({ poolId }) {
@@ -21,6 +21,14 @@ export default function AdminEntryList({ poolId }) {
 
   const deleteEntry = useMutation({
     mutationFn: (id) => base44.entities.PoolEntry.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['adminEntries', poolId] }),
+  });
+
+  const resetPassword = useMutation({
+    mutationFn: async (entryId) => {
+      const auths = await base44.entities.ParticipantAuth.filter({ entry_id: entryId });
+      await Promise.all(auths.map(a => base44.entities.ParticipantAuth.delete(a.id)));
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['adminEntries', poolId] }),
   });
 
@@ -212,6 +220,11 @@ export default function AdminEntryList({ poolId }) {
                 </span>
               </div>
               <Pencil className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary flex-shrink-0 transition-colors" />
+              {teamEmails.length > 0 && (
+                <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={(e) => { e.stopPropagation(); if (confirm(`Reset password for ${entry.participant_name}?`)) resetPassword.mutate(entry.id); }} title="Reset Password">
+                  <KeyRound className="w-3.5 h-3.5 text-amber-600" />
+                </Button>
+              )}
               <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={(e) => { e.stopPropagation(); deleteEntry.mutate(entry.id); }} title="Delete">
                 <Trash2 className="w-3.5 h-3.5 text-destructive" />
               </Button>
