@@ -73,7 +73,7 @@ const RULES = [
 
 export default function RulesTab() {
   return (
-    <div className="px-3 pt-3 pb-6 space-y-3">
+    <div className="px-3 pt-3 pb-0 space-y-3">
       <div className="text-center mb-4">
         <h2 className="text-2xl font-bold text-foreground mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
           Masters Pool Rules
@@ -122,7 +122,7 @@ export default function RulesTab() {
       <div className="animate-fade-in-up flex items-start gap-2.5 bg-accent/10 rounded-xl p-3 border border-accent/20" style={{ animationDelay: `${RULES.length * 60}ms` }}>
         <Info className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" aria-hidden="true" />
         <p className="text-xs text-foreground leading-relaxed">
-          <strong>Note:</strong> Rough estimate — Masters field size is approximately ~90 golfers.
+          <strong>Note:</strong> Group sizes are dynamic — based on the number of paid entries. Both groups will always be equal in size.
         </p>
       </div>
     </div>

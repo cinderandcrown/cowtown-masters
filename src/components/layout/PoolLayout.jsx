@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, LogIn, LogOut, Pencil, Check, X } from 'lucide-react';
 import { useParticipant } from '@/lib/ParticipantContext';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -181,6 +181,15 @@ export function PoolHeader() {
   const { poolId } = useParams();
   const navigate = useNavigate();
 
+  const { data: pool } = useQuery({
+    queryKey: ['pool', poolId],
+    queryFn: () => base44.entities.Pool.filter({ id: poolId }),
+    enabled: !!poolId,
+    select: (data) => data[0],
+  });
+
+  const isLive = pool?.status === 'live';
+
   // Determine current round day based on tournament schedule (Thu-Sun)
   const day = new Date().getDay(); // 0=Sun, 4=Thu, 5=Fri, 6=Sat
   const roundInfo = day === 4 ? { round: 'R1', day: 'THU' }
@@ -212,10 +221,16 @@ export function PoolHeader() {
             >
               Admin
             </button>
-            <div className="flex items-center gap-1.5 bg-black/20 rounded-lg px-2 py-1 border border-red-500/30" role="status" aria-label="Tournament is live">
-              <span className="text-[10px] font-black tracking-widest text-red-400 uppercase">LIVE</span>
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-live-pulse" aria-hidden="true" />
-            </div>
+            {isLive ? (
+              <div className="flex items-center gap-1.5 bg-black/20 rounded-lg px-2 py-1 border border-red-500/30" role="status" aria-label="Tournament is live">
+                <span className="text-[10px] font-black tracking-widest text-red-400 uppercase">LIVE</span>
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-live-pulse" aria-hidden="true" />
+              </div>
+            ) : pool?.status === 'complete' ? (
+              <div className="flex items-center gap-1.5 bg-black/20 rounded-lg px-2 py-1 border border-accent/30" role="status" aria-label="Tournament complete">
+                <span className="text-[10px] font-black tracking-widest text-accent uppercase">FINAL</span>
+              </div>
+            ) : null}
             <ParticipantBadge poolId={poolId} />
           </div>
         </div>
@@ -248,24 +263,24 @@ export function PoolHeader() {
 export function PoolBottomNav({ activeTab, onChange }) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-secondary to-primary border-t border-accent/30 backdrop-blur-lg" role="navigation" aria-label="Pool navigation">
-      <div className="max-w-md mx-auto flex justify-around px-2 py-2 pb-[env(safe-area-inset-bottom,1rem)]">
+      <div className="max-w-md mx-auto grid grid-cols-6 px-1 py-1 pb-[env(safe-area-inset-bottom,0.5rem)]">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => onChange(tab.id)}
             aria-label={tab.label}
             aria-current={activeTab === tab.id ? 'page' : undefined}
-            className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-all relative focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 ${
+            className={`flex flex-col items-center justify-center gap-0.5 py-2 min-h-[48px] rounded-lg transition-all relative focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 ${
               activeTab === tab.id
                 ? 'text-accent'
-                : 'text-primary-foreground/50 hover:text-primary-foreground/70'
+                : 'text-primary-foreground/50 hover:text-primary-foreground/70 active:text-primary-foreground/90'
             }`}
           >
             {activeTab === tab.id && (
-              <span className="absolute -top-2 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-accent" aria-hidden="true" />
+              <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-accent" aria-hidden="true" />
             )}
             <tab.Icon className={`w-5 h-5 transition-all ${activeTab === tab.id ? 'stroke-[2.5] scale-110' : 'stroke-[1.5]'}`} aria-hidden="true" />
-            <span className={`text-[9px] tracking-widest uppercase ${activeTab === tab.id ? 'font-bold' : 'font-medium'}`}>{tab.label}</span>
+            <span className={`text-[9px] tracking-wide uppercase ${activeTab === tab.id ? 'font-bold' : 'font-medium'}`}>{tab.label}</span>
           </button>
         ))}
       </div>

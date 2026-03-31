@@ -204,11 +204,11 @@ export default function DrawTab({ poolId }) {
   const isLoading = loadingEntries || loadingGolfers;
 
   if (isLoading) {
-    return <div className="px-3 pt-3 pb-6 text-center text-muted-foreground">Loading...</div>;
+    return <div className="px-3 pt-3 pb-0 text-center text-muted-foreground">Loading...</div>;
   }
 
   return (
-    <div className="px-3 pt-3 pb-6">
+    <div className="px-3 pt-3 pb-0">
       {/* Header */}
       <div className="bg-gradient-to-br from-secondary to-primary rounded-xl p-4 mb-4 border border-accent/30 text-center">
         <h2 className="text-2xl font-bold text-primary-foreground mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
@@ -298,12 +298,12 @@ export default function DrawTab({ poolId }) {
                 <div className="bg-primary/10 rounded-lg p-3 border border-primary/20">
                   <p className="text-xs font-bold text-primary tracking-widest uppercase mb-1">GROUP A</p>
                   <p className="text-2xl font-black text-primary">{groupA.length}</p>
-                  <p className="text-xs text-muted-foreground">Favorites</p>
+                  <p className="text-xs text-muted-foreground">Top Tier</p>
                 </div>
                 <div className="bg-accent/10 rounded-lg p-3 border border-accent/20">
                   <p className="text-xs font-bold text-accent tracking-widest uppercase mb-1">GROUP B</p>
                   <p className="text-2xl font-black text-accent">{groupB.length}</p>
-                  <p className="text-xs text-muted-foreground">Longshots</p>
+                  <p className="text-xs text-muted-foreground">Bottom Tier</p>
                 </div>
               </div>
 
@@ -364,7 +364,7 @@ export default function DrawTab({ poolId }) {
                     <div className="p-3 space-y-2">
                       <div>
                         <label className="text-[10px] font-bold text-primary tracking-widest uppercase mb-1 block">
-                          GROUP A — Favorites
+                          GROUP A — Top Tier
                         </label>
                         <Select
                           value={pick.golferAId || ''}
@@ -386,7 +386,7 @@ export default function DrawTab({ poolId }) {
 
                       <div>
                         <label className="text-[10px] font-bold text-accent tracking-widest uppercase mb-1 block">
-                          GROUP B — Longshots
+                          GROUP B — Bottom Tier
                         </label>
                         <Select
                           value={pick.golferBId || ''}

@@ -113,7 +113,7 @@ export default function TeamsTab({ poolId }) {
 
   if (loadingEntries || loadingGolfers) {
     return (
-      <div className="px-3 pt-3 pb-6 space-y-3">
+      <div className="px-3 pt-3 pb-0 space-y-3">
         <div className="text-center mb-2">
           <div className="h-6 w-40 mx-auto bg-primary/10 rounded animate-pulse" />
           <div className="h-3 w-48 mx-auto mt-2 bg-primary/5 rounded animate-pulse" />
@@ -146,7 +146,7 @@ export default function TeamsTab({ poolId }) {
   }).sort((a, b) => a.totalScore - b.totalScore);
 
   return (
-    <div className="px-3 pt-3 pb-6 space-y-3">
+    <div className="px-3 pt-3 pb-0 space-y-3">
       <div className="text-center mb-2">
         <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
           Team Standings

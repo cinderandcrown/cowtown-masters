@@ -18,7 +18,7 @@ const scoreColor = (s) => {
 
 export default function HistoryTab() {
   return (
-    <div className="px-3 pt-3 pb-6 space-y-3">
+    <div className="px-3 pt-3 pb-0 space-y-3">
       <h2 className="text-2xl font-bold text-foreground text-center mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
         Champions Wall
       </h2>

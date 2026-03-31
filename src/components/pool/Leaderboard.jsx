@@ -8,7 +8,7 @@ import { formatScore, scoreColor, enrichEntries, assignPositions } from '@/lib/s
 
 function LeaderboardSkeleton() {
   return (
-    <div className="px-3 pt-3 pb-6">
+    <div className="px-3 pt-3 pb-0">
       {/* Prize pot skeleton */}
       <Skeleton className="h-10 w-full rounded-lg mb-3" />
       {/* Hero card skeleton */}
@@ -92,7 +92,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
     : '';
 
   return (
-    <div className="px-3 pt-3 pb-6">
+    <div className="px-3 pt-3 pb-0">
       {/* Prize Pot Banner */}
       {totalPot > 0 && (
         <div className="animate-fade-in-up flex items-center justify-between bg-gradient-to-r from-accent/15 via-accent/10 to-accent/15 rounded-xl px-3 py-2.5 mb-3 border border-accent/30 relative overflow-hidden">
