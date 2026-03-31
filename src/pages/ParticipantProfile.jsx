@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Trophy } from 'lucide-react';
 import { getParticipantHistory } from '@/lib/poolHistoryData';
@@ -12,6 +12,10 @@ export default function ParticipantProfile() {
   const decodedName = decodeURIComponent(name);
   const history = getParticipantHistory(decodedName);
   const wins = history.filter((r) => r.isWinner).length;
+
+  useEffect(() => {
+    document.title = `Cowtown Masters - ${decodedName}`;
+  }, [decodedName]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted">

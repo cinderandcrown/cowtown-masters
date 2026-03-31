@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -21,6 +21,8 @@ export default function ParticipantLogin() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [matchedEntry, setMatchedEntry] = useState(null);
+
+  useEffect(() => { document.title = 'Cowtown Masters - Sign In'; }, []);
 
   const { data: entries = [] } = useQuery({
     queryKey: ['poolEntries', poolId],
