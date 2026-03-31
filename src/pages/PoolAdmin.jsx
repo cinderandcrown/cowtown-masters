@@ -26,7 +26,7 @@ export default function PoolAdmin() {
 
   if (loadingPool) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-cream to-sand">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
       </div>
     );
@@ -38,7 +38,7 @@ export default function PoolAdmin() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cream to-sand">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-gradient-to-r from-secondary to-primary border-b-2 border-accent px-4 py-3">
         <div className="max-w-2xl mx-auto flex items-center gap-3">
@@ -67,7 +67,7 @@ export default function PoolAdmin() {
               className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition ${
                 activeSection === tab.id
                   ? 'bg-primary text-white'
-                  : 'bg-white border border-primary/20 text-foreground hover:border-primary'
+                  : 'bg-card border border-primary/20 text-foreground hover:border-primary'
               }`}
             >
               {tab.icon}

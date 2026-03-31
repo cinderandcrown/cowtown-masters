@@ -14,7 +14,7 @@ export default function EntryDetailModal({ entry, open, onOpenChange, rank, tota
     const rounds = [golfer.round_1, golfer.round_2, golfer.round_3, golfer.round_4];
 
     return (
-      <div className="flex-1 bg-white rounded-lg p-3 border border-primary/20">
+      <div className="flex-1 bg-card rounded-lg p-3 border border-primary/20">
         <div className="flex justify-between items-center mb-2">
           <span className={`text-xs font-bold tracking-widest ${group === 'A' ? 'text-primary' : 'text-accent'}`}>
             GROUP {group}
@@ -44,7 +44,7 @@ export default function EntryDetailModal({ entry, open, onOpenChange, rank, tota
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white rounded-2xl max-w-sm w-full max-h-[85vh] overflow-y-auto">
+      <DialogContent className="bg-card rounded-2xl max-w-sm w-full max-h-[85vh] overflow-y-auto">
         <div className="space-y-4 pt-4">
           {/* Rank Badge */}
           <div className="text-center">
@@ -82,7 +82,7 @@ export default function EntryDetailModal({ entry, open, onOpenChange, rank, tota
                     .slice(0, i + 1)
                     .reduce((sum, j) => (roundsA[j] || 0) + (roundsB[j] || 0) + sum, 0);
                   return (
-                    <div key={i} className="text-center p-2 bg-white rounded-lg border border-primary/10">
+                    <div key={i} className="text-center p-2 bg-card rounded-lg border border-primary/10">
                       <div className="text-xs text-muted-foreground mb-1">R{i + 1}</div>
                       <div className={`text-lg font-black ${scoreColor(combined)}`}>{formatScore(combined)}</div>
                       <div className="text-xs text-muted-foreground mt-1">Cum: {formatScore(running)}</div>

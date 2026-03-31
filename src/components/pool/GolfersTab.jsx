@@ -156,7 +156,7 @@ export default function GolfersTab({ poolId }) {
                   {formatScore(r)}
                 </span>
               ))}
-              <span className={`text-center font-black text-sm tabular-nums rounded px-0.5 ${scoreColor(g.score_to_par)} ${(g.score_to_par || 0) < 0 ? 'bg-red-50' : ''}`}>
+              <span className={`text-center font-black text-sm tabular-nums rounded px-0.5 ${scoreColor(g.score_to_par)} ${(g.score_to_par || 0) < 0 ? 'bg-red-500/10' : ''}`}>
                 {formatScore(g.score_to_par)}
               </span>
             </div>

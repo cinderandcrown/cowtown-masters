@@ -219,7 +219,7 @@ export default function DrawTab({ poolId }) {
 
       {/* Already Drawn State */}
       {alreadyDrawn && phase === 'ready' && (
-        <div className="bg-white rounded-xl p-6 border border-primary/10 space-y-4">
+        <div className="bg-card rounded-xl p-6 border border-primary/10 space-y-4">
           <div className="text-center">
             <div className="text-4xl mb-2">
               <Check className="w-10 h-10 mx-auto text-green-600" />
@@ -266,7 +266,7 @@ export default function DrawTab({ poolId }) {
               className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
                 drawMode === 'random'
                   ? 'border-primary bg-primary/10 shadow-md'
-                  : 'border-primary/20 bg-white hover:border-primary/40'
+                  : 'border-primary/20 bg-card hover:border-primary/40'
               }`}
             >
               <Shuffle className={`w-6 h-6 ${drawMode === 'random' ? 'text-primary' : 'text-muted-foreground'}`} />
@@ -280,7 +280,7 @@ export default function DrawTab({ poolId }) {
               className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
                 drawMode === 'manual'
                   ? 'border-accent bg-accent/10 shadow-md'
-                  : 'border-accent/20 bg-white hover:border-accent/40'
+                  : 'border-accent/20 bg-card hover:border-accent/40'
               }`}
             >
               <PenLine className={`w-6 h-6 ${drawMode === 'manual' ? 'text-accent' : 'text-muted-foreground'}`} />
@@ -293,7 +293,7 @@ export default function DrawTab({ poolId }) {
 
           {/* Random Draw Ready State */}
           {drawMode === 'random' && (
-            <div className="bg-white rounded-xl p-6 border border-primary/10 text-center space-y-4">
+            <div className="bg-card rounded-xl p-6 border border-primary/10 text-center space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-primary/10 rounded-lg p-3 border border-primary/20">
                   <p className="text-xs font-bold text-primary tracking-widest uppercase mb-1">GROUP A</p>
@@ -336,7 +336,7 @@ export default function DrawTab({ poolId }) {
           {drawMode === 'manual' && (
             <div className="space-y-3">
               {entries.length === 0 && (
-                <div className="bg-white rounded-xl p-6 border border-primary/10 text-center">
+                <div className="bg-card rounded-xl p-6 border border-primary/10 text-center">
                   <p className="text-sm text-destructive font-semibold">Add participants first in the Admin panel.</p>
                 </div>
               )}
@@ -348,7 +348,7 @@ export default function DrawTab({ poolId }) {
                 return (
                   <div
                     key={entry.id}
-                    className={`bg-white rounded-xl border overflow-hidden transition-all ${
+                    className={`bg-card rounded-xl border overflow-hidden transition-all ${
                       isLocked ? 'border-green-300 bg-green-50/50' : 'border-primary/10'
                     }`}
                   >
@@ -497,7 +497,7 @@ export default function DrawTab({ poolId }) {
 
       {/* Complete Phase */}
       {phase === 'complete' && (
-        <div className="bg-white rounded-xl p-6 border border-primary/10 text-center space-y-4">
+        <div className="bg-card rounded-xl p-6 border border-primary/10 text-center space-y-4">
           <div className="text-6xl">🎉</div>
           <h3 className="text-2xl font-bold text-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
             Draw Complete!

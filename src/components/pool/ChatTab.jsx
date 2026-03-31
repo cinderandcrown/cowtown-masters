@@ -128,7 +128,7 @@ export default function ChatTab({ poolId, participantIdentity }) {
           <p className="text-xs text-accent">Who are you?</p>
         </div>
 
-        <div className="bg-white rounded-xl border border-primary/10 p-4 space-y-2">
+        <div className="bg-card rounded-xl border border-primary/10 p-4 space-y-2">
           <p className="text-sm text-muted-foreground text-center mb-3">Select your name to start talking trash</p>
           {participantNames.length === 0 && (
             <p className="text-sm text-destructive text-center">No participants yet. Add entries in the Admin panel first.</p>
@@ -214,7 +214,7 @@ export default function ChatTab({ poolId, participantIdentity }) {
                 <div className={`rounded-2xl px-3 py-2 ${
                   isMe
                     ? 'bg-primary text-primary-foreground rounded-br-md'
-                    : 'bg-white border border-primary/10 text-foreground rounded-bl-md'
+                    : 'bg-card border border-primary/10 text-foreground rounded-bl-md'
                 }`}>
                   <p className="text-sm">{renderMessageWithMentions(msg.message)}</p>
                 </div>
@@ -230,7 +230,7 @@ export default function ChatTab({ poolId, participantIdentity }) {
       {/* Mention Picker */}
       {showMentionPicker && (
         <div className="px-3 pb-1">
-          <div className="bg-white rounded-lg border border-accent/30 shadow-lg p-2 max-h-32 overflow-y-auto">
+          <div className="bg-card rounded-lg border border-accent/30 shadow-lg p-2 max-h-32 overflow-y-auto">
             <div className="flex items-center justify-between mb-1">
               <span className="text-[10px] font-bold text-accent tracking-widest uppercase">Mention someone</span>
               <button onClick={() => setShowMentionPicker(false)}>
@@ -252,7 +252,7 @@ export default function ChatTab({ poolId, participantIdentity }) {
 
       {/* Input Bar */}
       <div className="px-3 pb-3 pt-1">
-        <form onSubmit={handleSend} className="flex items-center gap-2 bg-white rounded-xl border border-primary/10 px-2 py-1.5 shadow-sm focus-within:border-primary/30 focus-within:shadow-md focus-within:shadow-primary/10 transition-all">
+        <form onSubmit={handleSend} className="flex items-center gap-2 bg-card rounded-xl border border-primary/10 px-2 py-1.5 shadow-sm focus-within:border-primary/30 focus-within:shadow-md focus-within:shadow-primary/10 transition-all">
           <button
             type="button"
             onClick={() => setShowMentionPicker(!showMentionPicker)}
