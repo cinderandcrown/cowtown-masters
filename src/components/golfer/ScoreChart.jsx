@@ -41,23 +41,24 @@ export default function ScoreChart({ golfer }) {
         data={data}
         margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
       >
-        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
         <XAxis
           dataKey="round"
-          stroke="#999"
+          stroke="hsl(var(--muted-foreground))"
           style={{ fontSize: '12px' }}
         />
         <YAxis
-          stroke="#999"
+          stroke="hsl(var(--muted-foreground))"
           style={{ fontSize: '12px' }}
           label={{ value: 'Score to Par', angle: -90, position: 'insideLeft' }}
         />
         <Tooltip
           contentStyle={{
-            backgroundColor: '#fff',
-            border: '1px solid #ccc',
+            backgroundColor: 'hsl(var(--card))',
+            border: '1px solid hsl(var(--border))',
             borderRadius: '8px',
             padding: '8px',
+            color: 'hsl(var(--foreground))',
           }}
           formatter={(value) => [formatScore(value), 'Cumulative']}
           labelFormatter={(label) => `Round: ${label}`}
