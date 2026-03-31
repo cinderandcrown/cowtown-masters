@@ -8,7 +8,7 @@ const TABS = [
   { id: 'teams', label: 'Teams', Icon: Users },
   { id: 'golfers', label: 'Golfers', Icon: Flag },
   { id: 'draw', label: 'Draw', Icon: Shuffle },
-  { id: 'messages', label: 'Messages', Icon: MessageCircle },
+  { id: 'messages', label: 'Smack', Icon: MessageCircle },
   { id: 'rules', label: 'Rules', Icon: BookOpen },
 ];
 

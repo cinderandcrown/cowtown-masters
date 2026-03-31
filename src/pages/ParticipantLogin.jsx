@@ -98,7 +98,8 @@ export default function ParticipantLogin() {
 
       navigate(`/pool/${poolId}`);
     } catch (err) {
-      setError('Failed to create account. Please try again.');
+      console.error('Registration error:', err);
+      setError(err?.message || 'Failed to create account. Please try again.');
     }
     setLoading(false);
   };
