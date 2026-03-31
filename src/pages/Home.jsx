@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 
 
 export default function Home() {
+  useEffect(() => { document.title = 'Cowtown Masters'; }, []);
   const navigate = useNavigate();
   const [showCreatePool, setShowCreatePool] = useState(false);
   const [showJoinPool, setShowJoinPool] = useState(false);

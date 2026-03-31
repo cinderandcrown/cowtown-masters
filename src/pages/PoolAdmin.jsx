@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -14,6 +14,8 @@ export default function PoolAdmin() {
   const { poolId } = useParams();
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('golfers');
+
+  useEffect(() => { document.title = 'Cowtown Masters - Admin'; }, []);
 
   const { data: pool, isLoading: loadingPool } = useQuery({
     queryKey: ['pool', poolId],

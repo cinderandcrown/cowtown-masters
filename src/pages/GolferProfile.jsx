@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -21,6 +21,10 @@ export default function GolferProfile() {
     },
     enabled: !!golferId,
   });
+
+  useEffect(() => {
+    document.title = golfer ? `Cowtown Masters - ${golfer.name}` : 'Cowtown Masters - Golfer';
+  }, [golfer]);
 
   if (isLoading) {
     return (

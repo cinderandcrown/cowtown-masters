@@ -35,6 +35,20 @@ export default function PoolDashboard() {
     document.body.scrollTop = 0;
   }, []);
 
+  // Update page title on tab change
+  useEffect(() => {
+    const tabNames = {
+      leaderboard: 'Leaderboard',
+      teams: 'Teams',
+      golfers: 'Golfers',
+      draw: 'Draw',
+      messages: 'Smack Talk',
+      rules: 'Rules',
+      history: 'History',
+    };
+    document.title = `Cowtown Masters - ${tabNames[activeTab] || 'Pool'}`;
+  }, [activeTab]);
+
   // Scroll to top on tab change
   useEffect(() => {
     window.scrollTo(0, 0);
