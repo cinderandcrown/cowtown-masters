@@ -65,9 +65,13 @@ function ParticipantBadge({ poolId }) {
           aria-expanded={showPanel}
           aria-haspopup="dialog"
           aria-label={`Account menu for ${participant.participant_name}`}
-          className="text-[10px] font-bold text-primary-foreground bg-white/15 rounded-lg px-2 py-1 border border-white/20 hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 transition truncate max-w-[80px]"
+          className="text-[10px] font-bold text-primary-foreground bg-white/15 rounded-lg px-2 py-1 border border-white/20 hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 transition truncate max-w-[100px]"
         >
-          {participant.participant_name}
+          {(() => {
+            const entries = queryClient.getQueryData(['poolEntries', poolId]) || [];
+            const myEntry = entries.find(e => e.id === participant.entry_id);
+            return myEntry?.team_name || participant.participant_name;
+          })()}
         </button>
 
         {showPanel && (

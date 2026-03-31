@@ -91,6 +91,12 @@ export default function ChatTab({ poolId, participantIdentity }) {
     [entries]
   );
 
+  const entryByName = useMemo(() => {
+    const map = {};
+    entries.forEach(e => { if (e.participant_name) map[e.participant_name] = e; });
+    return map;
+  }, [entries]);
+
   const selectIdentity = (name) => {
     setIdentity(name);
     localStorage.setItem(IDENTITY_KEY(poolId), name);
@@ -133,16 +139,22 @@ export default function ChatTab({ poolId, participantIdentity }) {
           {participantNames.length === 0 && (
             <p className="text-sm text-destructive text-center">No participants yet. Add entries in the Admin panel first.</p>
           )}
-          {participantNames.map((name, i) => (
-            <button
-              key={name}
-              onClick={() => selectIdentity(name)}
-              className="animate-fade-in-up w-full text-left px-4 py-3 rounded-lg border border-primary/10 hover:bg-primary/5 hover:border-primary/30 hover:scale-[1.01] hover:shadow-sm transition-all font-semibold text-sm"
-              style={{ animationDelay: `${i * 50}ms` }}
-            >
-              {name}
-            </button>
-          ))}
+          {participantNames.map((name, i) => {
+            const entry = entryByName[name];
+            return (
+              <button
+                key={name}
+                onClick={() => selectIdentity(name)}
+                className="animate-fade-in-up w-full text-left px-4 py-3 rounded-lg border border-primary/10 hover:bg-primary/5 hover:border-primary/30 hover:scale-[1.01] hover:shadow-sm transition-all"
+                style={{ animationDelay: `${i * 50}ms` }}
+              >
+                <span className="font-semibold text-sm text-foreground">{entry?.team_name || name}</span>
+                {entry?.team_name && (
+                  <span className="block text-[10px] text-muted-foreground mt-0.5">{name}</span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
     );
@@ -166,7 +178,7 @@ export default function ChatTab({ poolId, participantIdentity }) {
             onClick={() => setShowIdentityPicker(true)}
             className="text-[10px] text-accent bg-accent/10 px-2 py-1 rounded-full border border-accent/30 font-semibold"
           >
-            {identity}
+            {entryByName[identity]?.team_name || identity}
           </button>
         </div>
       </div>
@@ -209,7 +221,9 @@ export default function ChatTab({ poolId, participantIdentity }) {
             <div key={msg.id} className={`flex ${isMe ? 'justify-end animate-slide-in-right' : 'justify-start animate-slide-in-left'}`}>
               <div className={`max-w-[80%] ${isMe ? 'items-end' : 'items-start'}`}>
                 {!isMe && (
-                  <p className="text-[10px] font-bold text-primary ml-2 mb-0.5">{msg.user_name}</p>
+                  <p className="text-[10px] font-bold text-primary ml-2 mb-0.5">
+                    {entryByName[msg.user_name]?.team_name || msg.user_name}
+                  </p>
                 )}
                 <div className={`rounded-2xl px-3 py-2 ${
                   isMe
