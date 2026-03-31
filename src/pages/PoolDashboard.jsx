@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import PoolLayout from '@/components/layout/PoolLayout';
@@ -28,12 +28,16 @@ export default function PoolDashboard() {
 
   const { pullProps, PullIndicator } = usePullToRefresh(handleRefresh);
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [activeTab]);
+  const handleTabChange = useCallback((tab) => {
+    setActiveTab(tab);
+    // Scroll to top immediately when switching tabs
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, []);
 
   return (
-    <PoolLayout activeTab={activeTab} onChange={setActiveTab}>
+    <PoolLayout activeTab={activeTab} onChange={handleTabChange}>
       <div {...pullProps} className="min-h-[60vh]">
         <PullIndicator />
         {activeTab === 'leaderboard' && <Leaderboard poolId={poolId} onSelectEntry={setSelectedEntry} />}
