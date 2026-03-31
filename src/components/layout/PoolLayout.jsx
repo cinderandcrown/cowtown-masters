@@ -1,15 +1,49 @@
 import React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, User } from 'lucide-react';
+import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, LogIn } from 'lucide-react';
+import { useParticipant } from '@/lib/ParticipantContext';
 
 const TABS = [
   { id: 'leaderboard', label: 'Board', Icon: Trophy },
   { id: 'teams', label: 'Teams', Icon: Users },
   { id: 'golfers', label: 'Golfers', Icon: Flag },
   { id: 'draw', label: 'Draw', Icon: Shuffle },
-  { id: 'chat', label: 'Talk', Icon: MessageCircle },
+  { id: 'messages', label: 'Messages', Icon: MessageCircle },
   { id: 'rules', label: 'Rules', Icon: BookOpen },
 ];
+
+function ParticipantBadge({ poolId }) {
+  const navigate = useNavigate();
+  let participantCtx;
+  try {
+    participantCtx = useParticipant();
+  } catch {
+    participantCtx = { isLoggedIn: false, participant: null, logout: () => {} };
+  }
+  const { isLoggedIn, participant, logout } = participantCtx;
+
+  if (isLoggedIn) {
+    return (
+      <button
+        onClick={logout}
+        className="text-[10px] font-bold text-primary-foreground bg-white/15 rounded-lg px-2 py-1 border border-white/20 hover:bg-white/25 transition truncate max-w-[80px]"
+        title={`Signed in as ${participant.participant_name}. Click to sign out.`}
+      >
+        {participant.participant_name}
+      </button>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => navigate(`/pool/${poolId}/login`)}
+      className="p-1.5 hover:bg-white/10 rounded-lg transition"
+      title="Sign in"
+    >
+      <LogIn className="w-4 h-4 text-primary-foreground" />
+    </button>
+  );
+}
 
 export function PoolHeader() {
   const { poolId } = useParams();
@@ -49,9 +83,7 @@ export function PoolHeader() {
               <span className="text-[10px] font-black tracking-widest text-red-400 uppercase">LIVE</span>
               <span className="w-2 h-2 rounded-full bg-red-500 animate-live-pulse" />
             </div>
-            <Link to="/account" className="p-1.5 hover:bg-white/10 rounded-lg transition">
-              <User className="w-4 h-4 text-primary-foreground" />
-            </Link>
+            <ParticipantBadge poolId={poolId} />
           </div>
         </div>
       </div>

@@ -32,16 +32,27 @@ function renderMessageWithMentions(text) {
   });
 }
 
-export default function ChatTab({ poolId }) {
+export default function ChatTab({ poolId, participantIdentity }) {
   const queryClient = useQueryClient();
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
 
   const [message, setMessage] = useState('');
-  const [identity, setIdentity] = useState(() =>
-    typeof window !== 'undefined' ? localStorage.getItem(IDENTITY_KEY(poolId)) || '' : ''
-  );
-  const [showIdentityPicker, setShowIdentityPicker] = useState(!identity);
+  const [identity, setIdentity] = useState(() => {
+    // Use logged-in participant identity if available, fallback to localStorage
+    if (participantIdentity) return participantIdentity;
+    return typeof window !== 'undefined' ? localStorage.getItem(IDENTITY_KEY(poolId)) || '' : '';
+  });
+  const [showIdentityPicker, setShowIdentityPicker] = useState(!identity && !participantIdentity);
+
+  // Sync identity when participantIdentity prop changes (e.g., after login)
+  useEffect(() => {
+    if (participantIdentity && participantIdentity !== identity) {
+      setIdentity(participantIdentity);
+      setShowIdentityPicker(false);
+      localStorage.setItem(IDENTITY_KEY(poolId), participantIdentity);
+    }
+  }, [participantIdentity]);
   const [showMentionPicker, setShowMentionPicker] = useState(false);
 
   const { data: entries = [] } = useQuery({
@@ -138,7 +149,7 @@ export default function ChatTab({ poolId }) {
   }
 
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100vh - 180px)' }}>
+    <div className="flex flex-col flex-1 min-h-0">
       {/* Chat Header */}
       <div className="px-3 pt-3 pb-2">
         <div className="bg-gradient-to-r from-secondary to-primary rounded-xl px-4 py-2.5 border border-accent/30 flex items-center justify-between">

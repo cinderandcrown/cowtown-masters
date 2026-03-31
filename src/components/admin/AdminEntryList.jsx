@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Trash2, User, Users, Pencil, Check, X, Plus } from 'lucide-react';
+import { Trash2, User, Users, Pencil, Check, X, Plus, KeyRound } from 'lucide-react';
 import { parseTeamEmails } from '@/lib/scoreUtils';
 
 export default function AdminEntryList({ poolId }) {
@@ -31,6 +31,22 @@ export default function AdminEntryList({ poolId }) {
       queryClient.invalidateQueries({ queryKey: ['poolEntries', poolId] });
       setEditingId(null);
       setEmailInput('');
+    },
+  });
+
+  const resetPassword = useMutation({
+    mutationFn: async (email) => {
+      try {
+        const authRecords = await base44.entities.ParticipantAuth.filter({
+          pool_id: poolId,
+          email: email.trim().toLowerCase(),
+        });
+        for (const record of authRecords) {
+          await base44.entities.ParticipantAuth.delete(record.id);
+        }
+      } catch {
+        // Entity may not exist yet — that's fine
+      }
     },
   });
 
@@ -209,10 +225,25 @@ export default function AdminEntryList({ poolId }) {
                   {(entry.total_score || 0) === 0 ? 'E' : (entry.total_score > 0 ? '+' : '') + entry.total_score}
                 </span>
               </div>
-              <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => startEdit(entry)}>
+              <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => startEdit(entry)} title="Edit">
                 <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => deleteEntry.mutate(entry.id)}>
+              {teamEmails.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 flex-shrink-0"
+                  title="Reset password"
+                  onClick={() => {
+                    if (window.confirm(`Reset password for ${entry.participant_name}? They will need to set a new password on next login.`)) {
+                      teamEmails.forEach(e => resetPassword.mutate(e));
+                    }
+                  }}
+                >
+                  <KeyRound className={`w-3.5 h-3.5 ${resetPassword.isPending ? 'text-accent animate-pulse' : 'text-muted-foreground'}`} />
+                </Button>
+              )}
+              <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => deleteEntry.mutate(entry.id)} title="Delete">
                 <Trash2 className="w-3.5 h-3.5 text-destructive" />
               </Button>
             </div>

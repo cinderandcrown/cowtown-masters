@@ -5,7 +5,7 @@ import PoolLayout from '@/components/layout/PoolLayout';
 import Leaderboard from '@/components/pool/Leaderboard.jsx';
 import GolfersTab from '@/components/pool/GolfersTab.jsx';
 import DrawTab from '@/components/pool/DrawTab.jsx';
-import ChatTab from '@/components/pool/ChatTab.jsx';
+import MessagingHub from '@/components/pool/MessagingHub.jsx';
 import HistoryTab from '@/components/pool/HistoryTab';
 import RulesTab from '@/components/pool/RulesTab';
 import TeamsTab from '@/components/pool/TeamsTab';
@@ -22,6 +22,8 @@ export default function PoolDashboard() {
     await queryClient.invalidateQueries({ queryKey: ['poolEntries', poolId] });
     await queryClient.invalidateQueries({ queryKey: ['poolGolfers', poolId] });
     await queryClient.invalidateQueries({ queryKey: ['chatMessages', poolId] });
+    await queryClient.invalidateQueries({ queryKey: ['dmSent', poolId] });
+    await queryClient.invalidateQueries({ queryKey: ['dmReceived', poolId] });
   }, [queryClient, poolId]);
 
   const { pullProps, PullIndicator } = usePullToRefresh(handleRefresh);
@@ -37,7 +39,7 @@ export default function PoolDashboard() {
         {activeTab === 'leaderboard' && <Leaderboard poolId={poolId} onSelectEntry={setSelectedEntry} />}
         {activeTab === 'golfers' && <GolfersTab poolId={poolId} />}
         {activeTab === 'draw' && <DrawTab poolId={poolId} />}
-        {activeTab === 'chat' && <ChatTab poolId={poolId} />}
+        {activeTab === 'messages' && <MessagingHub poolId={poolId} />}
         {activeTab === 'teams' && <TeamsTab poolId={poolId} />}
         {activeTab === 'history' && <HistoryTab poolId={poolId} />}
         {activeTab === 'rules' && <RulesTab poolId={poolId} />}
