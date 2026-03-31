@@ -1,49 +1,82 @@
 import React from 'react';
+import { DollarSign, Layers, Shuffle, Target, Scissors, AlertTriangle, Scale, Trophy, Info } from 'lucide-react';
 
 const RULES = [
   {
-    icon: '👥',
-    title: 'The Pool',
-    desc: 'Each participant pays the entry fee and receives two golfers: one from Group A (favorites) and one from Group B (longshots).',
+    Icon: DollarSign,
+    title: 'Entry Fee',
+    items: [
+      '$50 per golfer',
+      'Each entry receives 2 golfers: 1 Top Tier + 1 Bottom Tier',
+    ],
+    highlight: 'Total per entry: $100',
   },
   {
-    icon: '📊',
-    title: 'Group Split',
-    desc: 'Golfers are divided into A & B groups based on pre-tournament betting odds. The top half by odds go to Group A, the rest to Group B.',
+    Icon: Layers,
+    title: 'Golfer Tiers',
+    items: [
+      'Golfers are split into Top Tier and Bottom Tier based on Vegas odds.',
+      'Example: 25 entries = 50 golfers total',
+      'Top 25 = Top Tier',
+      '26–50 = Bottom Tier',
+    ],
   },
   {
-    icon: '🎩',
-    title: 'The Hat Draw',
-    desc: 'Names are drawn from a hat — first Group A picks, then Group B. Pure luck of the draw. No trading, no swaps.',
+    Icon: Shuffle,
+    title: 'Random Draw',
+    items: [
+      'Golfers assigned via random draw (names out of a hat).',
+      'Draw will be recorded and shared.',
+      'Total golfers depends on number of paid entries.',
+    ],
   },
   {
-    icon: '⛳',
+    Icon: Target,
     title: 'Scoring',
-    desc: "Your total score = Group A golfer's final score to par + Group B golfer's final score to par. Lowest combined score wins.",
+    items: [
+      'Score = combined total of both golfers.',
+    ],
+    example: 'Morikawa -4, Fowler -3 → Total = -7',
   },
   {
-    icon: '✂️',
-    title: 'Missed Cuts',
-    desc: 'If your golfer misses the cut, their score at the cut line carries through all 4 rounds. They earn no improvement from the weekend.',
+    Icon: Scissors,
+    title: 'Missed Cut Rule',
+    items: [
+      <>If a golfer misses the cut, you take their score at the <strong>END OF FRIDAY&apos;S ROUND</strong>.</>,
+    ],
+    example: 'Mickelson +7 (MC after Friday), Straka -7 → Total = 0',
   },
   {
-    icon: '💰',
-    title: 'Payouts',
-    desc: 'Prize pool is split among top finishers. Exact payout structure is set before tournament week.',
+    Icon: AlertTriangle,
+    title: 'Withdrawal Rule',
+    items: [
+      <>If <strong>either</strong> of your golfers withdraws from the tournament, you will receive your money back.</>,
+    ],
   },
   {
-    icon: '🏆',
-    title: 'The Green Jacket',
-    desc: 'The winner gets eternal bragging rights and their name on the Cowtown Champions Wall.',
+    Icon: Scale,
+    title: 'Tie Breaker',
+    items: [
+      'Lowest individual score from either golfer.',
+    ],
+    example: 'Player A (-7, -3 = -10) vs Player B (-8, -2 = -10) — Player B wins with -8',
+  },
+  {
+    Icon: Trophy,
+    title: 'Payout',
+    items: [
+      '1st Place: 90% of final pot',
+      '2nd Place: 10% of final pot',
+    ],
   },
 ];
 
 export default function RulesTab() {
   return (
     <div className="px-3 pt-3 pb-6 space-y-3">
-      <div className="text-center mb-6">
+      <div className="text-center mb-4">
         <h2 className="text-2xl font-bold text-foreground mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-          How It Works
+          Masters Pool Rules
         </h2>
         <p className="text-sm text-muted-foreground">The Official Cowtown Masters Rules</p>
       </div>
@@ -51,19 +84,45 @@ export default function RulesTab() {
       {RULES.map((rule, i) => (
         <div
           key={i}
-          className="bg-card rounded-lg p-4 border border-border hover:border-primary/30 hover:shadow-sm transition flex gap-3"
+          className="animate-fade-in-up bg-card rounded-xl p-4 border border-border hover:border-primary/30 hover:shadow-sm transition"
+          style={{ animationDelay: `${i * 60}ms` }}
         >
-          <span className="text-3xl flex-shrink-0 filter drop-shadow">{rule.icon}</span>
-          <div>
-            <h4 className="font-bold text-foreground text-sm mb-1">{rule.title}</h4>
-            <p className="text-xs text-muted-foreground leading-relaxed">{rule.desc}</p>
+          <div className="flex items-center gap-2.5 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <rule.Icon className="w-4 h-4 text-primary" aria-hidden="true" />
+            </div>
+            <h3 className="font-bold text-foreground text-sm">{rule.title}</h3>
           </div>
+
+          <ul className="space-y-1 ml-[42px]" role="list">
+            {rule.items.map((item, j) => (
+              <li key={j} className="text-xs text-muted-foreground leading-relaxed flex gap-1.5">
+                <span className="text-primary/40 mt-0.5 flex-shrink-0" aria-hidden="true">•</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+
+          {rule.highlight && (
+            <div className="ml-[42px] mt-2 inline-block bg-accent/15 text-accent font-bold text-xs px-2.5 py-1 rounded-md border border-accent/25">
+              {rule.highlight}
+            </div>
+          )}
+
+          {rule.example && (
+            <div className="ml-[42px] mt-2 bg-primary/5 rounded-md px-2.5 py-1.5 border border-primary/10">
+              <span className="text-[10px] font-bold text-primary/60 tracking-widest uppercase">Example</span>
+              <p className="text-xs text-foreground font-medium">{rule.example}</p>
+            </div>
+          )}
         </div>
       ))}
 
-      <div className="bg-gradient-to-br from-secondary to-primary rounded-xl p-4 border border-accent/30 mt-6">
-        <p className="text-sm text-primary-foreground font-semibold text-center">
-          Questions? Ask your pool admin for details on entry fees & payout structure.
+      {/* Note */}
+      <div className="animate-fade-in-up flex items-start gap-2.5 bg-accent/10 rounded-xl p-3 border border-accent/20" style={{ animationDelay: `${RULES.length * 60}ms` }}>
+        <Info className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" aria-hidden="true" />
+        <p className="text-xs text-foreground leading-relaxed">
+          <strong>Note:</strong> Rough estimate — Masters field size is approximately ~90 golfers.
         </p>
       </div>
     </div>
