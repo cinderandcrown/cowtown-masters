@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, useLocation, useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import Home from '@/pages/Home';
@@ -25,10 +25,22 @@ function PoolWrapper({ children }) {
   return <ParticipantProvider poolId={poolId}>{children}</ParticipantProvider>;
 }
 
+function ScrollToTop() {
+  const location = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [location.pathname]);
+  return null;
+}
+
 export default function AnimatedRoutes() {
   const location = useLocation();
 
   return (
+    <>
+    <ScrollToTop />
     <AnimatePresence mode="wait">
       <motion.div
         key={location.pathname}
@@ -51,5 +63,6 @@ export default function AnimatedRoutes() {
         </Routes>
       </motion.div>
     </AnimatePresence>
+    </>
   );
 }
