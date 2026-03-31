@@ -125,7 +125,7 @@ export default function ChatTab({ poolId, participantIdentity }) {
   // Identity Picker
   if (showIdentityPicker) {
     return (
-      <div className="px-3 pt-3 pb-6">
+      <div className="px-3 pt-3 pb-0">
         <div className="bg-gradient-to-br from-secondary to-primary rounded-xl p-4 mb-4 border border-accent/30 text-center">
           <MessageCircle className="w-8 h-8 text-accent mx-auto mb-2" />
           <h2 className="text-xl font-bold text-primary-foreground mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>

@@ -7,7 +7,7 @@ import { formatScore, scoreColor } from '@/lib/scoreUtils';
 
 function GolfersSkeleton() {
   return (
-    <div className="px-3 pt-3 pb-6">
+    <div className="px-3 pt-3 pb-0">
       <Skeleton className="h-9 w-full rounded-t-xl" />
       <div className="flex gap-2 bg-card border-x border-primary/10 px-3 py-2">
         <Skeleton className="h-7 w-14 rounded-full" />
@@ -72,7 +72,7 @@ export default function GolfersTab({ poolId }) {
   });
 
   return (
-    <div className="px-3 pt-3 pb-6">
+    <div className="px-3 pt-3 pb-0">
       {/* TV-style header */}
       <div className="bg-gradient-to-r from-primary to-secondary rounded-t-xl px-3 py-2 flex items-center justify-between">
         <span className="text-sm font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>

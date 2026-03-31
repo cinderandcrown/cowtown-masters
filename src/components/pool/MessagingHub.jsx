@@ -22,7 +22,7 @@ export default function MessagingHub({ poolId }) {
   // Require login for messaging
   if (!isLoggedIn) {
     return (
-      <div className="px-3 pt-3 pb-6">
+      <div className="px-3 pt-3 pb-0">
         <div className="bg-gradient-to-br from-secondary to-primary rounded-xl p-6 border border-accent/30 text-center animate-fade-in-up">
           <MessageCircle className="w-10 h-10 text-accent mx-auto mb-3" />
           <h2 className="text-xl font-bold text-primary-foreground mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
