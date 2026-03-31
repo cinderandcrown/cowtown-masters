@@ -81,16 +81,16 @@ function ParticipantBadge({ poolId }) {
               ref={panelRef}
               role="dialog"
               aria-label="Account settings"
-              className="fixed right-3 top-14 z-[70] w-64 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden animate-fade-in-up"
+              className="fixed right-3 top-14 z-[70] w-64 bg-card rounded-xl shadow-xl border border-border overflow-hidden animate-fade-in-up"
             >
-              <div className="px-4 py-3 bg-gradient-to-r from-primary/5 to-accent/5 border-b border-gray-200">
-                <p className="text-sm font-bold text-gray-900">{participant.participant_name}</p>
-                <p className="text-xs text-gray-500">{participant.email}</p>
+              <div className="px-4 py-3 bg-gradient-to-r from-primary/5 to-accent/5 border-b border-border">
+                <p className="text-sm font-bold text-foreground">{participant.participant_name}</p>
+                <p className="text-xs text-muted-foreground">{participant.email}</p>
               </div>
 
-              <div className="px-4 py-3 border-b border-gray-200 bg-white">
+              <div className="px-4 py-3 border-b border-border bg-card">
                 <div className="flex items-center justify-between mb-1.5">
-                  <label id="team-name-label" className="text-[10px] font-bold text-gray-500 tracking-widest uppercase">Team Name</label>
+                  <label id="team-name-label" className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase">Team Name</label>
                   {!editingTeamName && (
                     <button
                       onClick={() => {
@@ -100,7 +100,7 @@ function ParticipantBadge({ poolId }) {
                         setEditingTeamName(true);
                       }}
                       aria-label="Edit team name"
-                      className="p-1 hover:bg-gray-100 rounded transition focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="p-1 hover:bg-muted rounded transition focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                       <Pencil className="w-3.5 h-3.5 text-primary" />
                     </button>
@@ -113,7 +113,7 @@ function ParticipantBadge({ poolId }) {
                       onChange={(e) => setTeamNameValue(e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter') updateTeamName.mutate(teamNameValue); }}
                       placeholder="e.g. The Outlaws"
-                      className="h-8 text-sm flex-1 bg-white"
+                      className="h-8 text-sm flex-1 bg-card"
                       aria-labelledby="team-name-label"
                       autoFocus
                     />
@@ -134,15 +134,15 @@ function ParticipantBadge({ poolId }) {
                       onClick={() => setEditingTeamName(false)}
                       aria-label="Cancel editing"
                     >
-                      <X className="w-4 h-4 text-gray-500" />
+                      <X className="w-4 h-4 text-muted-foreground" />
                     </Button>
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-900">
+                  <p className="text-sm text-foreground">
                     {(() => {
                       const entries = queryClient.getQueryData(['poolEntries', poolId]) || [];
                       const myEntry = entries.find(e => e.id === participant.entry_id);
-                      return myEntry?.team_name || <span className="text-gray-400 italic">Not set</span>;
+                      return myEntry?.team_name || <span className="text-muted-foreground/60 italic">Not set</span>;
                     })()}
                   </p>
                 )}
@@ -150,7 +150,7 @@ function ParticipantBadge({ poolId }) {
 
               <button
                 onClick={() => { logout(); setShowPanel(false); }}
-                className="w-full px-4 py-3 text-left text-sm font-medium text-red-600 hover:bg-red-50 transition flex items-center gap-2 bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-red-500"
+                className="w-full px-4 py-3 text-left text-sm font-medium text-red-600 hover:bg-destructive/10 transition flex items-center gap-2 bg-card focus:outline-none focus:ring-2 focus:ring-inset focus:ring-red-500"
               >
                 <LogOut className="w-4 h-4" aria-hidden="true" />
                 Sign Out
@@ -307,8 +307,8 @@ function CinderCrownFooter() {
 
 export default function PoolLayout({ activeTab, onChange, children }) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cream to-sand">
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:bg-white focus:text-primary focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:text-sm focus:font-bold">
+    <div className="min-h-screen bg-background">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:bg-card focus:text-primary focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:text-sm focus:font-bold">
         Skip to main content
       </a>
       <PoolHeader />

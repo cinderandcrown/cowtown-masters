@@ -184,7 +184,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
             >
               {entry.rank <= 3 ? (
                 <span className={`flex items-center justify-center text-xs font-black rounded-full w-7 h-7 mx-auto ${
-                  entry.rank === 1 ? 'bg-accent text-white' : entry.rank === 2 ? 'bg-gray-300 text-gray-700' : 'bg-amber-600/80 text-white'
+                  entry.rank === 1 ? 'bg-accent text-white' : entry.rank === 2 ? 'bg-muted text-muted-foreground' : 'bg-amber-600/80 text-white'
                 }`}>
                   {entry.displayRank}
                 </span>
@@ -208,9 +208,9 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
                   {entry.golferA?.name || 'TBD'} &amp; {entry.golferB?.name || 'TBD'}
                 </p>
               </div>
-              <span className={`text-center font-bold text-xs tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.score_a)} ${entry.score_a < 0 ? 'bg-red-50' : ''}`}>{formatScore(entry.score_a)}</span>
-              <span className={`text-center font-bold text-xs tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.score_b)} ${entry.score_b < 0 ? 'bg-red-50' : ''}`}>{formatScore(entry.score_b)}</span>
-              <span className={`text-center font-black text-sm tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.total_score)} ${entry.total_score < 0 ? 'bg-red-50' : ''}`}>
+              <span className={`text-center font-bold text-xs tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.score_a)} ${entry.score_a < 0 ? 'bg-red-500/10' : ''}`}>{formatScore(entry.score_a)}</span>
+              <span className={`text-center font-bold text-xs tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.score_b)} ${entry.score_b < 0 ? 'bg-red-500/10' : ''}`}>{formatScore(entry.score_b)}</span>
+              <span className={`text-center font-black text-sm tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.total_score)} ${entry.total_score < 0 ? 'bg-red-500/10' : ''}`}>
                 {formatScore(entry.total_score)}
               </span>
             </div>

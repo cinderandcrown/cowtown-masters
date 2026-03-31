@@ -94,7 +94,7 @@ export default function AdminEntryList({ poolId }) {
 
   if (entries.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-primary/10 p-6 text-center">
+      <div className="bg-card rounded-xl border border-primary/10 p-6 text-center">
         <User className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
         <p className="text-sm text-muted-foreground">No participants yet. Add someone above!</p>
       </div>
@@ -113,7 +113,7 @@ export default function AdminEntryList({ poolId }) {
 
         if (isEditing) {
           return (
-            <div key={entry.id} className="bg-white rounded-lg px-3 py-3 border border-accent/30 animate-fade-in-up">
+            <div key={entry.id} className="bg-card rounded-lg px-3 py-3 border border-accent/30 animate-fade-in-up">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-bold text-accent tracking-widest uppercase">Editing</span>
                 <div className="flex gap-1">
@@ -182,7 +182,7 @@ export default function AdminEntryList({ poolId }) {
         }
 
         return (
-          <div key={entry.id} className="bg-white rounded-lg px-3 py-2.5 border border-primary/10 hover:border-accent/30 transition-all cursor-pointer group"
+          <div key={entry.id} className="bg-card rounded-lg px-3 py-2.5 border border-primary/10 hover:border-accent/30 transition-all cursor-pointer group"
             onClick={() => startEdit(entry)}
           >
             <div className="flex items-center gap-3">

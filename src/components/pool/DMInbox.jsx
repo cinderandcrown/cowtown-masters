@@ -110,7 +110,7 @@ export default function DMInbox({ poolId, currentUser, conversation, onOpenConve
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search conversations..."
-            className="pl-10 h-9 text-sm bg-white"
+            className="pl-10 h-9 text-sm bg-card"
           />
         </div>
       </div>
@@ -129,7 +129,7 @@ export default function DMInbox({ poolId, currentUser, conversation, onOpenConve
           <button
             key={conv.name}
             onClick={() => onOpenConversation(conv.name)}
-            className="animate-fade-in-up w-full flex items-center gap-3 p-3 rounded-xl bg-white border border-primary/10 hover:bg-accent/5 hover:shadow-sm transition-all text-left"
+            className="animate-fade-in-up w-full flex items-center gap-3 p-3 rounded-xl bg-card border border-primary/10 hover:bg-accent/5 hover:shadow-sm transition-all text-left"
             style={{ animationDelay: `${i * 40}ms` }}
           >
             {/* Avatar */}
@@ -170,7 +170,7 @@ export default function DMInbox({ poolId, currentUser, conversation, onOpenConve
               <button
                 key={name}
                 onClick={() => onOpenConversation(name)}
-                className="animate-fade-in-up w-full flex items-center gap-3 p-3 rounded-xl bg-white/50 border border-dashed border-primary/15 hover:bg-accent/5 hover:border-accent/30 transition-all text-left"
+                className="animate-fade-in-up w-full flex items-center gap-3 p-3 rounded-xl bg-muted/30 border border-dashed border-primary/15 hover:bg-accent/5 hover:border-accent/30 transition-all text-left"
                 style={{ animationDelay: `${i * 40}ms` }}
               >
                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">

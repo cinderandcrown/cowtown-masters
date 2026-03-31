@@ -79,7 +79,7 @@ export default function AddEntryForm({ poolId }) {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-primary/10 shadow-sm overflow-hidden">
+    <div className="bg-card rounded-xl border border-primary/10 shadow-sm overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-4 py-3 hover:bg-primary/5 transition"

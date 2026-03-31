@@ -91,7 +91,7 @@ export default function PoolSettingsCard({ pool, poolId }) {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-primary/10 p-4 mb-4 shadow-sm">
+    <div className="bg-card rounded-xl border border-primary/10 p-4 mb-4 shadow-sm">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Settings className="w-4 h-4 text-primary" />

@@ -15,7 +15,7 @@ function GolferCard({ golfer, group }) {
   }
 
   return (
-    <div className={`bg-white rounded-lg p-3 shadow-sm ${group === 'A' ? 'border-l-4 border-l-primary border border-primary/10' : 'border-l-4 border-l-accent border border-accent/15'}`}>
+    <div className={`bg-card rounded-lg p-3 shadow-sm ${group === 'A' ? 'border-l-4 border-l-primary border border-primary/10' : 'border-l-4 border-l-accent border border-accent/15'}`}>
       <div className="flex items-center justify-between mb-1">
         <span className={`text-xs font-bold tracking-widest ${group === 'A' ? 'text-primary' : 'text-accent'}`}>
           GRP {group}
@@ -54,7 +54,7 @@ function TeamCard({ entry, golferA, golferB, rank }) {
 
   return (
     <div className={`rounded-xl border shadow-sm overflow-hidden transition-all ${
-      rank === 1 ? 'border-accent/40 bg-accent/5 shadow-accent/20 shadow-md' : rank <= 3 ? 'border-primary/20 bg-primary/5' : 'border-primary/10 bg-white hover:shadow-md'
+      rank === 1 ? 'border-accent/40 bg-accent/5 shadow-accent/20 shadow-md' : rank <= 3 ? 'border-primary/20 bg-primary/5' : 'border-primary/10 bg-card hover:shadow-md'
     }`}>
       {/* Team Header */}
       <div className={`flex items-center justify-between px-4 py-3 ${

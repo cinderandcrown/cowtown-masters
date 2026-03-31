@@ -96,7 +96,7 @@ export default function DMConversation({ poolId, currentUser, otherUser, onBack 
     <div className="flex-1 flex flex-col min-h-0">
       {/* Conversation Header */}
       <div className="px-3 py-2">
-        <div className="flex items-center gap-3 bg-white rounded-xl border border-primary/10 px-3 py-2.5">
+        <div className="flex items-center gap-3 bg-card rounded-xl border border-primary/10 px-3 py-2.5">
           <button onClick={onBack} className="p-1 hover:bg-muted rounded-lg transition">
             <ArrowLeft className="w-4 h-4 text-muted-foreground" />
           </button>
@@ -127,7 +127,7 @@ export default function DMConversation({ poolId, currentUser, otherUser, onBack 
                 <div className={`rounded-2xl px-3 py-2 ${
                   isMe
                     ? 'bg-primary text-primary-foreground rounded-br-md'
-                    : 'bg-white border border-primary/10 text-foreground rounded-bl-md'
+                    : 'bg-card border border-primary/10 text-foreground rounded-bl-md'
                 }`}>
                   <p className="text-sm">{msg.message}</p>
                 </div>
@@ -143,7 +143,7 @@ export default function DMConversation({ poolId, currentUser, otherUser, onBack 
 
       {/* Input */}
       <div className="px-3 pb-3 pt-1">
-        <form onSubmit={handleSend} className="flex items-center gap-2 bg-white rounded-xl border border-primary/10 px-3 py-1.5 shadow-sm focus-within:border-primary/30 focus-within:shadow-md focus-within:shadow-primary/10 transition-all">
+        <form onSubmit={handleSend} className="flex items-center gap-2 bg-card rounded-xl border border-primary/10 px-3 py-1.5 shadow-sm focus-within:border-primary/30 focus-within:shadow-md focus-within:shadow-primary/10 transition-all">
           <input
             ref={inputRef}
             value={message}

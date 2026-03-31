@@ -72,7 +72,7 @@ export default function GolferProfile() {
         <GolferHeader golfer={golfer} />
 
         {/* Score Evolution Chart */}
-        <div className="bg-white rounded-xl shadow-sm border border-primary/10 p-4">
+        <div className="bg-card rounded-xl shadow-sm border border-primary/10 p-4">
           <h2 className="text-lg font-bold text-foreground mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
             Score Progression
           </h2>
@@ -80,7 +80,7 @@ export default function GolferProfile() {
         </div>
 
         {/* Performance Trends */}
-        <div className="bg-white rounded-xl shadow-sm border border-primary/10 p-4">
+        <div className="bg-card rounded-xl shadow-sm border border-primary/10 p-4">
           <h2 className="text-lg font-bold text-foreground mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
             Tournament Trends
           </h2>
@@ -88,7 +88,7 @@ export default function GolferProfile() {
         </div>
 
         {/* Hole-by-Hole Breakdown */}
-        <div className="bg-white rounded-xl shadow-sm border border-primary/10 p-4">
+        <div className="bg-card rounded-xl shadow-sm border border-primary/10 p-4">
           <h2 className="text-lg font-bold text-foreground mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
             Round Details
           </h2>
