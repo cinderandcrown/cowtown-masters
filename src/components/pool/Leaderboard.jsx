@@ -119,10 +119,10 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
             <div className="flex-1">
               <p className="text-[10px] font-bold tracking-widest text-accent uppercase">Pool Leader</p>
               <h2 className="text-xl font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
-                {standings[0].participant_name}
+                {standings[0].team_name || standings[0].participant_name}
               </h2>
               {standings[0].team_name && (
-                <p className="text-xs text-accent/70">{standings[0].team_name}</p>
+                <p className="text-xs text-primary-foreground/60">{standings[0].participant_name}</p>
               )}
             </div>
             <div className={`text-3xl font-black tabular-nums ${standings[0].total_score < 0 ? 'text-red-400' : standings[0].total_score > 0 ? 'text-primary-foreground' : 'text-accent'}`}>
@@ -195,16 +195,18 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
               )}
               <div className="min-w-0">
                 <div className="flex items-center gap-1">
-                  <Link to={`/participant/${encodeURIComponent(entry.participant_name)}`} onClick={(e) => e.stopPropagation()} className="text-sm font-semibold text-foreground hover:text-accent truncate transition">{entry.participant_name}</Link>
+                  <Link to={`/participant/${encodeURIComponent(entry.participant_name)}`} onClick={(e) => e.stopPropagation()} className="text-sm font-semibold text-foreground hover:text-accent truncate transition">
+                    {entry.team_name || entry.participant_name}
+                  </Link>
                   {hasCut && <span className="text-[8px] font-bold text-destructive bg-destructive/10 px-1 rounded">CUT</span>}
                   {hasWD && <span className="text-[8px] font-bold text-orange-600 bg-orange-100 px-1 rounded">WD</span>}
                 </div>
+                {entry.team_name && (
+                  <p className="text-[10px] text-muted-foreground truncate">{entry.participant_name}</p>
+                )}
                 <p className="text-[10px] text-muted-foreground truncate">
                   {entry.golferA?.name || 'TBD'} &amp; {entry.golferB?.name || 'TBD'}
                 </p>
-                {entry.team_name && (
-                  <p className="text-[9px] text-accent/70 truncate">{entry.team_name}</p>
-                )}
               </div>
               <span className={`text-center font-bold text-xs tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.score_a)} ${entry.score_a < 0 ? 'bg-red-50' : ''}`}>{formatScore(entry.score_a)}</span>
               <span className={`text-center font-bold text-xs tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.score_b)} ${entry.score_b < 0 ? 'bg-red-50' : ''}`}>{formatScore(entry.score_b)}</span>
