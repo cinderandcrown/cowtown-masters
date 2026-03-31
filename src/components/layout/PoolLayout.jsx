@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, LogIn } from 'lucide-react';
+import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, LogIn, LogOut, Pencil, Check, X } from 'lucide-react';
 import { useParticipant } from '@/lib/ParticipantContext';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 const TABS = [
   { id: 'leaderboard', label: 'Board', Icon: Trophy },
@@ -14,6 +18,11 @@ const TABS = [
 
 function ParticipantBadge({ poolId }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [showPanel, setShowPanel] = useState(false);
+  const [editingTeamName, setEditingTeamName] = useState(false);
+  const [teamNameValue, setTeamNameValue] = useState('');
+
   let participantCtx;
   try {
     participantCtx = useParticipant();
@@ -22,15 +31,106 @@ function ParticipantBadge({ poolId }) {
   }
   const { isLoggedIn, participant, logout } = participantCtx;
 
+  const updateTeamName = useMutation({
+    mutationFn: async (newTeamName) => {
+      if (!participant?.entry_id) return;
+      await base44.entities.PoolEntry.update(participant.entry_id, { team_name: newTeamName.trim() });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['poolEntries', poolId] });
+      queryClient.invalidateQueries({ queryKey: ['adminEntries', poolId] });
+      setEditingTeamName(false);
+    },
+  });
+
   if (isLoggedIn) {
     return (
-      <button
-        onClick={logout}
-        className="text-[10px] font-bold text-primary-foreground bg-white/15 rounded-lg px-2 py-1 border border-white/20 hover:bg-white/25 transition truncate max-w-[80px]"
-        title={`Signed in as ${participant.participant_name}. Click to sign out.`}
-      >
-        {participant.participant_name}
-      </button>
+      <div className="relative">
+        <button
+          onClick={() => setShowPanel(!showPanel)}
+          className="text-[10px] font-bold text-primary-foreground bg-white/15 rounded-lg px-2 py-1 border border-white/20 hover:bg-white/25 transition truncate max-w-[80px]"
+          title={`Signed in as ${participant.participant_name}`}
+        >
+          {participant.participant_name}
+        </button>
+
+        {showPanel && (
+          <>
+            <div className="fixed inset-0 z-50" onClick={() => { setShowPanel(false); setEditingTeamName(false); }} />
+            <div className="absolute right-0 top-full mt-2 z-50 w-56 bg-white rounded-xl shadow-lg border border-primary/15 overflow-hidden animate-fade-in-up">
+              <div className="px-3 py-2.5 bg-gradient-to-r from-primary/5 to-accent/5 border-b border-primary/10">
+                <p className="text-xs font-bold text-foreground">{participant.participant_name}</p>
+                <p className="text-[10px] text-muted-foreground">{participant.email}</p>
+              </div>
+
+              <div className="px-3 py-2 border-b border-primary/10">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase">Team Name</span>
+                  {!editingTeamName && (
+                    <button
+                      onClick={() => {
+                        // Fetch current team name from entries
+                        const entries = queryClient.getQueryData(['poolEntries', poolId]) || [];
+                        const myEntry = entries.find(e => e.id === participant.entry_id);
+                        setTeamNameValue(myEntry?.team_name || '');
+                        setEditingTeamName(true);
+                      }}
+                      className="p-0.5 hover:bg-primary/10 rounded transition"
+                    >
+                      <Pencil className="w-3 h-3 text-primary" />
+                    </button>
+                  )}
+                </div>
+                {editingTeamName ? (
+                  <div className="flex gap-1">
+                    <Input
+                      value={teamNameValue}
+                      onChange={(e) => setTeamNameValue(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') updateTeamName.mutate(teamNameValue); }}
+                      placeholder="e.g. The Outlaws"
+                      className="h-7 text-xs flex-1"
+                      autoFocus
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 flex-shrink-0"
+                      onClick={() => updateTeamName.mutate(teamNameValue)}
+                      disabled={updateTeamName.isPending}
+                    >
+                      <Check className="w-3.5 h-3.5 text-green-600" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 flex-shrink-0"
+                      onClick={() => setEditingTeamName(false)}
+                    >
+                      <X className="w-3.5 h-3.5 text-muted-foreground" />
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="text-xs text-foreground">
+                    {(() => {
+                      const entries = queryClient.getQueryData(['poolEntries', poolId]) || [];
+                      const myEntry = entries.find(e => e.id === participant.entry_id);
+                      return myEntry?.team_name || <span className="text-muted-foreground italic">Not set</span>;
+                    })()}
+                  </p>
+                )}
+              </div>
+
+              <button
+                onClick={() => { logout(); setShowPanel(false); }}
+                className="w-full px-3 py-2 text-left text-xs font-medium text-destructive hover:bg-destructive/5 transition flex items-center gap-2"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                Sign Out
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     );
   }
 

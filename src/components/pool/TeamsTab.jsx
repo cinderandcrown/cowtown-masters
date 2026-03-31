@@ -66,10 +66,10 @@ function TeamCard({ entry, golferA, golferB, rank }) {
           </span>
           <div>
             <p className={`font-bold ${rank === 1 ? 'text-primary-foreground text-lg' : 'text-foreground'}`}>
-              {entry.participant_name}
+              {entry.team_name || entry.participant_name}
             </p>
             {entry.team_name && (
-              <p className={`text-xs ${rank === 1 ? 'text-accent/70' : 'text-accent'}`}>{entry.team_name}</p>
+              <p className={`text-xs ${rank === 1 ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>{entry.participant_name}</p>
             )}
             {(() => {
               const teamEmails = parseTeamEmails(entry.user_id);
