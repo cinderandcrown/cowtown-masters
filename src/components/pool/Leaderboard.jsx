@@ -103,9 +103,11 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
           </div>
           <div className="flex items-center gap-2.5 text-xs font-bold relative">
             <span className="text-accent text-sm font-black">${totalPot}</span>
-            <span className="text-muted-foreground/80 text-[10px]">1st ${Math.round(totalPot * (payout.first || 60) / 100)}</span>
-            <span className="text-muted-foreground/60 text-[10px]">2nd ${Math.round(totalPot * (payout.second || 25) / 100)}</span>
-            <span className="text-muted-foreground/60 text-[10px]">3rd ${Math.round(totalPot * (payout.third || 15) / 100)}</span>
+            <span className="text-muted-foreground/80 text-[10px]">1st ${Math.round(totalPot * (payout.first ?? 60) / 100)}</span>
+            <span className="text-muted-foreground/60 text-[10px]">2nd ${Math.round(totalPot * (payout.second ?? 25) / 100)}</span>
+            {(payout.third ?? 15) > 0 && (
+              <span className="text-muted-foreground/60 text-[10px]">3rd ${Math.round(totalPot * payout.third / 100)}</span>
+            )}
           </div>
         </div>
       )}
