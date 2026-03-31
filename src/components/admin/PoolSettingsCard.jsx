@@ -16,9 +16,9 @@ export default function PoolSettingsCard({ pool, poolId }) {
   const [editValues, setEditValues] = useState({
     entry_fee: pool?.entry_fee || 0,
     max_entries: pool?.max_entries || 0,
-    payout_first: pool?.payout_structure?.first || 60,
-    payout_second: pool?.payout_structure?.second || 25,
-    payout_third: pool?.payout_structure?.third || 15,
+    payout_first: pool?.payout_structure?.first ?? 60,
+    payout_second: pool?.payout_structure?.second ?? 25,
+    payout_third: pool?.payout_structure?.third ?? 15,
     name: pool?.name || '',
     year: pool?.year || new Date().getFullYear(),
   });
@@ -220,9 +220,11 @@ export default function PoolSettingsCard({ pool, poolId }) {
         <div className="mt-3 pt-3 border-t border-primary/10">
           <label className="text-xs font-semibold text-muted-foreground mb-1 block">Payouts</label>
           <div className="flex gap-3 text-xs">
-            <span className="text-accent font-bold">1st: {pool.payout_structure.first || 60}%</span>
-            <span className="text-primary font-bold">2nd: {pool.payout_structure.second || 25}%</span>
-            <span className="text-muted-foreground font-bold">3rd: {pool.payout_structure.third || 15}%</span>
+            <span className="text-accent font-bold">1st: {pool.payout_structure.first ?? 60}%</span>
+            <span className="text-primary font-bold">2nd: {pool.payout_structure.second ?? 25}%</span>
+            {(pool.payout_structure.third ?? 15) > 0 && (
+              <span className="text-muted-foreground font-bold">3rd: {pool.payout_structure.third}%</span>
+            )}
           </div>
         </div>
       )}
