@@ -349,7 +349,7 @@ export default function DrawTab({ poolId }) {
                   <div
                     key={entry.id}
                     className={`bg-card rounded-xl border overflow-hidden transition-all ${
-                      isLocked ? 'border-green-300 bg-green-50/50' : 'border-primary/10'
+                      isLocked ? 'border-green-500/30 bg-green-500/10' : 'border-primary/10'
                     }`}
                   >
                     <div className="flex items-center justify-between px-4 py-2.5 bg-primary/5">

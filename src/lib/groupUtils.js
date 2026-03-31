@@ -9,7 +9,7 @@
 
 function parseOdds(oddsStr) {
   if (!oddsStr) return 99999;
-  const num = parseInt(oddsStr.replace('+', '').replace('-', ''), 10);
+  const num = parseInt(oddsStr, 10);
   return isNaN(num) ? 99999 : num;
 }
 

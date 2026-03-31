@@ -247,7 +247,7 @@ export default function ChatTab({ poolId, participantIdentity }) {
           <div className="bg-card rounded-lg border border-accent/30 shadow-lg p-2 max-h-32 overflow-y-auto">
             <div className="flex items-center justify-between mb-1">
               <span className="text-[10px] font-bold text-accent tracking-widest uppercase">Mention someone</span>
-              <button onClick={() => setShowMentionPicker(false)}>
+              <button onClick={() => setShowMentionPicker(false)} aria-label="Close mention picker">
                 <X className="w-3 h-3 text-muted-foreground" />
               </button>
             </div>
@@ -271,6 +271,7 @@ export default function ChatTab({ poolId, participantIdentity }) {
             type="button"
             onClick={() => setShowMentionPicker(!showMentionPicker)}
             className="p-1.5 rounded-lg hover:bg-accent/10 transition flex-shrink-0"
+            aria-label="Mention a participant"
           >
             <AtSign className="w-4 h-4 text-accent" />
           </button>
@@ -280,6 +281,7 @@ export default function ChatTab({ poolId, participantIdentity }) {
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Talk your trash..."
             maxLength={500}
+            aria-label="Chat message"
             className="flex-1 text-sm bg-transparent outline-none placeholder:text-muted-foreground/50"
           />
           <span className="text-[9px] text-muted-foreground flex-shrink-0">{message.length}/500</span>
