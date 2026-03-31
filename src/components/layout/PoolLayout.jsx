@@ -307,15 +307,15 @@ function CinderCrownFooter() {
 
 export default function PoolLayout({ activeTab, onChange, children }) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cream to-sand flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-cream to-sand">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:bg-white focus:text-primary focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:text-sm focus:font-bold">
         Skip to main content
       </a>
       <PoolHeader />
-      <main id="main-content" className="max-w-md mx-auto pb-32 px-0 flex-1 w-full" role="main">
+      <main id="main-content" className="max-w-md mx-auto px-0 w-full" role="main">
         {children}
       </main>
-      <div className="pb-24">
+      <div className="pb-20">
         <CinderCrownFooter />
       </div>
       <PoolBottomNav activeTab={activeTab} onChange={onChange} />
