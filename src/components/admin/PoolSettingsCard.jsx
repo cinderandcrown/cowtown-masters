@@ -194,7 +194,7 @@ export default function PoolSettingsCard({ pool, poolId }) {
       {isEditing && (
         <div className="mt-3 pt-3 border-t border-primary/10">
           <label className="text-xs font-semibold text-muted-foreground mb-2 block">Payout Structure (%)</label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className={`grid gap-2 ${Number(editValues.payout_third) > 0 ? 'grid-cols-3' : 'grid-cols-2'}`}>
             <div>
               <span className="text-[10px] font-bold text-accent">1st Place</span>
               <Input type="number" min="0" max="100" value={editValues.payout_first} onChange={(e) => updateField('payout_first', e.target.value)} className="h-8 text-sm mt-0.5" />
@@ -203,11 +203,31 @@ export default function PoolSettingsCard({ pool, poolId }) {
               <span className="text-[10px] font-bold text-primary">2nd Place</span>
               <Input type="number" min="0" max="100" value={editValues.payout_second} onChange={(e) => updateField('payout_second', e.target.value)} className="h-8 text-sm mt-0.5" />
             </div>
-            <div>
-              <span className="text-[10px] font-bold text-muted-foreground">3rd Place</span>
-              <Input type="number" min="0" max="100" value={editValues.payout_third} onChange={(e) => updateField('payout_third', e.target.value)} className="h-8 text-sm mt-0.5" />
-            </div>
+            {Number(editValues.payout_third) > 0 && (
+              <div>
+                <span className="text-[10px] font-bold text-muted-foreground">3rd Place</span>
+                <Input type="number" min="0" max="100" value={editValues.payout_third} onChange={(e) => updateField('payout_third', e.target.value)} className="h-8 text-sm mt-0.5" />
+              </div>
+            )}
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (Number(editValues.payout_third) > 0) {
+                // Remove 3rd place — redistribute to 1st
+                updateField('payout_first', Number(editValues.payout_first) + Number(editValues.payout_third));
+                updateField('payout_third', 0);
+              } else {
+                // Add 3rd place — take 15 from 1st
+                const takeFrom = Math.min(15, Number(editValues.payout_first));
+                updateField('payout_first', Number(editValues.payout_first) - takeFrom);
+                updateField('payout_third', takeFrom);
+              }
+            }}
+            className="mt-2 text-[10px] font-semibold text-primary hover:text-primary/80 transition"
+          >
+            {Number(editValues.payout_third) > 0 ? '− Remove 3rd place payout' : '+ Add 3rd place payout'}
+          </button>
           {Number(editValues.payout_first) + Number(editValues.payout_second) + Number(editValues.payout_third) !== 100 && (
             <p className="text-[10px] text-destructive mt-1">
               Payouts should total 100% (currently {Number(editValues.payout_first) + Number(editValues.payout_second) + Number(editValues.payout_third)}%)
@@ -222,7 +242,7 @@ export default function PoolSettingsCard({ pool, poolId }) {
           <div className="flex gap-3 text-xs">
             <span className="text-accent font-bold">1st: {pool.payout_structure.first ?? 60}%</span>
             <span className="text-primary font-bold">2nd: {pool.payout_structure.second ?? 25}%</span>
-            {(pool.payout_structure.third ?? 15) > 0 && (
+            {(pool.payout_structure.third ?? 0) > 0 && (
               <span className="text-muted-foreground font-bold">3rd: {pool.payout_structure.third}%</span>
             )}
           </div>
