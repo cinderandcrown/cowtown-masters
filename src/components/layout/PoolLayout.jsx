@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, LogIn, LogOut, Pencil, Check, X } from 'lucide-react';
 import { useParticipant } from '@/lib/ParticipantContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -22,6 +22,7 @@ function ParticipantBadge({ poolId }) {
   const [showPanel, setShowPanel] = useState(false);
   const [editingTeamName, setEditingTeamName] = useState(false);
   const [teamNameValue, setTeamNameValue] = useState('');
+  const panelRef = useRef(null);
 
   let participantCtx;
   try {
@@ -30,6 +31,19 @@ function ParticipantBadge({ poolId }) {
     participantCtx = { isLoggedIn: false, participant: null, logout: () => {} };
   }
   const { isLoggedIn, participant, logout } = participantCtx;
+
+  // Close panel on Escape key
+  useEffect(() => {
+    if (!showPanel) return;
+    const handleKey = (e) => {
+      if (e.key === 'Escape') {
+        setShowPanel(false);
+        setEditingTeamName(false);
+      }
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [showPanel]);
 
   const updateTeamName = useMutation({
     mutationFn: async (newTeamName) => {
@@ -48,73 +62,87 @@ function ParticipantBadge({ poolId }) {
       <div className="relative">
         <button
           onClick={() => setShowPanel(!showPanel)}
-          className="text-[10px] font-bold text-primary-foreground bg-white/15 rounded-lg px-2 py-1 border border-white/20 hover:bg-white/25 transition truncate max-w-[80px]"
-          title={`Signed in as ${participant.participant_name}`}
+          aria-expanded={showPanel}
+          aria-haspopup="dialog"
+          aria-label={`Account menu for ${participant.participant_name}`}
+          className="text-[10px] font-bold text-primary-foreground bg-white/15 rounded-lg px-2 py-1 border border-white/20 hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 transition truncate max-w-[80px]"
         >
           {participant.participant_name}
         </button>
 
         {showPanel && (
           <>
-            <div className="fixed inset-0 z-50" onClick={() => { setShowPanel(false); setEditingTeamName(false); }} />
-            <div className="absolute right-0 top-full mt-2 z-50 w-56 bg-white rounded-xl shadow-lg border border-primary/15 overflow-hidden animate-fade-in-up">
-              <div className="px-3 py-2.5 bg-gradient-to-r from-primary/5 to-accent/5 border-b border-primary/10">
-                <p className="text-xs font-bold text-foreground">{participant.participant_name}</p>
-                <p className="text-[10px] text-muted-foreground">{participant.email}</p>
+            <div
+              className="fixed inset-0 z-[60]"
+              onClick={() => { setShowPanel(false); setEditingTeamName(false); }}
+              aria-hidden="true"
+            />
+            <div
+              ref={panelRef}
+              role="dialog"
+              aria-label="Account settings"
+              className="fixed right-3 top-14 z-[70] w-64 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden animate-fade-in-up"
+            >
+              <div className="px-4 py-3 bg-gradient-to-r from-primary/5 to-accent/5 border-b border-gray-200">
+                <p className="text-sm font-bold text-gray-900">{participant.participant_name}</p>
+                <p className="text-xs text-gray-500">{participant.email}</p>
               </div>
 
-              <div className="px-3 py-2 border-b border-primary/10">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase">Team Name</span>
+              <div className="px-4 py-3 border-b border-gray-200 bg-white">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label id="team-name-label" className="text-[10px] font-bold text-gray-500 tracking-widest uppercase">Team Name</label>
                   {!editingTeamName && (
                     <button
                       onClick={() => {
-                        // Fetch current team name from entries
                         const entries = queryClient.getQueryData(['poolEntries', poolId]) || [];
                         const myEntry = entries.find(e => e.id === participant.entry_id);
                         setTeamNameValue(myEntry?.team_name || '');
                         setEditingTeamName(true);
                       }}
-                      className="p-0.5 hover:bg-primary/10 rounded transition"
+                      aria-label="Edit team name"
+                      className="p-1 hover:bg-gray-100 rounded transition focus:outline-none focus:ring-2 focus:ring-primary"
                     >
-                      <Pencil className="w-3 h-3 text-primary" />
+                      <Pencil className="w-3.5 h-3.5 text-primary" />
                     </button>
                   )}
                 </div>
                 {editingTeamName ? (
-                  <div className="flex gap-1">
+                  <div className="flex gap-1.5">
                     <Input
                       value={teamNameValue}
                       onChange={(e) => setTeamNameValue(e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter') updateTeamName.mutate(teamNameValue); }}
                       placeholder="e.g. The Outlaws"
-                      className="h-7 text-xs flex-1"
+                      className="h-8 text-sm flex-1 bg-white"
+                      aria-labelledby="team-name-label"
                       autoFocus
                     />
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 flex-shrink-0"
+                      className="h-8 w-8 flex-shrink-0"
                       onClick={() => updateTeamName.mutate(teamNameValue)}
                       disabled={updateTeamName.isPending}
+                      aria-label="Save team name"
                     >
-                      <Check className="w-3.5 h-3.5 text-green-600" />
+                      <Check className="w-4 h-4 text-green-600" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 flex-shrink-0"
+                      className="h-8 w-8 flex-shrink-0"
                       onClick={() => setEditingTeamName(false)}
+                      aria-label="Cancel editing"
                     >
-                      <X className="w-3.5 h-3.5 text-muted-foreground" />
+                      <X className="w-4 h-4 text-gray-500" />
                     </Button>
                   </div>
                 ) : (
-                  <p className="text-xs text-foreground">
+                  <p className="text-sm text-gray-900">
                     {(() => {
                       const entries = queryClient.getQueryData(['poolEntries', poolId]) || [];
                       const myEntry = entries.find(e => e.id === participant.entry_id);
-                      return myEntry?.team_name || <span className="text-muted-foreground italic">Not set</span>;
+                      return myEntry?.team_name || <span className="text-gray-400 italic">Not set</span>;
                     })()}
                   </p>
                 )}
@@ -122,9 +150,9 @@ function ParticipantBadge({ poolId }) {
 
               <button
                 onClick={() => { logout(); setShowPanel(false); }}
-                className="w-full px-3 py-2 text-left text-xs font-medium text-destructive hover:bg-destructive/5 transition flex items-center gap-2"
+                className="w-full px-4 py-3 text-left text-sm font-medium text-red-600 hover:bg-red-50 transition flex items-center gap-2 bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-red-500"
               >
-                <LogOut className="w-3.5 h-3.5" />
+                <LogOut className="w-4 h-4" aria-hidden="true" />
                 Sign Out
               </button>
             </div>
@@ -137,10 +165,10 @@ function ParticipantBadge({ poolId }) {
   return (
     <button
       onClick={() => navigate(`/pool/${poolId}/login`)}
-      className="p-1.5 hover:bg-white/10 rounded-lg transition"
-      title="Sign in"
+      className="p-1.5 hover:bg-white/10 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-accent"
+      aria-label="Sign in to your account"
     >
-      <LogIn className="w-4 h-4 text-primary-foreground" />
+      <LogIn className="w-4 h-4 text-primary-foreground" aria-hidden="true" />
     </button>
   );
 }
@@ -158,30 +186,31 @@ export function PoolHeader() {
     : null;
 
   return (
-    <header className="sticky top-0 z-40">
+    <header className="sticky top-0 z-40" role="banner">
       {/* Main Header */}
       <div className="bg-gradient-to-r from-secondary to-primary border-b border-accent/40 px-4 py-3 md:py-4 relative overflow-hidden">
-        <div className="absolute inset-0 animate-shimmer pointer-events-none" />
+        <div className="absolute inset-0 animate-shimmer pointer-events-none" aria-hidden="true" />
         <div className="max-w-md mx-auto flex items-center justify-between relative">
           <div className="flex items-center gap-2">
-            <img src="https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/1752bc3ba_CowtownMastersLogo.png" alt="Cowtown Masters" className="w-8 h-8 object-contain" />
+            <img src="https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/1752bc3ba_CowtownMastersLogo.png" alt="Cowtown Masters logo" className="w-8 h-8 object-contain" />
             <div>
               <h1 className="text-xl font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
                 COWTOWN MASTERS
               </h1>
-              <p className="text-[10px] tracking-[0.2em] text-accent/80 uppercase font-medium">A Tradition Unlike Any Other</p>
+              <p className="text-[10px] tracking-[0.2em] text-accent uppercase font-medium" aria-label="Tagline: A Tradition Unlike Any Other">A Tradition Unlike Any Other</p>
             </div>
           </div>
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => navigate(`/pool/${poolId}/admin`)}
-              className="text-[10px] font-bold text-accent bg-accent/10 rounded-lg px-2 py-1 border border-accent/30 hover:bg-accent/20 transition"
+              className="text-[10px] font-bold text-accent bg-accent/10 rounded-lg px-2 py-1 border border-accent/30 hover:bg-accent/20 transition focus:outline-none focus:ring-2 focus:ring-accent"
+              aria-label="Open admin panel"
             >
               Admin
             </button>
-            <div className="flex items-center gap-1.5 bg-black/20 rounded-lg px-2 py-1 border border-red-500/30">
+            <div className="flex items-center gap-1.5 bg-black/20 rounded-lg px-2 py-1 border border-red-500/30" role="status" aria-label="Tournament is live">
               <span className="text-[10px] font-black tracking-widest text-red-400 uppercase">LIVE</span>
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-live-pulse" />
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-live-pulse" aria-hidden="true" />
             </div>
             <ParticipantBadge poolId={poolId} />
           </div>
@@ -189,20 +218,20 @@ export function PoolHeader() {
       </div>
 
       {/* Tournament Status Banner */}
-      <div className="bg-gradient-to-r from-primary via-secondary to-primary border-b-2 border-accent">
+      <div className="bg-gradient-to-r from-primary via-secondary to-primary border-b-2 border-accent" role="status" aria-label="Tournament round information">
         <div className="max-w-md mx-auto flex items-center justify-center gap-3 px-4 py-1.5">
           {roundInfo ? (
             <>
               <span className="text-[10px] font-black tracking-widest text-accent">{roundInfo.round}</span>
-              <span className="w-1 h-1 rounded-full bg-accent/40" />
+              <span className="w-1 h-1 rounded-full bg-accent/40" aria-hidden="true" />
               <span className="text-[10px] font-bold tracking-widest text-primary-foreground/70">{roundInfo.day}</span>
-              <span className="w-1 h-1 rounded-full bg-accent/40" />
+              <span className="w-1 h-1 rounded-full bg-accent/40" aria-hidden="true" />
               <span className="text-[10px] font-semibold text-accent/70">The Masters Tournament</span>
             </>
           ) : (
             <>
               <span className="text-[10px] font-bold tracking-widest text-primary-foreground/70">TOURNAMENT</span>
-              <span className="w-1 h-1 rounded-full bg-accent/40" />
+              <span className="w-1 h-1 rounded-full bg-accent/40" aria-hidden="true" />
               <span className="text-[10px] font-semibold text-accent/70">The Masters · Augusta National</span>
             </>
           )}
@@ -214,22 +243,24 @@ export function PoolHeader() {
 
 export function PoolBottomNav({ activeTab, onChange }) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-secondary to-primary border-t border-accent/30 backdrop-blur-lg">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-secondary to-primary border-t border-accent/30 backdrop-blur-lg" role="navigation" aria-label="Pool navigation">
       <div className="max-w-md mx-auto flex justify-around px-2 py-2 pb-[env(safe-area-inset-bottom,1rem)]">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => onChange(tab.id)}
-            className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-all relative ${
+            aria-label={tab.label}
+            aria-current={activeTab === tab.id ? 'page' : undefined}
+            className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-all relative focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 ${
               activeTab === tab.id
                 ? 'text-accent'
                 : 'text-primary-foreground/50 hover:text-primary-foreground/70'
             }`}
           >
             {activeTab === tab.id && (
-              <span className="absolute -top-2 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-accent" />
+              <span className="absolute -top-2 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-accent" aria-hidden="true" />
             )}
-            <tab.Icon className={`w-5 h-5 transition-all ${activeTab === tab.id ? 'stroke-[2.5] scale-110' : 'stroke-[1.5]'}`} />
+            <tab.Icon className={`w-5 h-5 transition-all ${activeTab === tab.id ? 'stroke-[2.5] scale-110' : 'stroke-[1.5]'}`} aria-hidden="true" />
             <span className={`text-[9px] tracking-widest uppercase ${activeTab === tab.id ? 'font-bold' : 'font-medium'}`}>{tab.label}</span>
           </button>
         ))}
@@ -238,13 +269,43 @@ export function PoolBottomNav({ activeTab, onChange }) {
   );
 }
 
+function CinderCrownFooter() {
+  return (
+    <footer className="bg-gradient-to-r from-secondary to-primary border-t border-accent/20 py-3 px-4" role="contentinfo">
+      <div className="max-w-md mx-auto flex items-center justify-center gap-2">
+        <span className="text-[10px] text-primary-foreground/50 tracking-wide">Created by</span>
+        <a
+          href="https://cinderandcrown.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 hover:opacity-80 transition focus:outline-none focus:ring-2 focus:ring-accent rounded"
+          aria-label="Visit Cinder and Crown website (opens in new tab)"
+        >
+          <img
+            src="https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/cinder-and-crown-logo.png"
+            alt="Cinder & Crown logo"
+            className="w-5 h-5 object-contain"
+          />
+          <span className="text-[11px] font-bold text-accent tracking-wide">Cinder & Crown</span>
+        </a>
+      </div>
+    </footer>
+  );
+}
+
 export default function PoolLayout({ activeTab, onChange, children }) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cream to-sand">
+    <div className="min-h-screen bg-gradient-to-b from-cream to-sand flex flex-col">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:bg-white focus:text-primary focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:text-sm focus:font-bold">
+        Skip to main content
+      </a>
       <PoolHeader />
-      <main className="max-w-md mx-auto pb-32 px-0">
+      <main id="main-content" className="max-w-md mx-auto pb-32 px-0 flex-1 w-full" role="main">
         {children}
       </main>
+      <div className="pb-24">
+        <CinderCrownFooter />
+      </div>
       <PoolBottomNav activeTab={activeTab} onChange={onChange} />
     </div>
   );
