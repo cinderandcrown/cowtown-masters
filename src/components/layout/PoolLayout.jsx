@@ -315,9 +315,8 @@ export default function PoolLayout({ activeTab, onChange, children }) {
       <main id="main-content" className="max-w-md mx-auto px-0 w-full" role="main">
         {children}
       </main>
-      <div className="pb-20">
-        <CinderCrownFooter />
-      </div>
+      <CinderCrownFooter />
+      <div className="h-20" />
       <PoolBottomNav activeTab={activeTab} onChange={onChange} />
     </div>
   );
