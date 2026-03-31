@@ -228,21 +228,20 @@ export default function AdminEntryList({ poolId }) {
               <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => startEdit(entry)} title="Edit">
                 <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
               </Button>
-              {teamEmails.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 flex-shrink-0"
-                  title="Reset password"
-                  onClick={() => {
-                    if (window.confirm(`Reset password for ${entry.participant_name}? They will need to set a new password on next login.`)) {
-                      teamEmails.forEach(e => resetPassword.mutate(e));
-                    }
-                  }}
-                >
-                  <KeyRound className={`w-3.5 h-3.5 ${resetPassword.isPending ? 'text-accent animate-pulse' : 'text-muted-foreground'}`} />
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 flex-shrink-0"
+                title={teamEmails.length > 0 ? 'Reset password' : 'No email set — edit to add'}
+                disabled={teamEmails.length === 0}
+                onClick={() => {
+                  if (teamEmails.length > 0 && window.confirm(`Reset password for ${entry.participant_name}? They will need to set a new password on next login.`)) {
+                    teamEmails.forEach(e => resetPassword.mutate(e));
+                  }
+                }}
+              >
+                <KeyRound className={`w-3.5 h-3.5 ${teamEmails.length === 0 ? 'text-muted-foreground/30' : resetPassword.isPending ? 'text-accent animate-pulse' : 'text-muted-foreground'}`} />
+              </Button>
               <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => deleteEntry.mutate(entry.id)} title="Delete">
                 <Trash2 className="w-3.5 h-3.5 text-destructive" />
               </Button>
