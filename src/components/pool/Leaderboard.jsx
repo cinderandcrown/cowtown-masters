@@ -178,8 +178,12 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
           return (
             <div
               key={entry.id}
+              role="button"
+              tabIndex={0}
               onClick={() => onSelectEntry({ ...entry, _rank: entry.rank, _totalEntries: standings.length })}
-              className={`animate-fade-in-up grid grid-cols-[36px_1fr_56px_56px_52px] gap-1 px-3 py-2 border-b border-primary/5 cursor-pointer hover:bg-accent/5 hover:shadow-sm transition-all ${
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelectEntry({ ...entry, _rank: entry.rank, _totalEntries: standings.length }); } }}
+              aria-label={`View details for ${entry.team_name || entry.participant_name}, position ${entry.displayRank}`}
+              className={`animate-fade-in-up grid grid-cols-[36px_1fr_56px_56px_52px] gap-1 px-3 py-2 border-b border-primary/5 cursor-pointer hover:bg-accent/5 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-inset focus:ring-accent ${
                 entry.rank === 1 ? 'bg-accent/10' : entry.rank <= 3 ? 'bg-primary/5' : ''
               }`}
               style={{ animationDelay: `${Math.min(i * 50, 500)}ms` }}
@@ -201,7 +205,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
                     {entry.team_name || entry.participant_name}
                   </Link>
                   {hasCut && <span className="text-[8px] font-bold text-destructive bg-destructive/10 px-1 rounded">CUT</span>}
-                  {hasWD && <span className="text-[8px] font-bold text-orange-600 bg-orange-100 px-1 rounded">WD</span>}
+                  {hasWD && <span className="text-[8px] font-bold text-orange-600 bg-orange-500/15 px-1 rounded">WD</span>}
                 </div>
                 {entry.team_name && (
                   <p className="text-[10px] text-muted-foreground truncate">{entry.participant_name}</p>
