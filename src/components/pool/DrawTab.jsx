@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { assignGroups } from '@/lib/groupUtils';
+import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Shuffle, PenLine, Check, RotateCcw, Lock } from 'lucide-react';
+import { Shuffle, PenLine, Check, RotateCcw, Lock, ShieldAlert } from 'lucide-react';
 
 function shuffle(arr) {
   const a = [...arr];
@@ -17,6 +18,7 @@ function shuffle(arr) {
 
 export default function DrawTab({ poolId }) {
   const queryClient = useQueryClient();
+  const { user } = useAuth() || {};
   const [drawMode, setDrawMode] = useState('random');
   const [phase, setPhase] = useState('ready');
   const [assignments, setAssignments] = useState([]);
@@ -26,6 +28,15 @@ export default function DrawTab({ poolId }) {
   // Manual assignment state
   const [manualPicks, setManualPicks] = useState({});
   const [lockedEntries, setLockedEntries] = useState({});
+
+  const { data: pool } = useQuery({
+    queryKey: ['pool', poolId],
+    queryFn: () => base44.entities.Pool.filter({ id: poolId }),
+    enabled: !!poolId,
+    select: (data) => data[0],
+  });
+
+  const isAdmin = user?.role === 'admin' || user?.email === pool?.admin_user_id || user?.email === pool?.created_by;
 
   const { data: entries = [], isLoading: loadingEntries } = useQuery({
     queryKey: ['poolEntries', poolId],
@@ -268,20 +279,42 @@ export default function DrawTab({ poolId }) {
               );
             })}
           </div>
-          <Button
-            onClick={() => resetMutation.mutate()}
-            disabled={resetMutation.isPending}
-            variant="outline"
-            className="w-full border-destructive/30 text-destructive hover:bg-destructive/5"
-          >
-            <RotateCcw className="w-4 h-4 mr-2" />
-            {resetMutation.isPending ? 'Resetting...' : 'Reset Draw'}
-          </Button>
+          {isAdmin && (
+            <Button
+              onClick={() => resetMutation.mutate()}
+              disabled={resetMutation.isPending}
+              variant="outline"
+              className="w-full border-destructive/30 text-destructive hover:bg-destructive/5"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              {resetMutation.isPending ? 'Resetting...' : 'Reset Draw'}
+            </Button>
+          )}
         </div>
       )}
 
-      {/* Mode Selector (only if not already drawn) */}
-      {!alreadyDrawn && phase === 'ready' && (
+      {/* Non-admin: Draw Pending */}
+      {!alreadyDrawn && phase === 'ready' && !isAdmin && (
+        <div className="bg-card rounded-xl p-6 border border-primary/10 text-center space-y-3">
+          <ShieldAlert className="w-8 h-8 mx-auto text-muted-foreground" />
+          <h3 className="text-lg font-bold text-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>Draw Pending</h3>
+          <p className="text-sm text-muted-foreground">The pool admin will run the draw. Check back soon!</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-primary/10 rounded-lg p-3 border border-primary/20">
+              <p className="text-xs font-bold text-primary tracking-widest uppercase mb-1">GROUP A</p>
+              <p className="text-2xl font-black text-primary">{groupA.length}</p>
+            </div>
+            <div className="bg-accent/10 rounded-lg p-3 border border-accent/20">
+              <p className="text-xs font-bold text-accent tracking-widest uppercase mb-1">GROUP B</p>
+              <p className="text-2xl font-black text-accent">{groupB.length}</p>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">{entries.length} participants waiting for assignment</p>
+        </div>
+      )}
+
+      {/* Admin-only Mode Selector */}
+      {!alreadyDrawn && phase === 'ready' && isAdmin && (
         <>
           <div className="grid grid-cols-2 gap-2 mb-4">
             <button
@@ -338,9 +371,13 @@ export default function DrawTab({ poolId }) {
                 <p className="text-sm text-destructive font-semibold">Add participants first in the Admin panel.</p>
               )}
 
+              {Object.keys(lockedEntries).length > 0 && (
+                <p className="text-sm text-destructive font-semibold">Some manual entries are already locked in. Reset the draw first to use random draw.</p>
+              )}
+
               <Button
                 onClick={runDraw}
-                disabled={entries.length === 0 || groupA.length < entries.length || groupB.length < entries.length}
+                disabled={entries.length === 0 || groupA.length < entries.length || groupB.length < entries.length || Object.keys(lockedEntries).length > 0}
                 className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg"
               >
                 <Shuffle className="w-4 h-4 mr-2" />
