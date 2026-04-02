@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, LogIn, LogOut, Pencil, Check, X } from 'lucide-react';
 import { useParticipant } from '@/lib/ParticipantContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -176,6 +177,7 @@ function ParticipantBadge({ poolId }) {
 export function PoolHeader() {
   const { poolId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth() || {};
 
   const { data: pool } = useQuery({
     queryKey: ['pool', poolId],
@@ -210,13 +212,15 @@ export function PoolHeader() {
             </div>
           </div>
           <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => navigate(`/pool/${poolId}/admin`)}
-              className="text-[10px] font-bold text-accent bg-accent/10 rounded-lg px-2 py-1 border border-accent/30 hover:bg-accent/20 transition focus:outline-none focus:ring-2 focus:ring-accent"
-              aria-label="Open admin panel"
-            >
-              Admin
-            </button>
+            {(user?.role === 'admin' || user?.email === pool?.admin_user_id) && (
+              <button
+                onClick={() => navigate(`/pool/${poolId}/admin`)}
+                className="text-[10px] font-bold text-accent bg-accent/10 rounded-lg px-2 py-1 border border-accent/30 hover:bg-accent/20 transition focus:outline-none focus:ring-2 focus:ring-accent"
+                aria-label="Open admin panel"
+              >
+                Admin
+              </button>
+            )}
             {isLive ? (
               <div className="flex items-center gap-1.5 bg-black/20 rounded-lg px-2 py-1 border border-red-500/30" role="status" aria-label="Tournament is live">
                 <span className="text-[10px] font-black tracking-widest text-red-400 uppercase">LIVE</span>

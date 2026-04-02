@@ -4,14 +4,19 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Settings, Copy, Check, Pencil, Save, X } from 'lucide-react';
+import { Settings, Copy, Check, Pencil, Save, X, Trash2, AlertTriangle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export default function PoolSettingsCard({ pool, poolId }) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [status, setStatus] = useState(pool?.status || 'setup');
   const [isEditing, setIsEditing] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const [editValues, setEditValues] = useState({
     entry_fee: pool?.entry_fee || 0,
@@ -248,6 +253,68 @@ export default function PoolSettingsCard({ pool, poolId }) {
           </div>
         </div>
       )}
+
+      {/* Delete Pool */}
+      <div className="mt-4 pt-3 border-t border-destructive/20">
+        <Button
+          variant="ghost"
+          onClick={() => setShowDeleteConfirm(true)}
+          className="w-full h-9 text-xs font-bold text-destructive hover:bg-destructive/10 hover:text-destructive"
+        >
+          <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+          Delete Pool
+        </Button>
+      </div>
+
+      {/* Delete Confirmation */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="bg-card rounded-2xl max-w-sm border-border">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" />
+              Delete Pool
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            This will permanently delete <strong>{pool?.name}</strong> and all associated data (golfers, entries, draft picks, chat messages). This cannot be undone.
+          </p>
+          <div className="flex gap-2 pt-2">
+            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)} className="flex-1">
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleting}
+              onClick={async () => {
+                setDeleting(true);
+                // Delete related entities
+                const [golfers, entries, drafts, chats, dms, auths] = await Promise.all([
+                  base44.entities.Golfer.filter({ pool_id: poolId }),
+                  base44.entities.PoolEntry.filter({ pool_id: poolId }),
+                  base44.entities.DraftPick.filter({ pool_id: poolId }),
+                  base44.entities.ChatMessage.filter({ pool_id: poolId }),
+                  base44.entities.DirectMessage.filter({ pool_id: poolId }),
+                  base44.entities.ParticipantAuth.filter({ pool_id: poolId }),
+                ]);
+                await Promise.all([
+                  ...golfers.map(g => base44.entities.Golfer.delete(g.id)),
+                  ...entries.map(e => base44.entities.PoolEntry.delete(e.id)),
+                  ...drafts.map(d => base44.entities.DraftPick.delete(d.id)),
+                  ...chats.map(c => base44.entities.ChatMessage.delete(c.id)),
+                  ...dms.map(d => base44.entities.DirectMessage.delete(d.id)),
+                  ...auths.map(a => base44.entities.ParticipantAuth.delete(a.id)),
+                ]);
+                await base44.entities.Pool.delete(poolId);
+                queryClient.invalidateQueries({ queryKey: ['pools'] });
+                navigate('/');
+              }}
+              className="flex-1"
+            >
+              {deleting ? 'Deleting...' : 'Delete Forever'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
