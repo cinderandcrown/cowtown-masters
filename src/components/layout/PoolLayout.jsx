@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, LogIn, LogOut, Pencil, Check, X } from 'lucide-react';
+import NotificationBell from '@/components/pool/NotificationBell';
 import { useParticipant } from '@/lib/ParticipantContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
@@ -212,6 +213,7 @@ export function PoolHeader() {
             </div>
           </div>
           <div className="flex items-center gap-1.5">
+            <NotificationBell poolId={poolId} />
             {(user?.role === 'admin' || user?.email === pool?.admin_user_id || user?.email === pool?.created_by) && (
               <button
                 onClick={() => navigate(`/pool/${poolId}/admin`)}

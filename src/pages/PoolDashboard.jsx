@@ -11,6 +11,7 @@ import RulesTab from '@/components/pool/RulesTab';
 import TeamsTab from '@/components/pool/TeamsTab';
 import EntryDetailModal from '@/components/pool/EntryDetailModal';
 import usePullToRefresh from '@/hooks/usePullToRefresh.jsx';
+import AddToHomeScreen from '@/components/pool/AddToHomeScreen';
 
 export default function PoolDashboard() {
   const { poolId } = useParams();
@@ -67,7 +68,12 @@ export default function PoolDashboard() {
     <PoolLayout activeTab={activeTab} onChange={handleTabChange}>
       <div {...pullProps} className="min-h-[60vh]">
         <PullIndicator />
-        {activeTab === 'leaderboard' && <Leaderboard poolId={poolId} onSelectEntry={setSelectedEntry} />}
+        {activeTab === 'leaderboard' && (
+          <>
+            <AddToHomeScreen />
+            <Leaderboard poolId={poolId} onSelectEntry={setSelectedEntry} />
+          </>
+        )}
         {activeTab === 'golfers' && <GolfersTab poolId={poolId} />}
         {activeTab === 'draw' && <DrawTab poolId={poolId} />}
         {activeTab === 'messages' && <MessagingHub poolId={poolId} />}

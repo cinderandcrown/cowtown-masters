@@ -1,0 +1,49 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "pool_id": {
+      "type": "string",
+      "description": "Reference to Pool entity"
+    },
+    "entry_id": {
+      "type": "string",
+      "description": "Reference to PoolEntry (null for pool-wide)"
+    },
+    "golfer_name": {
+      "type": "string",
+      "description": "Golfer who triggered the notification"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "birdie",
+        "eagle",
+        "round_finish",
+        "leaderboard_change"
+      ],
+      "description": "Notification type"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short notification title"
+    },
+    "message": {
+      "type": "string",
+      "description": "Notification message body"
+    },
+    "read_by": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of participant names who read this"
+    }
+  },
+  "required": [
+    "pool_id",
+    "type",
+    "title",
+    "message"
+  ]
+}
