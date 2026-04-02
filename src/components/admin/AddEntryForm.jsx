@@ -31,8 +31,24 @@ export default function AddEntryForm({ poolId }) {
 
   const createEntry = useMutation({
     mutationFn: (data) => base44.entities.PoolEntry.create(data),
-    onSuccess: () => {
+    onMutate: async (newData) => {
+      await queryClient.cancelQueries({ queryKey: ['adminEntries', poolId] });
+      const previous = queryClient.getQueryData(['adminEntries', poolId]);
+      queryClient.setQueryData(['adminEntries', poolId], (old = []) => [
+        ...old,
+        { ...newData, id: 'optimistic-' + Date.now(), created_date: new Date().toISOString() },
+      ]);
+      return { previous };
+    },
+    onError: (_err, _newData, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['adminEntries', poolId], context.previous);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['adminEntries', poolId] });
+    },
+    onSuccess: () => {
       setName('');
       setTeamName('');
       setEmails([]);

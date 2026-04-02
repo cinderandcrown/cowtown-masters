@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, LogIn, LogOut, Pencil, Check, X } from 'lucide-react';
+import { useParams, useNavigate, useLocation, NavLink } from 'react-router-dom';
+import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, LogIn, LogOut, Pencil, Check, X, ArrowLeft } from 'lucide-react';
 import NotificationBell from '@/components/pool/NotificationBell';
 import { useParticipant } from '@/lib/ParticipantContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -204,6 +204,19 @@ export function PoolHeader() {
         <div className="absolute inset-0 animate-shimmer pointer-events-none" aria-hidden="true" />
         <div className="max-w-md mx-auto flex items-center justify-between relative">
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                if (window.history.length > 1) {
+                  navigate(-1);
+                } else {
+                  navigate('/');
+                }
+              }}
+              className="p-1.5 hover:bg-white/10 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-accent"
+              aria-label="Go back"
+            >
+              <ArrowLeft className="w-4 h-4 text-primary-foreground" />
+            </button>
             <img src="https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/1752bc3ba_CowtownMastersLogo.png" alt="Cowtown Masters logo" className="w-8 h-8 object-contain" />
             <div>
               <h1 className="text-xl font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
@@ -262,36 +275,42 @@ export function PoolHeader() {
   );
 }
 
-export function PoolBottomNav({ activeTab, onChange }) {
+export function PoolBottomNav({ poolId }) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-secondary to-primary border-t border-accent/30 backdrop-blur-lg" role="navigation" aria-label="Pool navigation">
       <div className="max-w-md mx-auto grid grid-cols-7 px-1 py-1 pb-[env(safe-area-inset-bottom,0.5rem)]">
         {TABS.map((tab) => (
-          <button
+          <NavLink
             key={tab.id}
-            onClick={() => onChange(tab.id)}
+            to={`/pool/${poolId}/${tab.id}`}
+            replace
             aria-label={tab.label}
-            aria-current={activeTab === tab.id ? 'page' : undefined}
-            className={`flex flex-col items-center justify-center gap-0.5 py-2 min-h-[48px] rounded-lg transition-all relative focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 ${
-              activeTab === tab.id
-                ? 'text-accent'
-                : 'text-primary-foreground/50 hover:text-primary-foreground/70 active:text-primary-foreground/90'
-            }`}
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center gap-0.5 py-2 min-h-[48px] rounded-lg transition-all relative focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 ${
+                isActive
+                  ? 'text-accent'
+                  : 'text-primary-foreground/50 hover:text-primary-foreground/70 active:text-primary-foreground/90'
+              }`
+            }
           >
-            {activeTab === tab.id && (
-              <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-accent" aria-hidden="true" />
+            {({ isActive }) => (
+              <>
+                {isActive && (
+                  <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-accent" aria-hidden="true" />
+                )}
+                <tab.Icon className={`w-5 h-5 transition-all ${isActive ? 'stroke-[2.5] scale-110' : 'stroke-[1.5]'}`} aria-hidden="true" />
+                <span className={`text-[9px] tracking-wide uppercase ${isActive ? 'font-bold' : 'font-medium'}`}>{tab.label}</span>
+              </>
             )}
-            <tab.Icon className={`w-5 h-5 transition-all ${activeTab === tab.id ? 'stroke-[2.5] scale-110' : 'stroke-[1.5]'}`} aria-hidden="true" />
-            <span className={`text-[9px] tracking-wide uppercase ${activeTab === tab.id ? 'font-bold' : 'font-medium'}`}>{tab.label}</span>
-          </button>
+          </NavLink>
         ))}
       </div>
     </nav>
-  );
-}
+    );
+    }
 
-function CinderCrownFooter() {
-  return (
+    function CinderCrownFooter() {
+    return (
     <footer className="bg-gradient-to-r from-secondary to-primary border-t border-accent/20 py-3 pb-20 px-4" role="contentinfo">
       <div className="max-w-md mx-auto flex items-center justify-center gap-2">
         <span className="text-[10px] text-primary-foreground/50 tracking-wide">© {new Date().getFullYear()} Created by</span>
@@ -323,10 +342,11 @@ function CinderCrownFooter() {
         </a>
       </div>
     </footer>
-  );
-}
+    );
+    }
 
-export default function PoolLayout({ activeTab, onChange, children }) {
+export default function PoolLayout({ children }) {
+  const { poolId } = useParams();
   return (
     <div className="min-h-screen bg-background">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:bg-card focus:text-primary focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:text-sm focus:font-bold">
@@ -337,7 +357,7 @@ export default function PoolLayout({ activeTab, onChange, children }) {
         {children}
       </main>
       <CinderCrownFooter />
-      <PoolBottomNav activeTab={activeTab} onChange={onChange} />
+      <PoolBottomNav poolId={poolId} />
     </div>
   );
 }

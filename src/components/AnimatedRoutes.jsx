@@ -38,12 +38,16 @@ function ScrollToTop() {
 export default function AnimatedRoutes() {
   const location = useLocation();
 
+  // Use a stable key for pool tab routes to avoid re-animating on tab switch
+  const poolMatch = location.pathname.match(/^\/pool\/([^/]+)/);
+  const animationKey = poolMatch ? `/pool/${poolMatch[1]}` : location.pathname;
+
   return (
     <>
     <ScrollToTop />
     <AnimatePresence mode="wait">
       <motion.div
-        key={location.pathname}
+        key={animationKey}
         variants={pageVariants}
         initial="initial"
         animate="animate"
@@ -54,6 +58,7 @@ export default function AnimatedRoutes() {
         <Routes location={location}>
           <Route path="/" element={<Home />} />
           <Route path="/pool/:poolId" element={<PoolWrapper><PoolDashboard /></PoolWrapper>} />
+          <Route path="/pool/:poolId/:activeTab" element={<PoolWrapper><PoolDashboard /></PoolWrapper>} />
           <Route path="/pool/:poolId/login" element={<PoolWrapper><ParticipantLogin /></PoolWrapper>} />
           <Route path="/pool/:poolId/admin" element={<PoolWrapper><PoolAdmin /></PoolWrapper>} />
 

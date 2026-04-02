@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useLayoutEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import PoolLayout from '@/components/layout/PoolLayout';
 import Leaderboard from '@/components/pool/Leaderboard.jsx';
@@ -13,11 +13,21 @@ import EntryDetailModal from '@/components/pool/EntryDetailModal';
 import usePullToRefresh from '@/hooks/usePullToRefresh.jsx';
 import AddToHomeScreen from '@/components/pool/AddToHomeScreen';
 
+const VALID_TABS = ['leaderboard', 'teams', 'golfers', 'draw', 'messages', 'history', 'rules'];
+
 export default function PoolDashboard() {
-  const { poolId } = useParams();
-  const [activeTab, setActiveTab] = useState('leaderboard');
+  const { poolId, activeTab: tabParam } = useParams();
+  const navigate = useNavigate();
+  const activeTab = VALID_TABS.includes(tabParam) ? tabParam : 'leaderboard';
   const [selectedEntry, setSelectedEntry] = useState(null);
   const queryClient = useQueryClient();
+
+  // Redirect to /pool/:poolId/leaderboard if no valid tab
+  useEffect(() => {
+    if (!tabParam || !VALID_TABS.includes(tabParam)) {
+      navigate(`/pool/${poolId}/leaderboard`, { replace: true });
+    }
+  }, [tabParam, poolId, navigate]);
 
   const handleRefresh = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ['poolEntries', poolId] });
@@ -25,6 +35,7 @@ export default function PoolDashboard() {
     await queryClient.invalidateQueries({ queryKey: ['chatMessages', poolId] });
     await queryClient.invalidateQueries({ queryKey: ['dmSent', poolId] });
     await queryClient.invalidateQueries({ queryKey: ['dmReceived', poolId] });
+    await queryClient.invalidateQueries({ queryKey: ['notifications', poolId] });
   }, [queryClient, poolId]);
 
   const { pullProps, PullIndicator } = usePullToRefresh(handleRefresh);
@@ -36,7 +47,6 @@ export default function PoolDashboard() {
     document.body.scrollTop = 0;
   }, []);
 
-  // Update page title on tab change
   useEffect(() => {
     const tabNames = {
       leaderboard: 'Leaderboard',
@@ -58,14 +68,11 @@ export default function PoolDashboard() {
   }, [activeTab]);
 
   const handleTabChange = useCallback((tab) => {
-    setActiveTab(tab);
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-  }, []);
+    navigate(`/pool/${poolId}/${tab}`);
+  }, [navigate, poolId]);
 
   return (
-    <PoolLayout activeTab={activeTab} onChange={handleTabChange}>
+    <PoolLayout>
       <div {...pullProps} className="min-h-[60vh]">
         <PullIndicator />
         {activeTab === 'leaderboard' && (

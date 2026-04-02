@@ -62,7 +62,30 @@ export default function DrawTab({ poolId }) {
         });
       }
     },
-    onSuccess: () => {
+    onMutate: async (pairs) => {
+      await queryClient.cancelQueries({ queryKey: ['poolEntries', poolId] });
+      await queryClient.cancelQueries({ queryKey: ['poolGolfers', poolId] });
+      const prevEntries = queryClient.getQueryData(['poolEntries', poolId]);
+      const prevGolfers = queryClient.getQueryData(['poolGolfers', poolId]);
+      queryClient.setQueryData(['poolEntries', poolId], (old = []) =>
+        old.map(e => {
+          const pair = pairs.find(p => p.entryId === e.id);
+          return pair ? { ...e, golfer_a_id: pair.golferA.id, golfer_b_id: pair.golferB.id } : e;
+        })
+      );
+      queryClient.setQueryData(['poolGolfers', poolId], (old = []) =>
+        old.map(g => {
+          const pair = pairs.find(p => p.golferA.id === g.id || p.golferB.id === g.id);
+          return pair ? { ...g, is_drafted: true, drafted_by: pair.entryId } : g;
+        })
+      );
+      return { prevEntries, prevGolfers };
+    },
+    onError: (_err, _pairs, context) => {
+      if (context?.prevEntries) queryClient.setQueryData(['poolEntries', poolId], context.prevEntries);
+      if (context?.prevGolfers) queryClient.setQueryData(['poolGolfers', poolId], context.prevGolfers);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['poolEntries', poolId] });
       queryClient.invalidateQueries({ queryKey: ['poolGolfers', poolId] });
     },
