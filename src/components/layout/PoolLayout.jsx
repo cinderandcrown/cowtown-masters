@@ -290,7 +290,7 @@ export function PoolBottomNav({ activeTab, onChange }) {
 
 function CinderCrownFooter() {
   return (
-    <footer className="bg-gradient-to-r from-secondary to-primary border-t border-accent/20 py-3 px-4" role="contentinfo">
+    <footer className="bg-gradient-to-r from-secondary to-primary border-t border-accent/20 py-3 pb-20 px-4" role="contentinfo">
       <div className="max-w-md mx-auto flex items-center justify-center gap-2">
         <span className="text-[10px] text-primary-foreground/50 tracking-wide">Created by</span>
         <a
