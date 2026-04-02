@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import GolferDetailModal from './GolferDetailModal';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { assignGroups } from '@/lib/groupUtils';
@@ -39,6 +40,7 @@ function GolfersSkeleton() {
 
 export default function GolfersTab({ poolId }) {
   const [filter, setFilter] = useState('all');
+  const [selectedGolfer, setSelectedGolfer] = useState(null);
 
   const { data: rawGolfers = [], isLoading } = useQuery({
     queryKey: ['poolGolfers', poolId],
@@ -126,7 +128,11 @@ export default function GolfersTab({ poolId }) {
           return (
             <div
               key={g.id}
-              className={`animate-fade-in-up grid grid-cols-[28px_1fr_36px_36px_36px_36px_44px] gap-1 px-3 py-1.5 border-b border-primary/5 transition-all hover:bg-accent/5 ${
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelectedGolfer(g)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedGolfer(g); } }}
+              className={`animate-fade-in-up grid grid-cols-[28px_1fr_36px_36px_36px_36px_44px] gap-1 px-3 py-1.5 border-b border-primary/5 transition-all hover:bg-accent/5 cursor-pointer ${
                 isCut || isWD ? 'opacity-40' : i < 3 ? 'bg-accent/5' : ''
               } ${!isCut && !isWD && i < 3 ? 'border-l-2 border-l-accent' : 'border-l-2 border-l-transparent'}`}
               style={{ animationDelay: `${Math.min(i * 40, 600)}ms` }}
@@ -163,6 +169,12 @@ export default function GolfersTab({ poolId }) {
           );
         })}
       </div>
+
+      <GolferDetailModal
+        golfer={selectedGolfer}
+        open={!!selectedGolfer}
+        onOpenChange={(open) => !open && setSelectedGolfer(null)}
+      />
     </div>
   );
 }
