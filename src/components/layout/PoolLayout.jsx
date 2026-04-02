@@ -306,11 +306,11 @@ export function PoolBottomNav({ poolId }) {
         ))}
       </div>
     </nav>
-    );
-    }
+  );
+}
 
-    function CinderCrownFooter() {
-    return (
+function CinderCrownFooter() {
+  return (
     <footer className="bg-gradient-to-r from-secondary to-primary border-t border-accent/20 py-3 pb-20 px-4" role="contentinfo">
       <div className="max-w-md mx-auto flex items-center justify-center gap-2">
         <span className="text-[10px] text-primary-foreground/50 tracking-wide">© {new Date().getFullYear()} Created by</span>
@@ -322,28 +322,22 @@ export function PoolBottomNav({ poolId }) {
           aria-label="Visit Cinder and Crown website (opens in new tab)"
         >
           <svg width="18" height="18" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="flex-shrink-0">
-            {/* Crown */}
             <path d="M38 22L42 16L46 20L50 12L54 20L58 16L62 22" stroke="#E8A838" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-            {/* Phoenix body */}
             <path d="M50 28C50 28 44 35 42 42C40 49 42 58 50 68C58 58 60 49 58 42C56 35 50 28 50 28Z" fill="#6B1D2A"/>
-            {/* Left wing */}
             <path d="M42 42C42 42 30 32 22 30C26 36 28 44 32 50C36 56 42 58 42 58C40 52 40 46 42 42Z" fill="#6B1D2A"/>
             <path d="M32 50C32 50 24 40 18 38C22 44 24 50 28 54C30 56 32 56 32 56" fill="#E8A838" opacity="0.85"/>
-            {/* Right wing */}
             <path d="M58 42C58 42 70 32 78 30C74 36 72 44 68 50C64 56 58 58 58 58C60 52 60 46 58 42Z" fill="#6B1D2A"/>
             <path d="M68 50C68 50 76 40 82 38C78 44 76 50 72 54C70 56 68 56 68 56" fill="#E8A838" opacity="0.85"/>
-            {/* Tail feathers */}
             <path d="M50 68C50 68 46 78 44 88L50 82L56 88C54 78 50 68 50 68Z" fill="#6B1D2A"/>
             <path d="M50 72C50 72 48 80 47 86L50 82L53 86C52 80 50 72 50 72Z" fill="#E8A838" opacity="0.7"/>
-            {/* Phoenix head accent */}
             <ellipse cx="50" cy="34" rx="3" ry="4" fill="#E8A838"/>
           </svg>
           <span className="text-[11px] font-bold text-accent tracking-wide">Cinder & Crown</span>
         </a>
       </div>
     </footer>
-    );
-    }
+  );
+}
 
 export default function PoolLayout({ children }) {
   const { poolId } = useParams();
