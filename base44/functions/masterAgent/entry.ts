@@ -250,13 +250,14 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'stop') {
+      await base44.asServiceRole.entities.Pool.update(poolId, { status: 'setup' });
       await base44.asServiceRole.entities.Notification.create({
         pool_id: poolId, type: 'leaderboard_change',
         title: '🔴 Tournament Agent Stopped',
         message: 'Live scoring has been paused by the pool admin.',
       });
-      await log(base44, poolId, 'stop', 'Agent stopped by admin.', 'warn');
-      return Response.json({ success: true, message: 'Agent stopped' });
+      await log(base44, poolId, 'stop', 'Agent stopped by admin. Pool status reset to setup.', 'warn');
+      return Response.json({ success: true, message: 'Agent stopped, pool reset to setup' });
     }
 
     if (action === 'pollNow') {

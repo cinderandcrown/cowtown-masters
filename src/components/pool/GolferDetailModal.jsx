@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { formatScore, scoreColor } from '@/lib/scoreUtils';
-import { TrendingDown, TrendingUp, Minus } from 'lucide-react';
+import { TrendingDown, TrendingUp, Minus, BarChart3, Activity } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from 'recharts';
+import GolferAnalyticsTab from './GolferAnalyticsTab';
 
 function RoundRow({ label, scoreToPar, strokes, isComplete }) {
   return (
@@ -43,6 +44,8 @@ function ProgressBar({ scoreToPar }) {
 }
 
 export default function GolferDetailModal({ golfer, open, onOpenChange }) {
+  const [activeTab, setActiveTab] = useState('overview');
+
   if (!golfer) return null;
 
   const rounds = [
@@ -117,7 +120,38 @@ export default function GolferDetailModal({ golfer, open, onOpenChange }) {
           </div>
         </div>
 
-        {/* Round-by-Round Breakdown */}
+        {/* Tab Switcher */}
+        <div className="px-4 pt-3 flex gap-2 border-b border-border pb-3">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition ${
+              activeTab === 'overview'
+                ? 'bg-primary text-white'
+                : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+            }`}
+          >
+            <BarChart3 className="w-3.5 h-3.5" />
+            Overview
+          </button>
+          <button
+            onClick={() => setActiveTab('analytics')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition ${
+              activeTab === 'analytics'
+                ? 'bg-primary text-white'
+                : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+            }`}
+          >
+            <Activity className="w-3.5 h-3.5" />
+            Analytics
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === 'analytics' ? (
+          <div className="p-4">
+            <GolferAnalyticsTab golfer={golfer} />
+          </div>
+        ) : (
         <div className="p-4 space-y-4">
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -224,6 +258,7 @@ export default function GolferDetailModal({ golfer, open, onOpenChange }) {
             );
           })()}
         </div>
+        )}
       </DialogContent>
     </Dialog>
   );

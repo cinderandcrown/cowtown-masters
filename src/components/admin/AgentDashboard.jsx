@@ -141,30 +141,27 @@ export default function AgentDashboard({ poolId }) {
       </div>
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-2 gap-2">
-        {!isLive ? (
-          <Button
-            onClick={() => runAction.mutate({ action: 'start' })}
-            disabled={runAction.isPending}
-            className="h-12 bg-green-600 hover:bg-green-700 text-white font-bold gap-2"
-          >
-            {runAction.isPending && runAction.variables?.action === 'start'
-              ? <Loader2 className="w-4 h-4 animate-spin" />
-              : <Play className="w-4 h-4" />}
-            Start Agent
-          </Button>
-        ) : (
-          <Button
-            onClick={() => runAction.mutate({ action: 'stop' })}
-            disabled={runAction.isPending}
-            className="h-12 bg-red-600 hover:bg-red-700 text-white font-bold gap-2"
-          >
-            {runAction.isPending && runAction.variables?.action === 'stop'
-              ? <Loader2 className="w-4 h-4 animate-spin" />
-              : <Square className="w-4 h-4" />}
-            Stop Agent
-          </Button>
-        )}
+      <div className="grid grid-cols-3 gap-2">
+        <Button
+          onClick={() => runAction.mutate({ action: 'start' })}
+          disabled={runAction.isPending || isLive}
+          className="h-12 bg-green-600 hover:bg-green-700 text-white font-bold gap-2 disabled:opacity-40"
+        >
+          {runAction.isPending && runAction.variables?.action === 'start'
+            ? <Loader2 className="w-4 h-4 animate-spin" />
+            : <Play className="w-4 h-4" />}
+          Start
+        </Button>
+        <Button
+          onClick={() => runAction.mutate({ action: 'stop' })}
+          disabled={runAction.isPending || !isLive}
+          className="h-12 bg-red-600 hover:bg-red-700 text-white font-bold gap-2 disabled:opacity-40"
+        >
+          {runAction.isPending && runAction.variables?.action === 'stop'
+            ? <Loader2 className="w-4 h-4 animate-spin" />
+            : <Square className="w-4 h-4" />}
+          Stop
+        </Button>
         <Button
           onClick={() => runAction.mutate({ action: 'pollNow' })}
           disabled={runAction.isPending}
@@ -173,7 +170,7 @@ export default function AgentDashboard({ poolId }) {
           {runAction.isPending && runAction.variables?.action === 'pollNow'
             ? <Loader2 className="w-4 h-4 animate-spin" />
             : <Zap className="w-4 h-4" />}
-          Poll Now
+          Poll
         </Button>
       </div>
 
