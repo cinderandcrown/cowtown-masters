@@ -254,17 +254,19 @@ export default function PoolSettingsCard({ pool, poolId }) {
         </div>
       )}
 
-      {/* Delete Pool */}
-      <div className="mt-4 pt-3 border-t border-destructive/20">
-        <Button
-          variant="ghost"
-          onClick={() => setShowDeleteConfirm(true)}
-          className="w-full h-9 text-xs font-bold text-destructive hover:bg-destructive/10 hover:text-destructive"
-        >
-          <Trash2 className="w-3.5 h-3.5 mr-1.5" />
-          Delete Pool
-        </Button>
-      </div>
+      {/* Delete Pool — only visible in edit mode */}
+      {isEditing && (
+        <div className="mt-4 pt-3 border-t border-destructive/20">
+          <Button
+            variant="ghost"
+            onClick={() => setShowDeleteConfirm(true)}
+            className="w-full h-9 text-xs font-bold text-destructive hover:bg-destructive/10 hover:text-destructive"
+          >
+            <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+            Delete Pool
+          </Button>
+        </div>
+      )}
 
       {/* Delete Confirmation */}
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
