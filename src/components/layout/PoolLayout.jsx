@@ -27,6 +27,15 @@ function ParticipantBadge({ poolId }) {
 
   const { isLoggedIn, participant, logout } = useParticipant();
 
+  // Reactively fetch entries so team name updates are reflected
+  const { data: entries = [] } = useQuery({
+    queryKey: ['poolEntries', poolId],
+    queryFn: () => base44.entities.PoolEntry.filter({ pool_id: poolId }),
+    enabled: !!poolId && isLoggedIn,
+  });
+
+  const myEntry = entries.find(e => e.id === participant?.entry_id);
+
   // Close panel on Escape key
   useEffect(() => {
     if (!showPanel) return;
@@ -52,6 +61,8 @@ function ParticipantBadge({ poolId }) {
     },
   });
 
+  const displayTeamName = myEntry?.team_name || participant?.participant_name;
+
   if (isLoggedIn) {
     return (
       <div className="relative">
@@ -62,11 +73,7 @@ function ParticipantBadge({ poolId }) {
           aria-label={`Account menu for ${participant.participant_name}`}
           className="text-[10px] font-bold text-primary-foreground bg-white/15 rounded-lg px-2 py-1 border border-white/20 hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 transition truncate max-w-[100px]"
         >
-          {(() => {
-            const entries = queryClient.getQueryData(['poolEntries', poolId]) || [];
-            const myEntry = entries.find(e => e.id === participant.entry_id);
-            return myEntry?.team_name || participant.participant_name;
-          })()}
+          {displayTeamName}
         </button>
 
         {showPanel && (
@@ -93,8 +100,6 @@ function ParticipantBadge({ poolId }) {
                   {!editingTeamName && (
                     <button
                       onClick={() => {
-                        const entries = queryClient.getQueryData(['poolEntries', poolId]) || [];
-                        const myEntry = entries.find(e => e.id === participant.entry_id);
                         setTeamNameValue(myEntry?.team_name || '');
                         setEditingTeamName(true);
                       }}
@@ -138,11 +143,7 @@ function ParticipantBadge({ poolId }) {
                   </div>
                 ) : (
                   <p className="text-sm text-foreground">
-                    {(() => {
-                      const entries = queryClient.getQueryData(['poolEntries', poolId]) || [];
-                      const myEntry = entries.find(e => e.id === participant.entry_id);
-                      return myEntry?.team_name || <span className="text-muted-foreground/60 italic">Not set</span>;
-                    })()}
+                    {myEntry?.team_name || <span className="text-muted-foreground/60 italic">Not set</span>}
                   </p>
                 )}
               </div>
