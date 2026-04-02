@@ -1,0 +1,56 @@
+{
+  "name": "PoolEntry",
+  "type": "object",
+  "properties": {
+    "pool_id": {
+      "type": "string",
+      "description": "Reference to Pool entity"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Reference to User"
+    },
+    "participant_name": {
+      "type": "string",
+      "description": "Name of pool participant"
+    },
+    "team_name": {
+      "type": "string",
+      "description": "Custom team name chosen by participant"
+    },
+    "golfer_a_id": {
+      "type": "string",
+      "description": "Reference to Group A golfer"
+    },
+    "golfer_b_id": {
+      "type": "string",
+      "description": "Reference to Group B golfer"
+    },
+    "score_a": {
+      "type": "number",
+      "description": "Group A golfer's score to par"
+    },
+    "score_b": {
+      "type": "number",
+      "description": "Group B golfer's score to par"
+    },
+    "total_score": {
+      "type": "number",
+      "description": "Combined score (score_a + score_b)"
+    },
+    "rank": {
+      "type": "number",
+      "description": "Current ranking in pool"
+    },
+    "drafted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of draft selection"
+    }
+  },
+  "required": [
+    "pool_id",
+    "user_id",
+    "participant_name"
+  ]
+}
