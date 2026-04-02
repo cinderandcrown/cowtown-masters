@@ -16,8 +16,8 @@ export default function GolferProfile() {
   const { data: golfer, isLoading } = useQuery({
     queryKey: ['golfer', golferId],
     queryFn: async () => {
-      const all = await base44.asServiceRole.entities.Golfer.list();
-      return all.find((g) => g.id === golferId);
+      const results = await base44.entities.Golfer.filter({ id: golferId });
+      return results[0] || null;
     },
     enabled: !!golferId,
   });
