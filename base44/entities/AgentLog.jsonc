@@ -1,0 +1,50 @@
+{
+  "name": "AgentLog",
+  "type": "object",
+  "description": "Tracks Master Agent actions, decisions, and state transitions",
+  "properties": {
+    "pool_id": {
+      "type": "string",
+      "description": "Reference to Pool entity"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "start",
+        "stop",
+        "pollNow",
+        "phaseChange",
+        "diagnose",
+        "error",
+        "summary"
+      ],
+      "description": "Agent action performed"
+    },
+    "phase_from": {
+      "type": "string",
+      "description": "Previous tournament phase"
+    },
+    "phase_to": {
+      "type": "string",
+      "description": "New tournament phase"
+    },
+    "detail": {
+      "type": "string",
+      "description": "Human-readable description of what happened"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional data (scores updated, diagnostics, etc.)"
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["info", "warn", "error"],
+      "description": "Log severity level"
+    }
+  },
+  "required": [
+    "action",
+    "detail",
+    "severity"
+  ]
+}

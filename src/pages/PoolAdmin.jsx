@@ -3,17 +3,18 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Users, Trophy, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, Users, Trophy, ShieldAlert, Bot } from 'lucide-react';
 import AdminGolferList from '@/components/admin/AdminGolferList.jsx';
 import AdminEntryList from '@/components/admin/AdminEntryList';
 import AddGolferForm from '@/components/admin/AddGolferForm';
 import AddEntryForm from '@/components/admin/AddEntryForm';
 import PoolSettingsCard from '@/components/admin/PoolSettingsCard';
+import AgentDashboard from '@/components/admin/AgentDashboard';
 
 export default function PoolAdmin() {
   const { poolId } = useParams();
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState('golfers');
+  const [activeSection, setActiveSection] = useState('agent');
 
   useEffect(() => { document.title = 'Cowtown Masters - Admin'; }, []);
 
@@ -55,6 +56,7 @@ export default function PoolAdmin() {
   }
 
   const tabs = [
+    { id: 'agent', label: 'Agent', icon: <Bot className="w-4 h-4" /> },
     { id: 'golfers', label: 'Golfers', icon: <Trophy className="w-4 h-4" /> },
     { id: 'participants', label: 'Participants', icon: <Users className="w-4 h-4" /> },
   ];
@@ -99,6 +101,9 @@ export default function PoolAdmin() {
         </div>
 
         {/* Content */}
+        {activeSection === 'agent' && (
+          <AgentDashboard poolId={poolId} />
+        )}
         {activeSection === 'golfers' && (
           <div className="space-y-4">
             <AddGolferForm poolId={poolId} />
