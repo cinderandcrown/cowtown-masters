@@ -282,7 +282,7 @@ export default function Home() {
 
         {/* Footer attribution */}
         <div className="flex items-center justify-center gap-2 pb-6 pt-2">
-          <span className="text-[10px] text-muted-foreground/40 tracking-wide">Created by</span>
+          <span className="text-[10px] text-muted-foreground/40 tracking-wide">© {new Date().getFullYear()} Created by</span>
           <a
             href="https://cinderandcrown.com/"
             target="_blank"
