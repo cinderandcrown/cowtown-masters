@@ -25,10 +25,9 @@ export function ParticipantProvider({ poolId, children }) {
   );
 }
 
+const FALLBACK = { participant: null, isLoggedIn: false, login: () => {}, logout: () => {} };
+
 export function useParticipant() {
   const context = useContext(ParticipantContext);
-  if (!context) {
-    throw new Error('useParticipant must be used within a ParticipantProvider');
-  }
-  return context;
+  return context || FALLBACK;
 }

@@ -24,13 +24,7 @@ function ParticipantBadge({ poolId }) {
   const [teamNameValue, setTeamNameValue] = useState('');
   const panelRef = useRef(null);
 
-  let participantCtx;
-  try {
-    participantCtx = useParticipant();
-  } catch {
-    participantCtx = { isLoggedIn: false, participant: null, logout: () => {} };
-  }
-  const { isLoggedIn, participant, logout } = participantCtx;
+  const { isLoggedIn, participant, logout } = useParticipant();
 
   // Close panel on Escape key
   useEffect(() => {

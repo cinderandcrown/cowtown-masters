@@ -11,13 +11,7 @@ export default function MessagingHub({ poolId }) {
   const navigate = useNavigate();
   const { poolId: routePoolId } = useParams();
 
-  let participantCtx;
-  try {
-    participantCtx = useParticipant();
-  } catch {
-    participantCtx = { isLoggedIn: false, participant: null };
-  }
-  const { isLoggedIn, participant } = participantCtx;
+  const { isLoggedIn, participant } = useParticipant();
 
   // Require login for messaging
   if (!isLoggedIn) {
