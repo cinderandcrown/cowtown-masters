@@ -3,7 +3,7 @@ import { Routes, Route, useLocation, useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import Home from '@/pages/Home';
 import PoolDashboard from '@/pages/PoolDashboard';
-import GolferProfile from '@/pages/GolferProfile';
+
 import PoolAdmin from '@/pages/PoolAdmin';
 import AccountSettings from '@/pages/AccountSettings';
 import ParticipantProfile from '@/pages/ParticipantProfile';
@@ -56,7 +56,7 @@ export default function AnimatedRoutes() {
           <Route path="/pool/:poolId" element={<PoolWrapper><PoolDashboard /></PoolWrapper>} />
           <Route path="/pool/:poolId/login" element={<PoolWrapper><ParticipantLogin /></PoolWrapper>} />
           <Route path="/pool/:poolId/admin" element={<PoolWrapper><PoolAdmin /></PoolWrapper>} />
-          <Route path="/golfer/:golferId" element={<GolferProfile />} />
+
           <Route path="/participant/:name" element={<ParticipantProfile />} />
           <Route path="/account" element={<AccountSettings />} />
           <Route path="*" element={<PageNotFound />} />

@@ -1,8 +1,8 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { formatScore, scoreColor } from '@/lib/scoreUtils';
-import { TrendingDown, TrendingUp, Minus, ExternalLink } from 'lucide-react';
+import { TrendingDown, TrendingUp, Minus } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from 'recharts';
 
 function RoundRow({ label, scoreToPar, strokes, isComplete }) {
   return (
@@ -77,7 +77,8 @@ export default function GolferDetailModal({ golfer, open, onOpenChange }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card rounded-2xl max-w-sm w-full max-h-[85vh] overflow-y-auto p-0">
+      <DialogContent className="bg-card rounded-2xl max-w-sm w-full max-h-[85vh] overflow-y-auto p-0" aria-describedby={undefined}>
+        <DialogTitle className="sr-only">{golfer.name} Details</DialogTitle>
         {/* Hero Header */}
         <div className="bg-gradient-to-br from-secondary to-primary p-5 pt-8 relative overflow-hidden">
           <div className="absolute inset-0 animate-shimmer pointer-events-none opacity-30" />
@@ -178,15 +179,50 @@ export default function GolferDetailModal({ golfer, open, onOpenChange }) {
             )}
           </div>
 
-          {/* Link to full profile */}
-          <Link
-            to={`/golfer/${golfer.id}`}
-            onClick={() => onOpenChange(false)}
-            className="flex items-center justify-center gap-2 text-sm font-bold text-primary hover:text-accent transition py-2"
-          >
-            Full Golfer Profile
-            <ExternalLink className="w-4 h-4" />
-          </Link>
+          {/* Round Score Chart */}
+          {completedRounds > 0 && (
+            <div>
+              <h3 className="text-xs font-black text-primary tracking-widest uppercase mb-2">Round Performance</h3>
+              <div className="bg-muted/30 rounded-xl border border-border p-2">
+                <ResponsiveContainer width="100%" height={160}>
+                  <BarChart data={rounds.filter(r => r.score != null).map(r => ({ round: r.label, score: r.score }))} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="round" stroke="hsl(var(--muted-foreground))" style={{ fontSize: '10px' }} />
+                    <YAxis stroke="hsl(var(--muted-foreground))" style={{ fontSize: '10px' }} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', padding: '6px', fontSize: '12px', color: 'hsl(var(--foreground))' }}
+                      formatter={(value) => [formatScore(value), 'To Par']}
+                    />
+                    <Bar dataKey="score" fill="hsl(162, 100%, 20%)" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+
+          {/* Stats row */}
+          {completedRounds > 0 && (() => {
+            const roundScores = rounds.filter(r => r.score != null).map(r => r.score);
+            const avg = (roundScores.reduce((a, b) => a + b, 0) / roundScores.length).toFixed(1);
+            const best = Math.min(...roundScores);
+            const worst = Math.max(...roundScores);
+            return (
+              <div className="grid grid-cols-3 gap-2">
+                <div className="bg-primary/5 rounded-lg p-2.5 border border-primary/10 text-center">
+                  <div className="text-[10px] text-muted-foreground font-bold mb-0.5">AVG</div>
+                  <div className="text-lg font-black text-primary">{avg}</div>
+                </div>
+                <div className="bg-accent/5 rounded-lg p-2.5 border border-accent/10 text-center">
+                  <div className="text-[10px] text-muted-foreground font-bold mb-0.5">BEST</div>
+                  <div className="text-lg font-black text-red-600">{formatScore(best)}</div>
+                </div>
+                <div className="bg-destructive/5 rounded-lg p-2.5 border border-destructive/10 text-center">
+                  <div className="text-[10px] text-muted-foreground font-bold mb-0.5">WORST</div>
+                  <div className="text-lg font-black text-primary">{formatScore(worst)}</div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </DialogContent>
     </Dialog>
