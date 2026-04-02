@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
 import { Users } from 'lucide-react';
+import GolferDetailModal from '@/components/pool/GolferDetailModal';
 import { formatScore, scoreColor, parseTeamEmails } from '@/lib/scoreUtils';
 
-function GolferCard({ golfer, group }) {
+function GolferCard({ golfer, group, onTap }) {
   if (!golfer) {
     return (
       <div className="bg-muted/50 rounded-lg p-3 border border-dashed border-muted-foreground/30 text-center">
@@ -15,7 +16,14 @@ function GolferCard({ golfer, group }) {
   }
 
   return (
-    <div className={`bg-card rounded-lg p-3 shadow-sm ${group === 'A' ? 'border-l-4 border-l-primary border border-primary/10' : 'border-l-4 border-l-accent border border-accent/15'}`}>
+    <div
+      className={`bg-card rounded-lg p-3 shadow-sm cursor-pointer hover:shadow-md transition-all active:scale-[0.98] ${group === 'A' ? 'border-l-4 border-l-primary border border-primary/10' : 'border-l-4 border-l-accent border border-accent/15'}`}
+      onClick={() => onTap && onTap(golfer)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTap && onTap(golfer); } }}
+      aria-label={`View details for ${golfer.name}`}
+    >
       <div className="flex items-center justify-between mb-1">
         <span className={`text-xs font-bold tracking-widest ${group === 'A' ? 'text-primary' : 'text-accent'}`}>
           GRP {group}
@@ -49,7 +57,7 @@ function GolferCard({ golfer, group }) {
   );
 }
 
-function TeamCard({ entry, golferA, golferB, rank }) {
+function TeamCard({ entry, golferA, golferB, rank, onGolferTap }) {
   const totalScore = (golferA?.score_to_par || 0) + (golferB?.score_to_par || 0);
 
   return (
@@ -91,14 +99,15 @@ function TeamCard({ entry, golferA, golferB, rank }) {
 
       {/* Golfer Cards */}
       <div className="p-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <GolferCard golfer={golferA} group="A" />
-        <GolferCard golfer={golferB} group="B" />
+        <GolferCard golfer={golferA} group="A" onTap={onGolferTap} />
+        <GolferCard golfer={golferB} group="B" onTap={onGolferTap} />
       </div>
     </div>
   );
 }
 
 export default function TeamsTab({ poolId }) {
+  const [selectedGolfer, setSelectedGolfer] = useState(null);
   const { data: entries = [], isLoading: loadingEntries } = useQuery({
     queryKey: ['poolEntries', poolId],
     queryFn: () => base44.entities.PoolEntry.filter({ pool_id: poolId }),
@@ -168,9 +177,16 @@ export default function TeamsTab({ poolId }) {
             golferA={team.golferA}
             golferB={team.golferB}
             rank={i + 1}
+            onGolferTap={setSelectedGolfer}
           />
         </div>
       ))}
+
+      <GolferDetailModal
+        golfer={selectedGolfer}
+        open={!!selectedGolfer}
+        onOpenChange={(open) => !open && setSelectedGolfer(null)}
+      />
     </div>
   );
 }

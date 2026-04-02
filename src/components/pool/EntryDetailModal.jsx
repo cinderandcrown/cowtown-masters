@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { formatScore, scoreColor } from '@/lib/scoreUtils';
+import GolferDetailModal from '@/components/pool/GolferDetailModal';
 
 export default function EntryDetailModal({ entry, open, onOpenChange, rank, totalEntries }) {
+  const [selectedGolfer, setSelectedGolfer] = useState(null);
   if (!entry) return null;
 
   const golferA = entry.golferA;
@@ -14,14 +16,15 @@ export default function EntryDetailModal({ entry, open, onOpenChange, rank, tota
     const rounds = [golfer.round_1, golfer.round_2, golfer.round_3, golfer.round_4];
 
     return (
-      <div className="flex-1 bg-card rounded-lg p-3 border border-primary/20">
-        <div className="flex justify-between items-center mb-2">
-          <span className={`text-xs font-bold tracking-widest ${group === 'A' ? 'text-primary' : 'text-accent'}`}>
-            GROUP {group}
-          </span>
-          <span className={`text-lg font-black ${scoreColor(golfer.score_to_par)}`}>{formatScore(golfer.score_to_par)}</span>
-        </div>
-        <p className="text-sm font-bold text-foreground mb-1">{golfer.name}</p>
+      <div
+        className="flex-1 bg-card rounded-lg p-3 border border-primary/20 cursor-pointer hover:border-accent/40 hover:shadow-md transition-all active:scale-[0.98]"
+        onClick={() => setSelectedGolfer(golfer)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedGolfer(golfer); } }}
+        aria-label={`View details for ${golfer.name}`}
+      >
+        <p className="text-sm font-bold text-foreground mb-1 hover:text-accent transition">{golfer.name}</p>
         {golfer.status !== 'active' && (
           <span className="text-[10px] font-bold text-destructive uppercase">{golfer.status}</span>
         )}
@@ -43,6 +46,7 @@ export default function EntryDetailModal({ entry, open, onOpenChange, rank, tota
   const roundsB = [golferB?.round_1, golferB?.round_2, golferB?.round_3, golferB?.round_4];
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-card rounded-2xl max-w-sm w-full max-h-[85vh] overflow-y-auto">
         <div className="space-y-4 pt-4">
@@ -95,5 +99,13 @@ export default function EntryDetailModal({ entry, open, onOpenChange, rank, tota
         </div>
       </DialogContent>
     </Dialog>
+    {selectedGolfer && (
+      <GolferDetailModal
+        golfer={selectedGolfer}
+        open={!!selectedGolfer}
+        onOpenChange={(open) => !open && setSelectedGolfer(null)}
+      />
+    )}
+    </>
   );
 }
