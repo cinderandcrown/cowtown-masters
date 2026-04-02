@@ -13,6 +13,7 @@ const TABS = [
   { id: 'golfers', label: 'Golfers', Icon: Flag },
   { id: 'draw', label: 'Draw', Icon: Shuffle },
   { id: 'messages', label: 'Smack', Icon: MessageCircle },
+  { id: 'history', label: 'History', Icon: Trophy },
   { id: 'rules', label: 'Rules', Icon: BookOpen },
 ];
 
@@ -257,7 +258,7 @@ export function PoolHeader() {
 export function PoolBottomNav({ activeTab, onChange }) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-secondary to-primary border-t border-accent/30 backdrop-blur-lg" role="navigation" aria-label="Pool navigation">
-      <div className="max-w-md mx-auto grid grid-cols-6 px-1 py-1 pb-[env(safe-area-inset-bottom,0.5rem)]">
+      <div className="max-w-md mx-auto grid grid-cols-7 px-1 py-1 pb-[env(safe-area-inset-bottom,0.5rem)]">
         {TABS.map((tab) => (
           <button
             key={tab.id}
