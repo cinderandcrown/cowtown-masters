@@ -29,7 +29,7 @@ export default function PoolAdmin() {
     select: (data) => data[0],
   });
 
-  const isAdmin = currentUser?.role === 'admin' || currentUser?.email === pool?.admin_user_id;
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.email === pool?.admin_user_id || currentUser?.email === pool?.created_by;
 
   if (loadingPool) {
     return (
