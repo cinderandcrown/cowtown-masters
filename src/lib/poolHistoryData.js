@@ -25,11 +25,11 @@ export const POOL_HISTORY = {
     ],
   },
   2022: {
-    winner: 'N. Will',
+    winner: 'Nicholas Will',
     winningScore: -4,
     entries: 27,
     standings: [
-      { name: 'N. Will', golferA: 'Scottie Scheffler', scoreA: -10, golferB: 'Webb Simpson', scoreB: 6, total: -4, rank: 1 },
+      { name: 'Nicholas Will', golferA: 'Scottie Scheffler', scoreA: -10, golferB: 'Webb Simpson', scoreB: 6, total: -4, rank: 1 },
       { name: 'J. Pool', golferA: 'Cameron Smith', scoreA: -5, golferB: 'Talor Gooch', scoreB: 2, total: -3, rank: 2 },
       { name: 'C. Mitchell', golferA: 'Will Zalatoris', scoreA: -3, golferB: 'Lee Westwood', scoreB: 2, total: -1, rank: 3 },
       { name: 'G. Gomez', golferA: 'Justin Thomas', scoreA: -1, golferB: 'Kevin Na', scoreB: 2, total: 1, rank: 4 },
