@@ -57,10 +57,10 @@ export default function HistoryTab() {
         </h3>
         <div className="grid grid-cols-2 gap-3">
           {[
-            { label: 'Years Running', value: '3+' },
-            { label: 'Total Entries', value: '82' },
+            { label: 'Years Running', value: '5+' },
+            { label: 'Total Entries', value: '130' },
             { label: 'Best Score', value: '-15' },
-            { label: 'Avg Pool Size', value: '27' },
+            { label: 'Avg Pool Size', value: '26' },
           ].map((s) => (
             <div key={s.label} className="bg-white/10 rounded-lg p-3 text-center border border-white/10">
               <div className="text-2xl font-black text-primary-foreground">{s.value}</div>

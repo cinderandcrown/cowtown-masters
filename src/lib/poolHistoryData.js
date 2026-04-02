@@ -16,6 +16,14 @@ export const POOL_HISTORY = {
       { name: 'Will H.', golferA: 'Ludvig Åberg', scoreA: -7, golferB: 'Byeong Hun An', scoreB: 2, total: -5, rank: 1 },
     ],
   },
+  2023: {
+    winner: 'Charlie Brown',
+    winningScore: -13,
+    entries: 28,
+    standings: [
+      { name: 'Charlie Brown', golferA: 'Scottie Scheffler', scoreA: -10, golferB: 'Denny McCarthy', scoreB: -3, total: -13, rank: 1 },
+    ],
+  },
   2022: {
     winner: 'N. Will',
     winningScore: -4,
@@ -48,6 +56,14 @@ export const POOL_HISTORY = {
       { name: 'J. Howard', golferA: 'Tiger Woods', scoreA: 13, golferB: 'Bubba Watson', scoreB: 7, total: 20, rank: 25 },
       { name: 'W. Hudson', golferA: 'Tyrrell Hatton', scoreA: 17, golferB: 'Robert MacIntyre', scoreB: 3, total: 20, rank: 25 },
       { name: 'C. Platt', golferA: 'Patrick Cantley', scoreA: 7, golferB: 'Max Homa', scoreB: 14, total: 21, rank: 27 },
+    ],
+  },
+  2021: {
+    winner: 'Zac Hansen',
+    winningScore: -13,
+    entries: 20,
+    standings: [
+      { name: 'Zac Hansen', golferA: 'Hideki Matsuyama', scoreA: -10, golferB: 'Phil Mickelson', scoreB: -3, total: -13, rank: 1 },
     ],
   },
 };
