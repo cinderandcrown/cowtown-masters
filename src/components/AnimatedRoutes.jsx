@@ -6,7 +6,7 @@ import PoolDashboard from '@/pages/PoolDashboard';
 
 import PoolAdmin from '@/pages/PoolAdmin';
 import AccountSettings from '@/pages/AccountSettings';
-import ParticipantProfile from '@/pages/ParticipantProfile';
+
 import ParticipantLogin from '@/pages/ParticipantLogin';
 import PageNotFound from '@/lib/PageNotFound';
 import { ParticipantProvider } from '@/lib/ParticipantContext';
@@ -57,7 +57,7 @@ export default function AnimatedRoutes() {
           <Route path="/pool/:poolId/login" element={<PoolWrapper><ParticipantLogin /></PoolWrapper>} />
           <Route path="/pool/:poolId/admin" element={<PoolWrapper><PoolAdmin /></PoolWrapper>} />
 
-          <Route path="/participant/:name" element={<ParticipantProfile />} />
+
           <Route path="/account" element={<AccountSettings />} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>

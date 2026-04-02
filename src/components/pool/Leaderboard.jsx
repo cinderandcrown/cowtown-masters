@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+
 import { base44 } from '@/api/base44Client';
 import { Trophy, RefreshCw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -201,9 +201,9 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
               )}
               <div className="min-w-0">
                 <div className="flex items-center gap-1">
-                  <Link to={`/participant/${encodeURIComponent(entry.participant_name)}`} onClick={(e) => e.stopPropagation()} className="text-sm font-semibold text-foreground hover:text-accent truncate transition">
+                  <span className="text-sm font-semibold text-foreground truncate">
                     {entry.team_name || entry.participant_name}
-                  </Link>
+                  </span>
                   {hasCut && <span className="text-[8px] font-bold text-destructive bg-destructive/10 px-1 rounded">CUT</span>}
                   {hasWD && <span className="text-[8px] font-bold text-orange-600 bg-orange-500/15 px-1 rounded">WD</span>}
                 </div>

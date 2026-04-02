@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Trophy } from 'lucide-react';
 import { POOL_HISTORY } from '@/lib/poolHistoryData';
 
@@ -35,9 +34,9 @@ export default function HistoryTab() {
                 <div className="flex items-start gap-2">
                   <Trophy className="w-6 h-6 text-accent flex-shrink-0 mt-0.5" />
                   <div>
-                    <Link to={`/participant/${encodeURIComponent(data.winner)}`} className="text-lg font-bold text-card-foreground hover:text-accent transition" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    <span className="text-lg font-bold text-card-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
                       {data.winner}
-                    </Link>
+                    </span>
                     <p className="text-xs text-muted-foreground">{data.golferA} + {data.golferB}</p>
                   </div>
                 </div>
