@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { base44 } from '@/api/base44Client';
 import { Trophy, RefreshCw, Star, Share2, Download, TrendingUp, TrendingDown, Flame } from 'lucide-react';
@@ -101,12 +101,25 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
     enabled: !!poolId,
   });
 
+  const queryClient = useQueryClient();
+
   const { data: golfers = [], isLoading: loadingGolfers, dataUpdatedAt } = useQuery({
     queryKey: ['poolGolfers', poolId],
     queryFn: () => base44.entities.Golfer.filter({ pool_id: poolId }),
     enabled: !!poolId,
     refetchInterval: 60000,
   });
+
+  // Real-time subscription: auto-refresh when golfer scores update
+  React.useEffect(() => {
+    if (!poolId) return;
+    const unsubscribe = base44.entities.Golfer.subscribe((event) => {
+      if (event.type === 'update' || event.type === 'create') {
+        queryClient.invalidateQueries({ queryKey: ['poolGolfers', poolId] });
+      }
+    });
+    return unsubscribe;
+  }, [poolId, queryClient]);
 
   const isLoading = loadingEntries || loadingGolfers;
 
