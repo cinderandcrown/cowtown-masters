@@ -12,6 +12,7 @@ import AdminEntryList from '@/components/admin/AdminEntryList';
 import AddGolferForm from '@/components/admin/AddGolferForm';
 import AddEntryForm from '@/components/admin/AddEntryForm';
 import PoolSettingsCard from '@/components/admin/PoolSettingsCard';
+import { useParticipant } from '@/lib/ParticipantContext';
 
 export default function PoolAdmin() {
   const { poolId } = useParams();
@@ -33,7 +34,9 @@ export default function PoolAdmin() {
     select: (data) => data[0],
   });
 
-  const isAdmin = currentUser?.role === 'admin' || currentUser?.email === pool?.admin_user_id || currentUser?.email === pool?.created_by;
+  const { isLoggedIn: participantLoggedIn, participant } = useParticipant();
+
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.email === pool?.admin_user_id || currentUser?.email === pool?.created_by || (participantLoggedIn && participant?.email && (participant.email === pool?.admin_user_id || participant.email === pool?.created_by));
 
   if (loadingPool) {
     return (

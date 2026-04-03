@@ -200,6 +200,7 @@ export function PoolHeader() {
   const { poolId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth() || {};
+  const { isLoggedIn, participant } = useParticipant();
 
   const { data: pool } = useQuery({
     queryKey: ['pool', poolId],
@@ -250,7 +251,7 @@ export function PoolHeader() {
           <div className="flex items-center gap-1.5">
             <ThemeToggle />
             <NotificationBell poolId={poolId} />
-            {(user?.role === 'admin' || user?.email === pool?.admin_user_id || user?.email === pool?.created_by) && (
+            {(user?.role === 'admin' || user?.email === pool?.admin_user_id || user?.email === pool?.created_by || (isLoggedIn && participant?.email && (participant.email === pool?.admin_user_id || participant.email === pool?.created_by))) && (
               <button
                 onClick={() => navigate(`/pool/${poolId}/admin`)}
                 className="text-[10px] font-bold text-accent bg-accent/10 rounded-lg px-2 py-1 border border-accent/30 hover:bg-accent/20 transition focus:outline-none focus:ring-2 focus:ring-accent"
