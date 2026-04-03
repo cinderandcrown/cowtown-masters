@@ -32,11 +32,11 @@ export const POOL_HISTORY = {
     ],
   },
   2024: {
-    winner: 'Will H.',
+    winner: 'Will Hudson',
     winningScore: -5,
     entries: 32,
     standings: [
-      { name: 'Will H.', golferA: 'Ludvig Åberg', scoreA: -7, golferB: 'Byeong Hun An', scoreB: 2, total: -5, rank: 1 },
+      { name: 'Will Hudson', golferA: 'Ludvig Åberg', scoreA: -7, golferB: 'Byeong Hun An', scoreB: 2, total: -5, rank: 1 },
       { name: 'Alex T.', golferA: 'Max Homa', scoreA: -4, golferB: 'Nicolai Højgaard', scoreB: 2, total: -2, rank: 2 },
       { name: 'Charlie B.', golferA: 'Scottie Scheffler', scoreA: -11, golferB: 'Denny McCarthy', scoreB: 9, total: -2, rank: 2 },
       { name: 'Nick W.', golferA: 'Bryson DeChambeau', scoreA: -6, golferB: 'Adam Scott', scoreB: 4, total: -2, rank: 2 },
