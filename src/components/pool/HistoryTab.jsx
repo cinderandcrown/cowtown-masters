@@ -196,13 +196,17 @@ export default function HistoryTab({ poolId }) {
   const [expandedYear, setExpandedYear] = useState(null);
   const pastChampions = getPastChampions();
 
-  // Fire confetti + sound when entering champions wall
+  // Fire big celebration when entering champions wall
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const t1 = setTimeout(() => {
       fireGoldRain();
       soundChampion();
-    }, 400);
-    return () => clearTimeout(timer);
+    }, 300);
+    const t2 = setTimeout(() => {
+      fireJackpot();
+      soundJackpot();
+    }, 900);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
   // Count total wins per participant
