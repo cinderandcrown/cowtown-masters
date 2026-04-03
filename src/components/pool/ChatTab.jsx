@@ -3,6 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Send, MessageCircle, AtSign, X } from 'lucide-react';
+import ChatReactions from '@/components/pool/ChatReactions';
+import { toast } from 'sonner';
+import { hapticTap } from '@/lib/haptics';
 
 const IDENTITY_KEY = (poolId) => `cowtown_chat_identity_${poolId}`;
 
@@ -76,6 +79,7 @@ export default function ChatTab({ poolId, participantIdentity }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chatMessages', poolId] });
       setMessage('');
+      hapticTap();
     },
   });
 
@@ -247,9 +251,14 @@ export default function ChatTab({ poolId, participantIdentity }) {
                 }`}>
                   <p className="text-sm">{renderMessageWithMentions(msg.message)}</p>
                 </div>
-                <p className={`text-[9px] text-muted-foreground mt-0.5 ${isMe ? 'text-right mr-2' : 'ml-2'}`}>
-                  {msg.created_date ? timeAgo(msg.created_date) : ''}
-                </p>
+                <div className={`flex items-center gap-1 mt-0.5 ${isMe ? 'flex-row-reverse mr-2' : 'ml-0.5'}`}>
+                  <p className="text-[9px] text-muted-foreground">
+                    {msg.created_date ? timeAgo(msg.created_date) : ''}
+                  </p>
+                </div>
+                <div className={`${isMe ? 'flex justify-end' : ''}`}>
+                  <ChatReactions message={msg} identity={identity} poolId={poolId} />
+                </div>
               </div>
             </div>
           );

@@ -6,6 +6,9 @@ import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Shuffle, PenLine, Check, RotateCcw, Lock, ShieldAlert, Trophy } from 'lucide-react';
+import { toast } from 'sonner';
+import { hapticPulse, hapticDoubleTap } from '@/lib/haptics';
+import { fireConfetti } from '@/lib/useConfetti';
 
 function shuffle(arr) {
   const a = [...arr];
@@ -161,11 +164,14 @@ export default function DrawTab({ poolId }) {
   };
 
   const revealNext = () => {
+    hapticPulse();
     if (revealIndex < assignments.length - 1) {
       setRevealIndex(prev => prev + 1);
     } else {
       setPhase('complete');
       saveMutation.mutate(assignments);
+      fireConfetti();
+      toast.success('Draw complete! All golfers assigned.');
     }
   };
 
@@ -209,6 +215,8 @@ export default function DrawTab({ poolId }) {
       golferB,
     }]);
     setLockedEntries(prev => ({ ...prev, [entry.id]: true }));
+    hapticDoubleTap();
+    toast.success(`${entry.participant_name} locked in!`);
   };
 
   const allManualPicked = entries.every(e =>

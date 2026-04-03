@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Settings, Trophy, Shuffle, Tv, Flag, ChevronRight, Users, Sparkles, Zap, MessageCircle, Copy, Check, Share2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { hapticTap } from '@/lib/haptics';
 import MastersCountdown from '@/components/MastersCountdown';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,6 +61,8 @@ export default function Home() {
     e.stopPropagation();
     await navigator.clipboard.writeText(code);
     setCopiedCode(code);
+    hapticTap();
+    toast.success('Invite code copied!');
     setTimeout(() => setCopiedCode(null), 1500);
   };
 
@@ -70,6 +74,7 @@ export default function Home() {
       navigator.share({ title: pool.name, text: `Join my pool: ${pool.invite_code}`, url });
     } else {
       await navigator.clipboard.writeText(url);
+      toast.success('Pool link copied!');
     }
   };
 

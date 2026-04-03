@@ -4,7 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Users, Trophy, ShieldAlert, Bot, Copy, Share2, Check } from 'lucide-react';
-import { useState as useReactState } from 'react';
+import { toast } from 'sonner';
+import { hapticTap } from '@/lib/haptics';
 import AdminGolferList from '@/components/admin/AdminGolferList.jsx';
 import AgentDashboard from '@/components/admin/AgentDashboard';
 import AdminEntryList from '@/components/admin/AdminEntryList';
@@ -67,6 +68,8 @@ export default function PoolAdmin() {
     if (pool?.invite_code) {
       await navigator.clipboard.writeText(pool.invite_code);
       setCopied(true);
+      hapticTap();
+      toast.success('Invite code copied!');
       setTimeout(() => setCopied(false), 1500);
     }
   };
@@ -77,6 +80,7 @@ export default function PoolAdmin() {
       navigator.share({ title: pool?.name || 'Cowtown Masters Pool', url });
     } else {
       await navigator.clipboard.writeText(url);
+      toast.success('Pool link copied!');
     }
   };
 

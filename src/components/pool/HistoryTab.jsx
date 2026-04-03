@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Trophy, Calendar, Hash, TrendingUp } from 'lucide-react';
+import { fireConfetti } from '@/lib/useConfetti';
 import { POOL_HISTORY } from '@/lib/poolHistoryData';
 
 const HISTORY = {};
@@ -16,6 +17,12 @@ const scoreColor = (s) => {
 };
 
 export default function HistoryTab() {
+  // Fire confetti when viewing the champions wall
+  useEffect(() => {
+    const timer = setTimeout(() => fireConfetti(), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="px-3 pt-3 pb-0 space-y-3">
       <div className="bg-gradient-to-br from-[#0a3d0a] to-primary rounded-xl p-4 border border-accent/30 text-center relative overflow-hidden mb-4">

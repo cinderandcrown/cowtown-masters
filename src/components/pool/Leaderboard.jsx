@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { base44 } from '@/api/base44Client';
 import { Trophy, RefreshCw, Star, Share2, Download } from 'lucide-react';
+import LeaderboardRoundTabs from '@/components/pool/LeaderboardRoundTabs';
+import LeaderboardSearch from '@/components/pool/LeaderboardSearch';
+import ScoringAlertBanner from '@/components/pool/ScoringAlertBanner';
+import { toast } from 'sonner';
+import { hapticTap } from '@/lib/haptics';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useParticipant } from '@/lib/ParticipantContext';
 import { Button } from '@/components/ui/button';
@@ -53,6 +58,8 @@ function LeaderboardSkeleton() {
 
 export default function Leaderboard({ poolId, onSelectEntry }) {
   const { isLoggedIn, participant } = useParticipant();
+  const [activeRound, setActiveRound] = useState('total');
+  const [search, setSearch] = useState('');
 
   const { data: pool } = useQuery({
     queryKey: ['pool', poolId],
@@ -76,13 +83,39 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
 
   const isLoading = loadingEntries || loadingGolfers;
 
+  const allStandings = useMemo(() => {
+    if (isLoading) return [];
+    return assignPositions(enrichEntries(entries, golfers));
+  }, [entries, golfers, isLoading]);
+
+  // Round-based sorting + search
+  const standings = useMemo(() => {
+    let list = [...allStandings];
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(e =>
+        (e.participant_name || '').toLowerCase().includes(q) ||
+        (e.team_name || '').toLowerCase().includes(q) ||
+        (e.golferA?.name || '').toLowerCase().includes(q) ||
+        (e.golferB?.name || '').toLowerCase().includes(q)
+      );
+    }
+    if (activeRound !== 'total') {
+      const rKey = { r1: 'round_1', r2: 'round_2', r3: 'round_3', r4: 'round_4' }[activeRound];
+      list.sort((a, b) => {
+        const aScore = (a.golferA?.[rKey] || 0) + (a.golferB?.[rKey] || 0);
+        const bScore = (b.golferA?.[rKey] || 0) + (b.golferB?.[rKey] || 0);
+        return aScore - bScore;
+      });
+    }
+    return list;
+  }, [allStandings, activeRound, search]);
+
+  const myEntry = isLoggedIn ? allStandings.find(s => s.id === participant?.entry_id) : null;
+
   if (isLoading) {
     return <LeaderboardSkeleton />;
   }
-
-  const standings = assignPositions(enrichEntries(entries, golfers));
-
-  const myEntry = isLoggedIn ? standings.find(s => s.id === participant?.entry_id) : null;
 
   const handleShare = async () => {
     if (!myEntry) return;
@@ -91,10 +124,13 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
       navigator.share({ title: 'Cowtown Masters', text });
     } else {
       await navigator.clipboard.writeText(text);
+      toast.success('Standing copied!');
     }
+    hapticTap();
   };
 
   const handleExport = () => {
+    hapticTap();
     const header = 'Rank,Player,Team,Golfer A,Score A,Golfer B,Score B,Total';
     const rows = standings.map(s => 
       `${s.displayRank},"${s.participant_name}","${s.team_name || ''}","${s.golferA?.name || 'TBD'}",${s.score_a},"${s.golferB?.name || 'TBD'}",${s.score_b},${s.total_score}`
@@ -107,6 +143,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
     a.download = 'cowtown-masters-standings.csv';
     a.click();
     URL.revokeObjectURL(url);
+    toast.success('CSV exported!');
   };
 
   // Prize pot calculation
@@ -122,8 +159,16 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
     ? timeAgo < 60 ? `${timeAgo}s ago` : `${Math.round(timeAgo / 60)}m ago`
     : '';
 
+  // Get round score for display
+  const getRoundScore = (entry) => {
+    if (activeRound === 'total') return entry.total_score;
+    const rKey = { r1: 'round_1', r2: 'round_2', r3: 'round_3', r4: 'round_4' }[activeRound];
+    return (entry.golferA?.[rKey] || 0) + (entry.golferB?.[rKey] || 0);
+  };
+
   return (
     <div className="px-3 pt-3 pb-0">
+      <ScoringAlertBanner poolId={poolId} />
       {/* Prize Pot Banner */}
       {totalPot > 0 && (
         <div className="animate-fade-in-up flex items-center justify-between bg-gradient-to-r from-accent/15 via-accent/10 to-accent/15 rounded-xl px-3 py-2.5 mb-3 border border-accent/30 relative overflow-hidden">
@@ -199,11 +244,17 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
             Pool Standings
           </span>
           <div className="flex items-center gap-2">
+            <LeaderboardSearch value={search} onChange={setSearch} />
             <button onClick={handleExport} className="p-1 hover:bg-white/10 rounded transition" aria-label="Export CSV">
               <Download className="w-3.5 h-3.5 text-accent" />
             </button>
             <span className="text-[10px] text-accent font-semibold">{standings.length} ENTRIES</span>
           </div>
+        </div>
+
+        {/* Round Tabs */}
+        <div className="px-3 py-2 border-b border-primary/10">
+          <LeaderboardRoundTabs activeRound={activeRound} onRoundChange={setActiveRound} />
         </div>
 
         {/* Header */}
@@ -212,7 +263,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
           <span>Player</span>
           <span className="text-center">A</span>
           <span className="text-center">B</span>
-          <span className="text-center">Tot</span>
+          <span className="text-center">{activeRound === 'total' ? 'Tot' : activeRound.toUpperCase()}</span>
         </div>
 
         {/* Rows */}
@@ -269,8 +320,8 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
               </div>
               <span className={`text-center font-bold text-xs tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.score_a)} ${entry.score_a < 0 ? 'bg-red-500/10' : ''}`}>{formatScore(entry.score_a)}</span>
               <span className={`text-center font-bold text-xs tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.score_b)} ${entry.score_b < 0 ? 'bg-red-500/10' : ''}`}>{formatScore(entry.score_b)}</span>
-              <span className={`text-center font-black text-sm tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.total_score)} ${entry.total_score < 0 ? 'bg-red-500/10' : ''}`}>
-                {formatScore(entry.total_score)}
+              <span className={`text-center font-black text-sm tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(getRoundScore(entry))} ${getRoundScore(entry) < 0 ? 'bg-red-500/10' : ''}`}>
+                {formatScore(getRoundScore(entry))}
               </span>
             </div>
           );

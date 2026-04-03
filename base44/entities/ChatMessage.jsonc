@@ -1,0 +1,41 @@
+{
+  "name": "ChatMessage",
+  "type": "object",
+  "properties": {
+    "pool_id": {
+      "type": "string",
+      "description": "Reference to Pool entity"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Sender participant name"
+    },
+    "message": {
+      "type": "string",
+      "description": "Message text content"
+    },
+    "message_type": {
+      "type": "string",
+      "enum": [
+        "chat",
+        "system"
+      ],
+      "default": "chat",
+      "description": "Message type"
+    },
+    "reactions": {
+      "type": "object",
+      "description": "Emoji reactions map: { '\ud83d\udd25': ['name1', 'name2'], '\ud83d\udc4f': ['name3'] }"
+    },
+    "created_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Message timestamp"
+    }
+  },
+  "required": [
+    "pool_id",
+    "user_name",
+    "message"
+  ]
+}

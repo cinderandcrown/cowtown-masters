@@ -7,21 +7,16 @@ export function useTheme() {
 }
 
 export default function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() =>
-    window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-  );
+  const [theme, setTheme] = useState(() => {
+    const stored = localStorage.getItem('cowtown_theme');
+    if (stored === 'dark' || stored === 'light') return stored;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
+    localStorage.setItem('cowtown_theme', theme);
   }, [theme]);
-
-  // Sync with device/OS preference changes in real time
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const handler = (e) => setTheme(e.matches ? 'dark' : 'light');
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
 
   const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
 

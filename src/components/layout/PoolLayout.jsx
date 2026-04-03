@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate, useLocation, NavLink } from 'react-router-dom';
-import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, LogIn, LogOut, Pencil, Check, X, ArrowLeft, MoreHorizontal, Share2, Copy, Link2 } from 'lucide-react';
+import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, LogIn, LogOut, Pencil, Check, X, ArrowLeft, MoreHorizontal, Share2, Copy, Link2, Moon, Sun } from 'lucide-react';
+import { useTheme } from '@/lib/ThemeProvider';
+import { toast } from 'sonner';
+import { hapticTap } from '@/lib/haptics';
 import NotificationBell from '@/components/pool/NotificationBell';
 import { useParticipant } from '@/lib/ParticipantContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -179,6 +182,19 @@ function ParticipantBadge({ poolId }) {
   );
 }
 
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme();
+  return (
+    <button
+      onClick={toggleTheme}
+      className="p-1.5 hover:bg-white/10 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-accent"
+      aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+    >
+      {theme === 'dark' ? <Sun className="w-4 h-4 text-accent" /> : <Moon className="w-4 h-4 text-primary-foreground/70" />}
+    </button>
+  );
+}
+
 export function PoolHeader() {
   const { poolId } = useParams();
   const navigate = useNavigate();
@@ -230,6 +246,7 @@ export function PoolHeader() {
             </div>
           </div>
           <div className="flex items-center gap-1.5">
+            <ThemeToggle />
             <NotificationBell poolId={poolId} />
             {(user?.role === 'admin' || user?.email === pool?.admin_user_id || user?.email === pool?.created_by) && (
               <button
@@ -292,6 +309,8 @@ export function PoolBottomNav({ poolId }) {
   const handleCopyInvite = async () => {
     if (pool?.invite_code) {
       await navigator.clipboard.writeText(pool.invite_code);
+      hapticTap();
+      toast.success('Invite code copied!');
     }
   };
 
@@ -301,6 +320,7 @@ export function PoolBottomNav({ poolId }) {
       navigator.share({ title: pool?.name || 'Cowtown Masters Pool', url });
     } else {
       await navigator.clipboard.writeText(url);
+      toast.success('Pool link copied!');
     }
   };
 

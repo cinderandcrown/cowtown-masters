@@ -12,6 +12,7 @@ import TeamsTab from '@/components/pool/TeamsTab';
 import EntryDetailModal from '@/components/pool/EntryDetailModal';
 import usePullToRefresh from '@/hooks/usePullToRefresh.jsx';
 import AddToHomeScreen from '@/components/pool/AddToHomeScreen';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 const VALID_TABS = ['leaderboard', 'teams', 'golfers', 'draw', 'messages', 'history', 'rules'];
 
@@ -76,17 +77,41 @@ export default function PoolDashboard() {
       <div {...pullProps} className="min-h-[60vh]">
         <PullIndicator />
         {activeTab === 'leaderboard' && (
-          <>
+          <ErrorBoundary fallbackMessage="Leaderboard couldn't load.">
             <AddToHomeScreen />
             <Leaderboard poolId={poolId} onSelectEntry={setSelectedEntry} />
-          </>
+          </ErrorBoundary>
         )}
-        {activeTab === 'golfers' && <GolfersTab poolId={poolId} />}
-        {activeTab === 'draw' && <DrawTab poolId={poolId} />}
-        {activeTab === 'messages' && <MessagingHub poolId={poolId} />}
-        {activeTab === 'teams' && <TeamsTab poolId={poolId} />}
-        {activeTab === 'history' && <HistoryTab poolId={poolId} />}
-        {activeTab === 'rules' && <RulesTab poolId={poolId} />}
+        {activeTab === 'golfers' && (
+          <ErrorBoundary fallbackMessage="Field data couldn't load.">
+            <GolfersTab poolId={poolId} />
+          </ErrorBoundary>
+        )}
+        {activeTab === 'draw' && (
+          <ErrorBoundary fallbackMessage="Draw couldn't load.">
+            <DrawTab poolId={poolId} />
+          </ErrorBoundary>
+        )}
+        {activeTab === 'messages' && (
+          <ErrorBoundary fallbackMessage="Chat couldn't load.">
+            <MessagingHub poolId={poolId} />
+          </ErrorBoundary>
+        )}
+        {activeTab === 'teams' && (
+          <ErrorBoundary fallbackMessage="Teams couldn't load.">
+            <TeamsTab poolId={poolId} />
+          </ErrorBoundary>
+        )}
+        {activeTab === 'history' && (
+          <ErrorBoundary fallbackMessage="History couldn't load.">
+            <HistoryTab poolId={poolId} />
+          </ErrorBoundary>
+        )}
+        {activeTab === 'rules' && (
+          <ErrorBoundary fallbackMessage="Rules couldn't load.">
+            <RulesTab poolId={poolId} />
+          </ErrorBoundary>
+        )}
       </div>
 
       <EntryDetailModal

@@ -130,12 +130,45 @@ export default function TeamsTab({ poolId }) {
           <div className="h-6 w-40 mx-auto bg-primary/10 rounded animate-pulse" />
           <div className="h-3 w-48 mx-auto mt-2 bg-primary/5 rounded animate-pulse" />
         </div>
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="rounded-xl border border-primary/10 overflow-hidden">
-            <div className="h-16 bg-primary/5 animate-pulse" />
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="rounded-xl border border-primary/10 overflow-hidden" style={{ animationDelay: `${i * 100}ms` }}>
+            <div className="flex items-center justify-between px-4 py-3 bg-primary/5">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
+                <div className="space-y-1">
+                  <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+                  <div className="h-3 w-16 bg-muted/50 animate-pulse rounded" />
+                </div>
+              </div>
+              <div className="h-8 w-14 bg-muted animate-pulse rounded-lg" />
+            </div>
             <div className="p-3 grid grid-cols-2 gap-2">
-              <div className="h-24 rounded-lg bg-muted/50 animate-pulse" />
-              <div className="h-24 rounded-lg bg-muted/50 animate-pulse" />
+              <div className="rounded-lg border border-primary/10 p-3 space-y-2">
+                <div className="h-3 w-12 bg-primary/10 animate-pulse rounded" />
+                <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+                <div className="flex gap-2 mt-1">
+                  {Array.from({ length: 4 }).map((_, j) => (
+                    <div key={j} className="h-3 w-8 bg-muted/50 animate-pulse rounded" />
+                  ))}
+                </div>
+                <div className="flex justify-between items-center pt-2 border-t border-primary/5">
+                  <div className="h-3 w-12 bg-muted/50 animate-pulse rounded" />
+                  <div className="h-5 w-10 bg-muted animate-pulse rounded" />
+                </div>
+              </div>
+              <div className="rounded-lg border border-accent/10 p-3 space-y-2">
+                <div className="h-3 w-12 bg-accent/10 animate-pulse rounded" />
+                <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+                <div className="flex gap-2 mt-1">
+                  {Array.from({ length: 4 }).map((_, j) => (
+                    <div key={j} className="h-3 w-8 bg-muted/50 animate-pulse rounded" />
+                  ))}
+                </div>
+                <div className="flex justify-between items-center pt-2 border-t border-accent/5">
+                  <div className="h-3 w-12 bg-muted/50 animate-pulse rounded" />
+                  <div className="h-5 w-10 bg-muted animate-pulse rounded" />
+                </div>
+              </div>
             </div>
           </div>
         ))}
