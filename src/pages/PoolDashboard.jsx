@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useEffect, useLayoutEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 import PoolLayout from '@/components/layout/PoolLayout';
 import Leaderboard from '@/components/pool/Leaderboard.jsx';
 import GolfersTab from '@/components/pool/GolfersTab.jsx';
@@ -22,6 +24,13 @@ export default function PoolDashboard() {
   const activeTab = VALID_TABS.includes(tabParam) ? tabParam : 'leaderboard';
   const [selectedEntry, setSelectedEntry] = useState(null);
   const queryClient = useQueryClient();
+
+  const { data: pool } = useQuery({
+    queryKey: ['pool', poolId],
+    queryFn: () => base44.entities.Pool.filter({ id: poolId }),
+    enabled: !!poolId,
+    select: (data) => data[0],
+  });
 
   // Redirect to /pool/:poolId/leaderboard if no valid tab
   useEffect(() => {
@@ -109,7 +118,7 @@ export default function PoolDashboard() {
         )}
         {activeTab === 'rules' && (
           <ErrorBoundary fallbackMessage="Rules couldn't load.">
-            <RulesTab poolId={poolId} />
+            <RulesTab pool={pool} />
           </ErrorBoundary>
         )}
       </div>
