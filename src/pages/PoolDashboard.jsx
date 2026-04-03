@@ -51,7 +51,7 @@ export default function PoolDashboard() {
     const tabNames = {
       leaderboard: 'Leaderboard',
       teams: 'Teams',
-      golfers: 'Golfers',
+      golfers: 'Field',
       draw: 'Draw',
       messages: 'Smack Talk',
       rules: 'Rules',

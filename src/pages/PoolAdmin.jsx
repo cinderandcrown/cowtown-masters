@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Users, Trophy, ShieldAlert, Bot } from 'lucide-react';
+import { ArrowLeft, Users, Trophy, ShieldAlert, Bot, Copy, Share2, Check } from 'lucide-react';
+import { useState as useReactState } from 'react';
 import AdminGolferList from '@/components/admin/AdminGolferList.jsx';
 import AgentDashboard from '@/components/admin/AgentDashboard';
 import AdminEntryList from '@/components/admin/AdminEntryList';
@@ -15,6 +16,7 @@ export default function PoolAdmin() {
   const { poolId } = useParams();
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('agent');
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => { document.title = 'Cowtown Masters - Admin'; }, []);
 
@@ -58,13 +60,30 @@ export default function PoolAdmin() {
   const tabs = [
     { id: 'agent', label: 'Agent', icon: <Bot className="w-4 h-4" /> },
     { id: 'golfers', label: 'Golfers', icon: <Trophy className="w-4 h-4" /> },
-    { id: 'participants', label: 'Participants', icon: <Users className="w-4 h-4" /> },
+    { id: 'participants', label: 'Entries', icon: <Users className="w-4 h-4" /> },
   ];
+
+  const handleCopyCode = async () => {
+    if (pool?.invite_code) {
+      await navigator.clipboard.writeText(pool.invite_code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
+  };
+
+  const handleSharePool = async () => {
+    const url = `${window.location.origin}/pool/${poolId}`;
+    if (navigator.share) {
+      navigator.share({ title: pool?.name || 'Cowtown Masters Pool', url });
+    } else {
+      await navigator.clipboard.writeText(url);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-gradient-to-r from-secondary to-primary border-b-2 border-accent px-4 py-3">
+      <header className="sticky top-0 z-40 bg-gradient-to-r from-[#0a3d0a] to-primary border-b-2 border-accent px-4 py-3">
         <div className="max-w-2xl mx-auto flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate(`/pool/${poolId}`)} className="text-primary-foreground hover:bg-white/10">
             <ArrowLeft className="w-5 h-5" />
@@ -79,19 +98,38 @@ export default function PoolAdmin() {
       </header>
 
       <div className="max-w-2xl mx-auto px-4 py-4 pb-8">
+        {/* Invite Code Card */}
+        {pool?.invite_code && (
+          <div className="bg-card rounded-xl border border-border p-4 mb-4 flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase mb-1">Invite Code</p>
+              <p className="text-2xl font-black font-mono tracking-[0.2em] text-foreground">{pool.invite_code}</p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={handleCopyCode}>
+                {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? 'Copied' : 'Copy'}
+              </Button>
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={handleSharePool}>
+                <Share2 className="w-3.5 h-3.5" /> Share
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Pool Settings */}
         <PoolSettingsCard pool={pool} poolId={poolId} />
 
         {/* Tab Switcher */}
-        <div className="flex gap-2 mb-4">
+        <div className="flex bg-muted/30 rounded-xl p-1 mb-4">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveSection(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition ${
+              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition ${
                 activeSection === tab.id
-                  ? 'bg-primary text-white'
-                  : 'bg-card border border-primary/20 text-foreground hover:border-primary'
+                  ? 'bg-primary text-white shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {tab.icon}

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate, useLocation, NavLink } from 'react-router-dom';
-import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, LogIn, LogOut, Pencil, Check, X, ArrowLeft } from 'lucide-react';
+import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, LogIn, LogOut, Pencil, Check, X, ArrowLeft, MoreHorizontal, Share2, Copy, Link2 } from 'lucide-react';
 import NotificationBell from '@/components/pool/NotificationBell';
 import { useParticipant } from '@/lib/ParticipantContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -8,15 +8,14 @@ import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 const TABS = [
   { id: 'leaderboard', label: 'Board', Icon: Trophy },
   { id: 'teams', label: 'Teams', Icon: Users },
-  { id: 'golfers', label: 'Golfers', Icon: Flag },
+  { id: 'golfers', label: 'Field', Icon: Flag },
   { id: 'draw', label: 'Draw', Icon: Shuffle },
-  { id: 'messages', label: 'Smack', Icon: MessageCircle },
-  { id: 'history', label: 'History', Icon: Trophy },
-  { id: 'rules', label: 'Rules', Icon: BookOpen },
+  { id: 'more', label: 'More', Icon: MoreHorizontal },
 ];
 
 function ParticipantBadge({ poolId }) {
@@ -65,6 +64,8 @@ function ParticipantBadge({ poolId }) {
 
   const displayTeamName = myEntry?.team_name || participant?.participant_name;
 
+  const initials = (participant?.participant_name || '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+
   if (isLoggedIn) {
     return (
       <div className="relative">
@@ -73,8 +74,9 @@ function ParticipantBadge({ poolId }) {
           aria-expanded={showPanel}
           aria-haspopup="dialog"
           aria-label={`Account menu for ${participant.participant_name}`}
-          className="text-[10px] font-bold text-primary-foreground bg-white/15 rounded-lg px-2 py-1 border border-white/20 hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 transition truncate max-w-[100px]"
+          className="flex items-center gap-1.5 text-[10px] font-bold text-primary-foreground bg-white/15 rounded-lg px-2 py-1 border border-white/20 hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 transition truncate max-w-[120px]"
         >
+          <span className="w-5 h-5 rounded-full bg-accent/30 flex items-center justify-center text-[8px] font-black text-accent flex-shrink-0">{initials}</span>
           {displayTeamName}
         </button>
 
@@ -167,10 +169,11 @@ function ParticipantBadge({ poolId }) {
   return (
     <button
       onClick={() => navigate(`/pool/${poolId}/login`)}
-      className="p-1.5 hover:bg-white/10 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-accent"
+      className="flex items-center gap-1.5 text-[10px] font-bold text-primary-foreground bg-white/15 rounded-lg px-2.5 py-1.5 border border-white/20 hover:bg-white/25 transition focus:outline-none focus:ring-2 focus:ring-accent"
       aria-label="Sign in to your account"
     >
-      <LogIn className="w-4 h-4 text-primary-foreground" aria-hidden="true" />
+      <LogIn className="w-3.5 h-3.5" aria-hidden="true" />
+      Sign In
     </button>
   );
 }
@@ -200,9 +203,9 @@ export function PoolHeader() {
   return (
     <header className="sticky top-0 z-40" role="banner">
       {/* Main Header */}
-      <div className="bg-gradient-to-r from-secondary to-primary border-b border-accent/40 px-4 py-3 md:py-4 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-[#0a3d0a] to-primary border-b border-accent/40 px-4 py-3 md:py-4 relative overflow-hidden">
         <div className="absolute inset-0 animate-shimmer pointer-events-none" aria-hidden="true" />
-        <div className="max-w-md mx-auto flex items-center justify-between relative">
+        <div className="max-w-lg mx-auto flex items-center justify-between relative">
           <div className="flex items-center gap-2">
             <button
               onClick={() => {
@@ -253,7 +256,7 @@ export function PoolHeader() {
 
       {/* Tournament Status Banner */}
       <div className="bg-gradient-to-r from-primary via-secondary to-primary border-b-2 border-accent" role="status" aria-label="Tournament round information">
-        <div className="max-w-md mx-auto flex items-center justify-center gap-3 px-4 py-1.5">
+        <div className="max-w-lg mx-auto flex items-center justify-center gap-2 px-4 py-1">
           {roundInfo ? (
             <>
               <span className="text-[10px] font-black tracking-widest text-accent">{roundInfo.round}</span>
@@ -276,10 +279,52 @@ export function PoolHeader() {
 }
 
 export function PoolBottomNav({ poolId }) {
+  const [moreOpen, setMoreOpen] = useState(false);
+  const navigate = useNavigate();
+  const { data: pool } = useQuery({
+    queryKey: ['pool', poolId],
+    queryFn: () => base44.entities.Pool.filter({ id: poolId }),
+    enabled: !!poolId,
+    select: (data) => data[0],
+  });
+
+  const handleCopyInvite = async () => {
+    if (pool?.invite_code) {
+      await navigator.clipboard.writeText(pool.invite_code);
+    }
+  };
+
+  const handleSharePool = async () => {
+    const url = `${window.location.origin}/pool/${poolId}`;
+    if (navigator.share) {
+      navigator.share({ title: pool?.name || 'Cowtown Masters Pool', url });
+    } else {
+      await navigator.clipboard.writeText(url);
+    }
+  };
+
+  const MORE_ITEMS = [
+    { id: 'messages', label: 'Smack Talk', Icon: MessageCircle },
+    { id: 'history', label: 'Champions Wall', Icon: Trophy },
+    { id: 'rules', label: 'Pool Rules', Icon: BookOpen },
+  ];
+
   return (
+    <>
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-secondary to-primary border-t border-accent/30 backdrop-blur-lg" role="navigation" aria-label="Pool navigation">
-      <div className="max-w-md mx-auto grid grid-cols-7 px-1 py-1 pb-[env(safe-area-inset-bottom,0.5rem)]">
+      <div className="max-w-lg mx-auto grid grid-cols-5 px-1 py-1 pb-[env(safe-area-inset-bottom,0.5rem)]">
         {TABS.map((tab) => (
+          tab.id === 'more' ? (
+            <button
+              key="more"
+              onClick={() => setMoreOpen(true)}
+              aria-label="More options"
+              className="flex flex-col items-center justify-center gap-0.5 py-2 min-h-[48px] rounded-lg transition-all text-primary-foreground/50 hover:text-primary-foreground/70 active:text-primary-foreground/90"
+            >
+              <tab.Icon className="w-5 h-5 stroke-[1.5]" aria-hidden="true" />
+              <span className="text-[9px] tracking-wide uppercase font-medium">{tab.label}</span>
+            </button>
+          ) : (
           <NavLink
             key={tab.id}
             to={`/pool/${poolId}/${tab.id}`}
@@ -303,9 +348,44 @@ export function PoolBottomNav({ poolId }) {
               </>
             )}
           </NavLink>
+          )
         ))}
       </div>
     </nav>
+
+    <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+      <SheetContent side="bottom" className="rounded-t-2xl pb-8">
+        <SheetHeader className="pb-3">
+          <SheetTitle style={{ fontFamily: "'Playfair Display', serif" }}>More</SheetTitle>
+        </SheetHeader>
+        <div className="space-y-1">
+          {MORE_ITEMS.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => { setMoreOpen(false); navigate(`/pool/${poolId}/${item.id}`); }}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-muted transition text-left"
+            >
+              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <item.Icon className="w-4.5 h-4.5 text-primary" />
+              </div>
+              <span className="text-sm font-semibold text-foreground">{item.label}</span>
+            </button>
+          ))}
+        </div>
+        <div className="mt-4 pt-4 border-t border-border">
+          <p className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase mb-2 px-1">Share Pool</p>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="flex-1 gap-2" onClick={handleCopyInvite}>
+              <Copy className="w-3.5 h-3.5" /> Copy Invite Code
+            </Button>
+            <Button variant="outline" size="sm" className="flex-1 gap-2" onClick={handleSharePool}>
+              <Link2 className="w-3.5 h-3.5" /> Share Link
+            </Button>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+    </>
   );
 }
 
@@ -347,7 +427,7 @@ export default function PoolLayout({ children }) {
         Skip to main content
       </a>
       <PoolHeader />
-      <main id="main-content" className="max-w-md mx-auto px-0 w-full pb-20" role="main">
+      <main id="main-content" className="max-w-lg mx-auto px-0 w-full pb-20" role="main">
         {children}
       </main>
       <CinderCrownFooter />

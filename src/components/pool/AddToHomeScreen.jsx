@@ -30,46 +30,24 @@ export default function AddToHomeScreen() {
   if (!isIOS && !isAndroid) return null;
 
   return (
-    <div className="mx-3 mt-3 bg-gradient-to-r from-primary to-secondary rounded-xl p-4 border border-accent/30 relative overflow-hidden animate-fade-in-up">
-      <div className="absolute inset-0 animate-shimmer pointer-events-none opacity-30" />
-      <button
-        onClick={handleDismiss}
-        className="absolute top-2 right-2 p-1 hover:bg-white/10 rounded-full transition z-10"
-        aria-label="Dismiss"
-      >
-        <X className="w-4 h-4 text-primary-foreground/60" />
-      </button>
-      <div className="relative flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center flex-shrink-0 border border-accent/30">
-          <Smartphone className="w-5 h-5 text-accent" />
+    <div className="mx-3 mt-3 bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl px-4 py-3 border border-border animate-fade-in-up">
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
+          <Smartphone className="w-4 h-4 text-primary" />
         </div>
-        <div className="flex-1">
-          <h4 className="text-sm font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Stay in the Action! 📱
-          </h4>
-          <p className="text-xs text-primary-foreground/70 mt-1 leading-relaxed">
-            Add Cowtown Masters to your home screen for instant access to live scores and alerts during the tournament.
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-bold text-foreground">Add to Home Screen</p>
+          <p className="text-[10px] text-muted-foreground">
+            {isIOS ? 'Tap Share → Add to Home Screen' : 'Tap ⋮ → Add to Home Screen'}
           </p>
-          <div className="mt-2.5 bg-black/20 rounded-lg p-2.5 border border-white/10">
-            {isIOS ? (
-              <div className="flex items-center gap-2">
-                <Download className="w-4 h-4 text-accent flex-shrink-0" />
-                <p className="text-[11px] text-primary-foreground/80">
-                  Tap <span className="font-bold text-accent">Share</span> →{' '}
-                  <span className="font-bold text-accent">Add to Home Screen</span>
-                </p>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Download className="w-4 h-4 text-accent flex-shrink-0" />
-                <p className="text-[11px] text-primary-foreground/80">
-                  Tap <span className="font-bold text-accent">⋮ Menu</span> →{' '}
-                  <span className="font-bold text-accent">Add to Home Screen</span>
-                </p>
-              </div>
-            )}
-          </div>
         </div>
+        <button
+          onClick={handleDismiss}
+          className="p-1 hover:bg-muted rounded-full transition flex-shrink-0"
+          aria-label="Dismiss"
+        >
+          <X className="w-3.5 h-3.5 text-muted-foreground" />
+        </button>
       </div>
     </div>
   );

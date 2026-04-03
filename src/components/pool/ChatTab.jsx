@@ -141,17 +141,23 @@ export default function ChatTab({ poolId, participantIdentity }) {
           )}
           {participantNames.map((name, i) => {
             const entry = entryByName[name];
+            const initial = name.charAt(0).toUpperCase();
             return (
               <button
                 key={name}
                 onClick={() => selectIdentity(name)}
-                className="animate-fade-in-up w-full text-left px-4 py-3 rounded-lg border border-primary/10 hover:bg-primary/5 hover:border-primary/30 hover:scale-[1.01] hover:shadow-sm transition-all"
+                className="animate-fade-in-up w-full text-left px-4 py-3 rounded-lg border border-primary/10 hover:bg-primary/5 hover:border-primary/30 hover:scale-[1.01] hover:shadow-sm transition-all flex items-center gap-3"
                 style={{ animationDelay: `${i * 50}ms` }}
               >
-                <span className="font-semibold text-sm text-foreground">{entry?.team_name || name}</span>
-                {entry?.team_name && (
-                  <span className="block text-[10px] text-muted-foreground mt-0.5">{name}</span>
-                )}
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs font-black text-primary-foreground">{initial}</span>
+                </div>
+                <div>
+                  <span className="font-semibold text-sm text-foreground">{entry?.team_name || name}</span>
+                  {entry?.team_name && (
+                    <span className="block text-[10px] text-muted-foreground mt-0.5">{name}</span>
+                  )}
+                </div>
               </button>
             );
           })}
@@ -176,8 +182,9 @@ export default function ChatTab({ poolId, participantIdentity }) {
           </div>
           <button
             onClick={() => setShowIdentityPicker(true)}
-            className="text-[10px] text-accent bg-accent/10 px-2 py-1 rounded-full border border-accent/30 font-semibold"
+            className="flex items-center gap-1.5 text-[10px] text-accent bg-accent/10 px-2 py-1 rounded-full border border-accent/30 font-semibold"
           >
+            <span className="w-4 h-4 rounded-full bg-accent/20 flex items-center justify-center text-[8px] font-black text-accent">{identity.charAt(0).toUpperCase()}</span>
             {entryByName[identity]?.team_name || identity}
           </button>
         </div>
@@ -203,9 +210,11 @@ export default function ChatTab({ poolId, participantIdentity }) {
           </div>
         )}
 
-        {messages.map((msg) => {
+        {messages.map((msg, msgIdx) => {
           const isMe = msg.user_name === identity;
           const isSystem = msg.message_type === 'system';
+          const prevMsg = msgIdx > 0 ? messages[msgIdx - 1] : null;
+          const sameAsPrev = prevMsg && prevMsg.user_name === msg.user_name && prevMsg.message_type !== 'system';
 
           if (isSystem) {
             return (
@@ -218,10 +227,16 @@ export default function ChatTab({ poolId, participantIdentity }) {
           }
 
           return (
-            <div key={msg.id} className={`flex ${isMe ? 'justify-end animate-slide-in-right' : 'justify-start animate-slide-in-left'}`}>
+            <div key={msg.id} className={`flex ${isMe ? 'justify-end animate-slide-in-right' : 'justify-start animate-slide-in-left'} ${!sameAsPrev && msgIdx > 0 ? 'mt-2' : ''}`}>
+              {!isMe && !sameAsPrev && (
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 mr-1.5 mt-4">
+                  <span className="text-[8px] font-black text-primary-foreground">{(msg.user_name || '?').charAt(0).toUpperCase()}</span>
+                </div>
+              )}
+              {!isMe && sameAsPrev && <div className="w-6 mr-1.5 flex-shrink-0" />}
               <div className={`max-w-[80%] ${isMe ? 'items-end' : 'items-start'}`}>
-                {!isMe && (
-                  <p className="text-[10px] font-bold text-primary ml-2 mb-0.5">
+                {!isMe && !sameAsPrev && (
+                  <p className="text-[10px] font-bold text-primary ml-0.5 mb-0.5">
                     {entryByName[msg.user_name]?.team_name || msg.user_name}
                   </p>
                 )}

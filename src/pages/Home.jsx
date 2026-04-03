@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Settings, Trophy, Shuffle, Tv, Flag, ChevronRight, Users, Sparkles, Zap, MessageCircle } from 'lucide-react';
+import { Settings, Trophy, Shuffle, Tv, Flag, ChevronRight, Users, Sparkles, Zap, MessageCircle, Copy, Check, Share2 } from 'lucide-react';
 import MastersCountdown from '@/components/MastersCountdown';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,8 @@ export default function Home() {
   const [poolYear, setPoolYear] = useState(2026);
   const [entryFee, setEntryFee] = useState(50);
   const [creating, setCreating] = useState(false);
+  const [joinError, setJoinError] = useState('');
+  const [copiedCode, setCopiedCode] = useState(null);
 
   const { data: pools = [] } = useQuery({
     queryKey: ['pools'],
@@ -43,9 +45,31 @@ export default function Home() {
 
   const handleJoinPool = () => {
     if (!inviteCode.trim()) return;
+    setJoinError('');
     const match = pools.find(p => p.invite_code === inviteCode.toUpperCase());
     if (match) {
       navigate(`/pool/${match.id}`);
+    } else {
+      setJoinError('No pool found with that code');
+    }
+  };
+
+  const handleCopyCode = async (code, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    setTimeout(() => setCopiedCode(null), 1500);
+  };
+
+  const handleSharePool = async (pool, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const url = `${window.location.origin}/pool/${pool.id}`;
+    if (navigator.share) {
+      navigator.share({ title: pool.name, text: `Join my pool: ${pool.invite_code}`, url });
+    } else {
+      await navigator.clipboard.writeText(url);
     }
   };
 
@@ -70,21 +94,21 @@ export default function Home() {
         {/* Content */}
         <div className="relative flex-1 flex flex-col items-center justify-center px-6 pt-16 pb-8">
           {/* Logo with glow */}
-          <div className="animate-fade-in-up mb-8">
+          <div className="animate-fade-in-up mb-6">
             <div className="relative">
               <div className="absolute inset-0 blur-2xl bg-accent/20 rounded-full scale-150" aria-hidden="true" />
-              <div className="relative w-32 h-32 rounded-full bg-black/20 border-2 border-accent/50 flex items-center justify-center backdrop-blur-md shadow-2xl shadow-black/30 ring-1 ring-white/10">
+              <div className="relative w-28 h-28 rounded-full bg-black/20 border-2 border-accent/50 flex items-center justify-center backdrop-blur-md shadow-2xl shadow-black/30 ring-1 ring-white/10">
                 <img
                   src="https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/1752bc3ba_CowtownMastersLogo.png"
                   alt="Cowtown Masters logo"
-                  className="w-24 h-24 object-contain drop-shadow-lg"
+                  className="w-20 h-20 object-contain drop-shadow-lg"
                 />
               </div>
             </div>
           </div>
 
           {/* Title stack */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-6">
             <p
               className="animate-fade-in-up text-[10px] tracking-[0.4em] text-accent/80 font-bold uppercase mb-3"
               style={{ animationDelay: '100ms' }}
@@ -154,6 +178,7 @@ export default function Home() {
             <div className="flex items-center gap-2 mb-3 px-1">
               <Trophy className="w-4 h-4 text-accent" />
               <h3 className="text-xs font-black text-foreground tracking-[0.15em] uppercase">Your Pools</h3>
+              <span className="text-[10px] font-black bg-accent/15 text-accent px-2 py-0.5 rounded-full">{pools.length}</span>
             </div>
             <div className="space-y-2.5">
               {pools.map((pool, i) => (
@@ -172,6 +197,12 @@ export default function Home() {
                       <span className="text-xs text-muted-foreground">{pool.year}</span>
                       <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
                       <span className="text-xs font-mono text-muted-foreground/70 tracking-wider">{pool.invite_code}</span>
+                      <button onClick={(e) => handleCopyCode(pool.invite_code, e)} className="p-0.5 hover:bg-muted rounded transition" aria-label="Copy invite code">
+                        {copiedCode === pool.invite_code ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3 text-muted-foreground/50" />}
+                      </button>
+                      <button onClick={(e) => handleSharePool(pool, e)} className="p-0.5 hover:bg-muted rounded transition" aria-label="Share pool">
+                        <Share2 className="w-3 h-3 text-muted-foreground/50" />
+                      </button>
                     </div>
                   </div>
                   <div className="flex items-center gap-2.5 flex-shrink-0">
@@ -201,32 +232,26 @@ export default function Home() {
             <Zap className="w-4 h-4 text-accent" />
             <h3 className="text-xs font-black text-foreground tracking-[0.15em] uppercase">How It Works</h3>
           </div>
-          <div className="space-y-0">
+          <div className="grid grid-cols-2 gap-2.5">
             {[
-              { step: '01', Icon: Users, title: 'Gather Your Crew', desc: 'Invite friends, family, and rivals to join your pool.' },
-              { step: '02', Icon: Shuffle, title: 'The Hat Draw', desc: 'Each entry gets a Top Tier and Bottom Tier golfer by random draw.' },
-              { step: '03', Icon: Tv, title: 'Watch It Play Out', desc: 'Live leaderboard updates all four rounds of the Masters.' },
-              { step: '04', Icon: Trophy, title: 'Collect the Glory', desc: 'Winner takes the pot and earns year-long bragging rights.' },
+              { step: '01', Icon: Users, title: 'Gather Your Crew', desc: 'Invite friends & rivals to your pool.' },
+              { step: '02', Icon: Shuffle, title: 'The Hat Draw', desc: 'Random draw assigns your golfers.' },
+              { step: '03', Icon: Tv, title: 'Watch It Play Out', desc: 'Live scores all four rounds.' },
+              { step: '04', Icon: Trophy, title: 'Collect the Glory', desc: 'Winner takes pot & bragging rights.' },
             ].map((item, i) => (
               <div
                 key={i}
-                className="animate-fade-in-up flex items-start gap-4 p-4 relative"
-                style={{ animationDelay: `${i * 80}ms` }}
+                className="animate-fade-in-up bg-card rounded-xl p-3.5 border border-border hover:border-primary/30 hover:shadow-sm transition-all"
+                style={{ animationDelay: `${i * 60}ms` }}
               >
-                {/* Connector line */}
-                {i < 3 && (
-                  <div className="absolute left-[27px] top-[52px] w-px h-[calc(100%-32px)] bg-border" aria-hidden="true" />
-                )}
-                <div className="w-[22px] h-[22px] rounded-full bg-accent/15 border-2 border-accent flex items-center justify-center flex-shrink-0 mt-0.5 relative z-10">
-                  <span className="text-[8px] font-black text-accent">{item.step}</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                     <item.Icon className="w-4 h-4 text-primary" aria-hidden="true" />
-                    <h4 className="font-bold text-foreground text-sm">{item.title}</h4>
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+                  <span className="text-[9px] font-black text-accent tracking-widest">{item.step}</span>
                 </div>
+                <h4 className="font-bold text-foreground text-sm mb-0.5">{item.title}</h4>
+                <p className="text-[11px] text-muted-foreground leading-snug">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -238,23 +263,25 @@ export default function Home() {
             <Flag className="w-4 h-4 text-accent" />
             <h3 className="text-xs font-black text-foreground tracking-[0.15em] uppercase">Built for This</h3>
           </div>
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="bg-card rounded-xl border border-border overflow-hidden">
             {[
-              { Icon: Shuffle, title: 'Hat Draw', desc: 'Randomized & recorded', gradient: 'from-primary to-secondary', iconColor: 'text-accent' },
-              { Icon: Tv, title: 'Live Scores', desc: 'Real-time leaderboard', gradient: 'from-red-700 to-red-900', iconColor: 'text-red-200' },
-              { Icon: MessageCircle, title: 'Smack Talk', desc: 'Group chat & DMs', gradient: 'from-accent to-amber-700', iconColor: 'text-white' },
-              { Icon: Flag, title: 'Full Field', desc: 'Top & Bottom Tier', gradient: 'from-emerald-700 to-emerald-900', iconColor: 'text-emerald-200' },
-            ].map((f, i) => (
+              { Icon: Shuffle, title: 'Hat Draw', desc: 'Randomized & recorded draw ceremony' },
+              { Icon: Tv, title: 'Live Scores', desc: 'Real-time leaderboard all four rounds' },
+              { Icon: MessageCircle, title: 'Smack Talk', desc: 'Group chat & direct messages' },
+              { Icon: Flag, title: 'Full Field', desc: 'Top Tier & Bottom Tier golfer pairings' },
+            ].map((f, i, arr) => (
               <div
                 key={i}
-                className="animate-fade-in-up bg-card rounded-xl p-4 border border-border hover:border-primary/30 hover:shadow-md transition-all group"
+                className={`animate-fade-in-up flex items-center gap-3.5 px-4 py-3.5 ${i < arr.length - 1 ? 'border-b border-border' : ''}`}
                 style={{ animationDelay: `${i * 60}ms` }}
               >
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${f.gradient} flex items-center justify-center mb-3 shadow-md group-hover:scale-110 transition-transform`}>
-                  <f.Icon className={`w-5 h-5 ${f.iconColor}`} aria-hidden="true" />
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <f.Icon className="w-4.5 h-4.5 text-primary" aria-hidden="true" />
                 </div>
-                <h4 className="font-bold text-foreground text-sm mb-0.5">{f.title}</h4>
-                <p className="text-[11px] text-muted-foreground leading-snug">{f.desc}</p>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-bold text-foreground text-sm">{f.title}</h4>
+                  <p className="text-[11px] text-muted-foreground leading-snug">{f.desc}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -356,13 +383,17 @@ export default function Home() {
               <Input
                 placeholder="e.g., COW26"
                 value={inviteCode}
-                onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                onChange={(e) => { setInviteCode(e.target.value.toUpperCase()); setJoinError(''); }}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleJoinPool(); }}
                 className="border-border font-mono text-lg tracking-widest text-center"
                 maxLength="6"
               />
             </div>
+            {joinError && (
+              <p className="text-sm text-destructive text-center animate-fade-in-up">{joinError}</p>
+            )}
             <div className="pt-2 flex gap-2">
-              <Button variant="outline" onClick={() => setShowJoinPool(false)} className="flex-1">Cancel</Button>
+              <Button variant="outline" onClick={() => { setShowJoinPool(false); setJoinError(''); }} className="flex-1">Cancel</Button>
               <Button onClick={handleJoinPool} className="flex-1 bg-primary hover:bg-primary/90 text-white">Join Pool</Button>
             </div>
           </div>

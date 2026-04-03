@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trophy } from 'lucide-react';
+import { Trophy, Calendar, Hash, TrendingUp } from 'lucide-react';
 import { POOL_HISTORY } from '@/lib/poolHistoryData';
 
 const HISTORY = {};
@@ -18,9 +18,16 @@ const scoreColor = (s) => {
 export default function HistoryTab() {
   return (
     <div className="px-3 pt-3 pb-0 space-y-3">
-      <h2 className="text-2xl font-bold text-foreground text-center mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
-        Champions Wall
-      </h2>
+      <div className="bg-gradient-to-br from-[#0a3d0a] to-primary rounded-xl p-4 border border-accent/30 text-center relative overflow-hidden mb-4">
+        <div className="absolute inset-0 animate-shimmer pointer-events-none opacity-30" />
+        <div className="relative">
+          <Trophy className="w-8 h-8 text-accent mx-auto mb-2" />
+          <h2 className="text-2xl font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
+            Champions Wall
+          </h2>
+          <p className="text-[10px] tracking-widest text-accent uppercase font-semibold mt-1">Past Victors</p>
+        </div>
+      </div>
 
       {Object.entries(HISTORY)
         .sort((a, b) => b[0] - a[0])
@@ -52,16 +59,17 @@ export default function HistoryTab() {
       {/* Pool Stats */}
       <div className="bg-gradient-to-br from-secondary to-primary rounded-xl p-4 border border-accent/30 mt-6">
         <h3 className="text-lg font-bold text-primary-foreground mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
-          📊 Pool Stats
+          Pool Legacy
         </h3>
         <div className="grid grid-cols-2 gap-3">
           {[
-            { label: 'Years Running', value: '5+' },
-            { label: 'Total Entries', value: '130' },
-            { label: 'Best Score', value: '-15' },
-            { label: 'Avg Pool Size', value: '26' },
+            { label: 'Years Running', value: '5+', Icon: Calendar },
+            { label: 'Total Entries', value: '130', Icon: Hash },
+            { label: 'Best Score', value: '-15', Icon: TrendingUp },
+            { label: 'Avg Pool Size', value: '26', Icon: Trophy },
           ].map((s) => (
             <div key={s.label} className="bg-white/10 rounded-lg p-3 text-center border border-white/10">
+              <s.Icon className="w-4 h-4 text-accent mx-auto mb-1" />
               <div className="text-2xl font-black text-primary-foreground">{s.value}</div>
               <div className="text-xs text-accent tracking-widest font-semibold mt-1">{s.label.toUpperCase()}</div>
             </div>

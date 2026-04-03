@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
-import { Users } from 'lucide-react';
+import { Users, Star } from 'lucide-react';
+import { useParticipant } from '@/lib/ParticipantContext';
 import GolferDetailModal from '@/components/pool/GolferDetailModal';
 import { formatScore, scoreColor, parseTeamEmails } from '@/lib/scoreUtils';
 
@@ -26,7 +27,7 @@ function GolferCard({ golfer, group, onTap }) {
     >
       <div className="flex items-center justify-between mb-1">
         <span className={`text-xs font-bold tracking-widest ${group === 'A' ? 'text-primary' : 'text-accent'}`}>
-          GRP {group}
+          {group === 'A' ? 'TOP' : 'BTM'}
         </span>
         {golfer.position && (
           <span className="text-xs font-semibold text-muted-foreground">Pos: {golfer.position}</span>
@@ -57,12 +58,12 @@ function GolferCard({ golfer, group, onTap }) {
   );
 }
 
-function TeamCard({ entry, golferA, golferB, rank, onGolferTap }) {
+function TeamCard({ entry, golferA, golferB, rank, onGolferTap, isMyTeam }) {
   const totalScore = (golferA?.score_to_par || 0) + (golferB?.score_to_par || 0);
 
   return (
     <div className={`rounded-xl border shadow-sm overflow-hidden transition-all ${
-      rank === 1 ? 'border-accent/40 bg-accent/5 shadow-accent/20 shadow-md' : rank <= 3 ? 'border-primary/20 bg-primary/5' : 'border-primary/10 bg-card hover:shadow-md'
+      isMyTeam ? 'border-accent/40 bg-accent/5 ring-1 ring-accent/20 shadow-md' : rank === 1 ? 'border-accent/40 bg-accent/5 shadow-accent/20 shadow-md' : rank <= 3 ? 'border-primary/20 bg-primary/5' : 'border-primary/10 bg-card hover:shadow-md'
     }`}>
       {/* Team Header */}
       <div className={`flex items-center justify-between px-4 py-3 ${
@@ -70,10 +71,11 @@ function TeamCard({ entry, golferA, golferB, rank, onGolferTap }) {
       }`}>
         <div className="flex items-center gap-2">
           <span className={`font-black text-lg ${rank === 1 ? 'text-accent' : rank <= 3 ? 'text-primary' : 'text-muted-foreground'}`}>
-            {rank === 1 ? '🏆' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`}
+            #{rank}
           </span>
           <div>
-            <p className={`font-bold ${rank === 1 ? 'text-primary-foreground text-lg' : 'text-foreground'}`}>
+            <p className={`font-bold flex items-center gap-1.5 ${rank === 1 ? 'text-primary-foreground text-lg' : 'text-foreground'}`}>
+              {isMyTeam && <Star className="w-3.5 h-3.5 text-accent flex-shrink-0" />}
               {entry.team_name || entry.participant_name}
             </p>
             {entry.team_name && (
@@ -108,6 +110,7 @@ function TeamCard({ entry, golferA, golferB, rank, onGolferTap }) {
 
 export default function TeamsTab({ poolId }) {
   const [selectedGolfer, setSelectedGolfer] = useState(null);
+  const { isLoggedIn, participant } = useParticipant();
   const { data: entries = [], isLoading: loadingEntries } = useQuery({
     queryKey: ['poolEntries', poolId],
     queryFn: () => base44.entities.PoolEntry.filter({ pool_id: poolId }),
@@ -164,9 +167,10 @@ export default function TeamsTab({ poolId }) {
       </div>
 
       {teams.length === 0 && (
-        <div className="text-center py-8 text-muted-foreground">
-          <p className="text-lg mb-1">No teams yet</p>
-          <p className="text-sm">Participants need to draft golfers first</p>
+        <div className="text-center py-10">
+          <Users className="w-10 h-10 text-muted-foreground/20 mx-auto mb-3" />
+          <p className="text-sm font-semibold text-muted-foreground">No teams yet</p>
+          <p className="text-xs text-muted-foreground mt-1">Run the hat draw to assign golfers</p>
         </div>
       )}
 
@@ -178,6 +182,7 @@ export default function TeamsTab({ poolId }) {
             golferB={team.golferB}
             rank={i + 1}
             onGolferTap={setSelectedGolfer}
+            isMyTeam={isLoggedIn && team.entry.id === participant?.entry_id}
           />
         </div>
       ))}

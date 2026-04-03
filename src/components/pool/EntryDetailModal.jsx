@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { formatScore, scoreColor } from '@/lib/scoreUtils';
 import GolferDetailModal from '@/components/pool/GolferDetailModal';
+import { Share2 } from 'lucide-react';
 
 export default function EntryDetailModal({ entry, open, onOpenChange, rank, totalEntries }) {
   const [selectedGolfer, setSelectedGolfer] = useState(null);
@@ -11,13 +12,13 @@ export default function EntryDetailModal({ entry, open, onOpenChange, rank, tota
   const golferB = entry.golferB;
 
   const GolferCard = ({ golfer, group }) => {
-    if (!golfer) return <div className="flex-1 bg-muted/50 rounded-lg p-3 border border-dashed text-center text-xs text-muted-foreground">No Group {group} golfer</div>;
+  if (!golfer) return <div className="flex-1 bg-muted/50 rounded-lg p-3 border border-dashed text-center text-xs text-muted-foreground">No {group === 'A' ? 'Top Tier' : 'Btm Tier'} golfer</div>;
 
     const rounds = [golfer.round_1, golfer.round_2, golfer.round_3, golfer.round_4];
 
     return (
       <div
-        className="flex-1 bg-card rounded-lg p-3 border border-primary/20 cursor-pointer hover:border-accent/40 hover:shadow-md transition-all active:scale-[0.98]"
+        className={`flex-1 bg-card rounded-lg p-3 cursor-pointer hover:border-accent/40 hover:shadow-md transition-all active:scale-[0.98] ${group === 'A' ? 'border-l-[3px] border-l-primary border border-primary/20' : 'border-l-[3px] border-l-accent border border-accent/20'}`}
         onClick={() => setSelectedGolfer(golfer)}
         role="button"
         tabIndex={0}
@@ -48,34 +49,46 @@ export default function EntryDetailModal({ entry, open, onOpenChange, rank, tota
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card rounded-2xl max-w-sm w-full max-h-[85vh] overflow-y-auto">
-        <div className="space-y-4 pt-4">
-          {/* Rank Badge */}
-          <div className="text-center">
-            <div className="inline-flex items-center gap-2 bg-accent/10 px-4 py-2 rounded-full border border-accent/30 mb-3">
-              <span className="text-xs font-bold tracking-widest text-accent">
-                {rank === 1 ? '🏆' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '🏌️'} #{rank || '?'} OF {totalEntries || '?'}
-              </span>
+      <DialogContent className="bg-card rounded-2xl max-w-sm w-full max-h-[85vh] overflow-y-auto p-0">
+        <div className="space-y-4">
+          {/* Hero Header */}
+          <div className="bg-gradient-to-br from-[#0a3d0a] to-primary rounded-t-2xl p-5 text-center relative overflow-hidden">
+            <div className="absolute inset-0 animate-shimmer pointer-events-none opacity-20" />
+            <div className="relative">
+              <div className="inline-flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full border border-white/15 mb-3">
+                <span className="text-[10px] font-bold tracking-widest text-accent">
+                  #{rank || '?'} OF {totalEntries || '?'}
+                </span>
+              </div>
+              <h2 className="text-2xl font-bold text-primary-foreground mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+                {entry.team_name || entry.participant_name}
+              </h2>
+              {entry.team_name && (
+                <p className="text-xs text-primary-foreground/60 mb-2">{entry.participant_name}</p>
+              )}
+              <div className={`text-4xl font-black ${entry.total_score < 0 ? 'text-red-400' : entry.total_score > 0 ? 'text-primary-foreground' : 'text-accent'}`}>{formatScore(entry.total_score)}</div>
+              <p className="text-[10px] text-primary-foreground/50 mt-1">Combined Score to Par</p>
+              <button
+                onClick={() => {
+                  const text = `${entry.team_name || entry.participant_name} is #${rank} with ${formatScore(entry.total_score)} in Cowtown Masters!`;
+                  navigator.share ? navigator.share({ title: 'Cowtown Masters', text }) : navigator.clipboard.writeText(text);
+                }}
+                className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-bold text-accent bg-white/10 px-3 py-1.5 rounded-full border border-white/15 hover:bg-white/20 transition"
+              >
+                <Share2 className="w-3 h-3" /> Share Standing
+              </button>
             </div>
-            <h2 className="text-2xl font-bold text-foreground mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-              {entry.participant_name}
-            </h2>
-            {entry.team_name && (
-              <p className="text-xs text-muted-foreground mb-1">{entry.team_name}</p>
-            )}
-            <div className={`text-4xl font-black ${scoreColor(entry.total_score)}`}>{formatScore(entry.total_score)}</div>
-            <p className="text-xs text-muted-foreground mt-1">Combined Score to Par</p>
           </div>
 
           {/* Golfer Cards */}
-          <div className="flex gap-3">
+          <div className="flex gap-3 px-4">
             <GolferCard golfer={golferA} group="A" />
             <GolferCard golfer={golferB} group="B" />
           </div>
 
           {/* Round by Round Combined */}
           {golferA && golferB && (
-            <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
+            <div className="bg-primary/5 rounded-lg p-3 border border-primary/20 mx-4 mb-4">
               <p className="text-xs font-bold text-primary tracking-widest uppercase mb-3">Round-by-Round Combined</p>
               <div className="grid grid-cols-4 gap-2">
                 {[0, 1, 2, 3].map((i) => {

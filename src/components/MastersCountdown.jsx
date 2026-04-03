@@ -26,7 +26,7 @@ export default function MastersCountdown() {
     return (
       <div className="animate-fade-in-up bg-black/30 backdrop-blur-md rounded-2xl border border-accent/30 px-5 py-3">
         <p className="text-sm font-black text-accent tracking-widest uppercase text-center">
-          ⛳ The Masters is Underway!
+          The Masters is Underway!
         </p>
       </div>
     );
@@ -44,13 +44,13 @@ export default function MastersCountdown() {
       <p className="text-[10px] tracking-[0.3em] text-accent/80 font-bold uppercase text-center mb-2">
         Countdown to the Masters
       </p>
-      <div className="flex items-center justify-center gap-2">
+      <div className="flex items-center justify-center gap-1.5">
         {units.map((u, i) => (
           <React.Fragment key={u.label}>
-            {i > 0 && <span className="text-accent/40 font-black text-lg mb-3">:</span>}
+            {i > 0 && <span className="text-accent/40 font-black text-base mb-3">:</span>}
             <div className="flex flex-col items-center">
-              <div className="bg-black/40 backdrop-blur-md rounded-xl border border-accent/20 w-16 h-16 flex items-center justify-center shadow-lg">
-                <span className="text-2xl font-black text-primary-foreground tabular-nums">
+              <div className="bg-black/40 backdrop-blur-md rounded-xl border border-accent/20 w-14 h-14 flex items-center justify-center shadow-lg">
+                <span className="text-xl font-black text-primary-foreground tabular-nums">
                   {String(u.value).padStart(2, '0')}
                 </span>
               </div>

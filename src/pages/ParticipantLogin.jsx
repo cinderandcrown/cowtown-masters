@@ -165,11 +165,11 @@ export default function ParticipantLogin() {
       </div>
 
       {/* Logo */}
-      <div className="text-center mb-8">
+      <div className="text-center mb-6">
         <img
           src="https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/1752bc3ba_CowtownMastersLogo.png"
           alt="Cowtown Masters"
-          className="w-20 h-20 mx-auto mb-3 object-contain"
+          className="w-16 h-16 mx-auto mb-3 object-contain"
         />
         <h1 className="text-2xl font-bold text-primary" style={{ fontFamily: "'Playfair Display', serif" }}>
           {step === 'email' ? 'Sign In' : step === 'register' ? 'Create Password' : 'Welcome Back'}
@@ -187,7 +187,7 @@ export default function ParticipantLogin() {
       <div className="w-full max-w-sm">
         {/* Step 1: Email Entry */}
         {step === 'email' && (
-          <form onSubmit={handleEmailSubmit} className="space-y-4">
+          <form onSubmit={handleEmailSubmit} className="space-y-3">
             <div className="bg-card rounded-xl border border-primary/10 p-4 space-y-3">
               <div>
                 <label className="text-xs font-semibold text-muted-foreground mb-1 block">Email Address</label>
@@ -221,7 +221,7 @@ export default function ParticipantLogin() {
 
         {/* Step 2: Register (first time — set password) */}
         {step === 'register' && (
-          <form onSubmit={handleRegister} className="space-y-4">
+          <form onSubmit={handleRegister} className="space-y-3">
             <div className="bg-accent/10 rounded-xl border border-accent/30 p-3 flex items-center gap-2 animate-fade-in-up">
               <CheckCircle className="w-5 h-5 text-accent flex-shrink-0" />
               <div>
@@ -279,7 +279,7 @@ export default function ParticipantLogin() {
 
         {/* Step 3: Login (returning user — enter password) */}
         {step === 'login' && (
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-3">
             <div className="bg-accent/10 rounded-xl border border-accent/30 p-3 flex items-center gap-2 animate-fade-in-up">
               <CheckCircle className="w-5 h-5 text-accent flex-shrink-0" />
               <div>

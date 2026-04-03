@@ -5,6 +5,8 @@ import { base44 } from '@/api/base44Client';
 import { assignGroups } from '@/lib/groupUtils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatScore, scoreColor } from '@/lib/scoreUtils';
+import { Flag, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 function GolfersSkeleton() {
   return (
@@ -40,6 +42,7 @@ function GolfersSkeleton() {
 
 export default function GolfersTab({ poolId }) {
   const [filter, setFilter] = useState('all');
+  const [search, setSearch] = useState('');
   const [selectedGolfer, setSelectedGolfer] = useState(null);
 
   const { data: rawGolfers = [], isLoading } = useQuery({
@@ -58,6 +61,7 @@ export default function GolfersTab({ poolId }) {
 
   const sorted = golfers
     .filter((g) => filter === 'all' || g.group === filter)
+    .filter((g) => !search || g.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => (a.score_to_par || 0) - (b.score_to_par || 0));
 
   if (isLoading) {
@@ -77,18 +81,34 @@ export default function GolfersTab({ poolId }) {
     <div className="px-3 pt-3 pb-0">
       {/* TV-style header */}
       <div className="bg-gradient-to-r from-primary to-secondary rounded-t-xl px-3 py-2 flex items-center justify-between">
-        <span className="text-sm font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
-          ⛳ Tournament Leaderboard
-        </span>
+        <div className="flex items-center gap-2">
+          <Flag className="w-4 h-4 text-accent" />
+          <span className="text-sm font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
+            Tournament Field
+          </span>
+        </div>
         <span className="text-[10px] text-accent font-semibold">{sorted.length} GOLFERS</span>
+      </div>
+
+      {/* Search */}
+      <div className="bg-card border-x border-primary/10 px-3 py-2">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+          <Input
+            placeholder="Search golfers..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-8 pl-8 text-xs bg-muted/30 border-0"
+          />
+        </div>
       </div>
 
       {/* Filter pills */}
       <div className="flex gap-2 bg-card border-x border-primary/10 px-3 py-2">
         {[
           { value: 'all', label: 'All' },
-          { value: 'A', label: 'Group A' },
-          { value: 'B', label: 'Group B' },
+          { value: 'A', label: 'Top Tier' },
+          { value: 'B', label: 'Bottom Tier' },
         ].map((f) => (
           <button
             key={f.value}
@@ -118,7 +138,10 @@ export default function GolfersTab({ poolId }) {
       {/* Golfer rows */}
       <div className="bg-card rounded-b-xl border-x border-b border-primary/10 overflow-hidden">
         {withPosition.length === 0 && (
-          <div className="py-8 text-center text-muted-foreground text-sm">No golfers found</div>
+          <div className="py-10 text-center">
+            <Flag className="w-10 h-10 text-muted-foreground/20 mx-auto mb-3" />
+            <p className="text-sm font-semibold text-muted-foreground">No golfers found</p>
+          </div>
         )}
         {withPosition.map((g, i) => {
           const isCut = g.status === 'cut';
@@ -152,7 +175,7 @@ export default function GolfersTab({ poolId }) {
                 <p className={`text-xs font-semibold text-foreground truncate ${isCut || isWD ? 'line-through' : ''}`}>{g.name}</p>
                 <div className="flex items-center gap-1">
                   <span className={`text-[9px] font-bold tracking-wider ${g.group === 'A' ? 'text-primary' : 'text-accent'}`}>
-                    GRP {g.group}
+                    {g.group === 'A' ? 'TOP' : 'BTM'}
                   </span>
                   {g.betting_odds && <span className="text-[9px] text-muted-foreground">{g.betting_odds}</span>}
                 </div>

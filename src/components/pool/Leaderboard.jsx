@@ -2,8 +2,10 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { base44 } from '@/api/base44Client';
-import { Trophy, RefreshCw } from 'lucide-react';
+import { Trophy, RefreshCw, Star, Share2, Download } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useParticipant } from '@/lib/ParticipantContext';
+import { Button } from '@/components/ui/button';
 import { formatScore, scoreColor, enrichEntries, assignPositions } from '@/lib/scoreUtils';
 
 function LeaderboardSkeleton() {
@@ -50,6 +52,8 @@ function LeaderboardSkeleton() {
 }
 
 export default function Leaderboard({ poolId, onSelectEntry }) {
+  const { isLoggedIn, participant } = useParticipant();
+
   const { data: pool } = useQuery({
     queryKey: ['pool', poolId],
     queryFn: () => base44.entities.Pool.filter({ id: poolId }),
@@ -77,6 +81,33 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
   }
 
   const standings = assignPositions(enrichEntries(entries, golfers));
+
+  const myEntry = isLoggedIn ? standings.find(s => s.id === participant?.entry_id) : null;
+
+  const handleShare = async () => {
+    if (!myEntry) return;
+    const text = `I'm #${myEntry.displayRank} in the Cowtown Masters pool with ${formatScore(myEntry.total_score)}!`;
+    if (navigator.share) {
+      navigator.share({ title: 'Cowtown Masters', text });
+    } else {
+      await navigator.clipboard.writeText(text);
+    }
+  };
+
+  const handleExport = () => {
+    const header = 'Rank,Player,Team,Golfer A,Score A,Golfer B,Score B,Total';
+    const rows = standings.map(s => 
+      `${s.displayRank},"${s.participant_name}","${s.team_name || ''}","${s.golferA?.name || 'TBD'}",${s.score_a},"${s.golferB?.name || 'TBD'}",${s.score_b},${s.total_score}`
+    );
+    const csv = [header, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'cowtown-masters-standings.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   // Prize pot calculation
   const entryFee = pool?.entry_fee || 0;
@@ -112,6 +143,21 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
         </div>
       )}
 
+      {/* Your Entry Quick Card */}
+      {myEntry && (
+        <div className="animate-fade-in-up flex items-center gap-3 bg-accent/8 rounded-xl px-3 py-2.5 mb-3 border border-accent/25">
+          <Star className="w-4 h-4 text-accent flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-foreground truncate">{myEntry.team_name || myEntry.participant_name}</p>
+            <p className="text-[10px] text-muted-foreground">#{myEntry.displayRank} of {standings.length}</p>
+          </div>
+          <span className={`text-lg font-black tabular-nums ${scoreColor(myEntry.total_score)}`}>{formatScore(myEntry.total_score)}</span>
+          <button onClick={handleShare} className="p-1.5 hover:bg-accent/10 rounded-lg transition" aria-label="Share standing">
+            <Share2 className="w-3.5 h-3.5 text-accent" />
+          </button>
+        </div>
+      )}
+
       {/* Leader Hero */}
       {standings.length > 0 && (
         <div className="animate-fade-in-up bg-gradient-to-br from-secondary to-primary rounded-xl p-4 mb-4 border border-accent/30 shadow-lg shadow-primary/20 relative overflow-hidden">
@@ -133,12 +179,12 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
           </div>
           <div className="grid grid-cols-2 gap-2 relative">
             <div className="bg-white/10 rounded-lg p-2 border border-white/10">
-              <p className="text-[10px] font-bold text-accent tracking-widest">GROUP A</p>
+              <p className="text-[10px] font-bold text-accent tracking-widest">TOP TIER</p>
               <p className="text-sm font-semibold text-primary-foreground truncate">{standings[0].golferA?.name || 'TBD'}</p>
               <p className={`text-lg font-bold tabular-nums ${standings[0].score_a < 0 ? 'text-red-400' : 'text-primary-foreground'}`}>{formatScore(standings[0].score_a)}</p>
             </div>
             <div className="bg-white/10 rounded-lg p-2 border border-white/10">
-              <p className="text-[10px] font-bold text-accent tracking-widest">GROUP B</p>
+              <p className="text-[10px] font-bold text-accent tracking-widest">BTM TIER</p>
               <p className="text-sm font-semibold text-primary-foreground truncate">{standings[0].golferB?.name || 'TBD'}</p>
               <p className={`text-lg font-bold tabular-nums ${standings[0].score_b < 0 ? 'text-red-400' : 'text-primary-foreground'}`}>{formatScore(standings[0].score_b)}</p>
             </div>
@@ -152,7 +198,12 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
           <span className="text-sm font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
             Pool Standings
           </span>
-          <span className="text-[10px] text-accent font-semibold">{standings.length} ENTRIES</span>
+          <div className="flex items-center gap-2">
+            <button onClick={handleExport} className="p-1 hover:bg-white/10 rounded transition" aria-label="Export CSV">
+              <Download className="w-3.5 h-3.5 text-accent" />
+            </button>
+            <span className="text-[10px] text-accent font-semibold">{standings.length} ENTRIES</span>
+          </div>
         </div>
 
         {/* Header */}
@@ -166,9 +217,10 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
 
         {/* Rows */}
         {standings.length === 0 && (
-          <div className="py-8 text-center text-muted-foreground text-sm">
-            <p>No entries yet</p>
-            <p className="text-xs mt-1">Add participants in the Admin panel</p>
+          <div className="py-10 text-center">
+            <Trophy className="w-10 h-10 text-muted-foreground/20 mx-auto mb-3" />
+            <p className="text-sm font-semibold text-muted-foreground">No entries yet</p>
+            <p className="text-xs text-muted-foreground mt-1">Add participants in the Admin panel</p>
           </div>
         )}
 
@@ -184,7 +236,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelectEntry({ ...entry, _rank: entry.rank, _totalEntries: standings.length }); } }}
               aria-label={`View details for ${entry.team_name || entry.participant_name}, position ${entry.displayRank}`}
               className={`animate-fade-in-up grid grid-cols-[36px_1fr_56px_56px_52px] gap-1 px-3 py-2 border-b border-primary/5 cursor-pointer hover:bg-accent/5 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-inset focus:ring-accent ${
-                entry.rank === 1 ? 'bg-accent/10' : entry.rank <= 3 ? 'bg-primary/5' : ''
+                myEntry?.id === entry.id ? 'bg-accent/8 border-l-2 border-l-accent' : entry.rank === 1 ? 'bg-accent/10' : entry.rank <= 3 ? 'bg-primary/5' : ''
               }`}
               style={{ animationDelay: `${Math.min(i * 50, 500)}ms` }}
             >
@@ -201,6 +253,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
               )}
               <div className="min-w-0">
                 <div className="flex items-center gap-1">
+                  {myEntry?.id === entry.id && <Star className="w-3 h-3 text-accent flex-shrink-0" />}
                   <span className="text-sm font-semibold text-foreground truncate">
                     {entry.team_name || entry.participant_name}
                   </span>

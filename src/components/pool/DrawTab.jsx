@@ -5,7 +5,7 @@ import { assignGroups } from '@/lib/groupUtils';
 import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Shuffle, PenLine, Check, RotateCcw, Lock, ShieldAlert } from 'lucide-react';
+import { Shuffle, PenLine, Check, RotateCcw, Lock, ShieldAlert, Trophy } from 'lucide-react';
 
 function shuffle(arr) {
   const a = [...arr];
@@ -244,11 +244,15 @@ export default function DrawTab({ poolId }) {
   return (
     <div className="px-3 pt-3 pb-0">
       {/* Header */}
-      <div className="bg-gradient-to-br from-secondary to-primary rounded-xl p-4 mb-4 border border-accent/30 text-center">
-        <h2 className="text-2xl font-bold text-primary-foreground mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-          The Hat Draw
-        </h2>
-        <p className="text-xs tracking-widest text-accent uppercase font-semibold">Golfer Assignment</p>
+      <div className="bg-gradient-to-br from-[#0a3d0a] to-primary rounded-xl p-4 mb-4 border border-accent/30 text-center relative overflow-hidden">
+        <div className="absolute inset-0 animate-shimmer pointer-events-none opacity-30" />
+        <div className="relative flex items-center justify-center gap-2 mb-1">
+          <Shuffle className="w-5 h-5 text-accent" />
+          <h2 className="text-2xl font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
+            The Hat Draw
+          </h2>
+        </div>
+        <p className="text-xs tracking-widest text-accent uppercase font-semibold relative">Golfer Assignment</p>
       </div>
 
       {/* Already Drawn State */}
@@ -301,11 +305,11 @@ export default function DrawTab({ poolId }) {
           <p className="text-sm text-muted-foreground">The pool admin will run the draw. Check back soon!</p>
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-primary/10 rounded-lg p-3 border border-primary/20">
-              <p className="text-xs font-bold text-primary tracking-widest uppercase mb-1">GROUP A</p>
+              <p className="text-xs font-bold text-primary tracking-widest uppercase mb-1">TOP TIER</p>
               <p className="text-2xl font-black text-primary">{groupA.length}</p>
             </div>
             <div className="bg-accent/10 rounded-lg p-3 border border-accent/20">
-              <p className="text-xs font-bold text-accent tracking-widest uppercase mb-1">GROUP B</p>
+              <p className="text-xs font-bold text-accent tracking-widest uppercase mb-1">BTM TIER</p>
               <p className="text-2xl font-black text-accent">{groupB.length}</p>
             </div>
           </div>
@@ -352,14 +356,14 @@ export default function DrawTab({ poolId }) {
             <div className="bg-card rounded-xl p-6 border border-primary/10 text-center space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-primary/10 rounded-lg p-3 border border-primary/20">
-                  <p className="text-xs font-bold text-primary tracking-widest uppercase mb-1">GROUP A</p>
+                  <p className="text-xs font-bold text-primary tracking-widest uppercase mb-1">TOP TIER</p>
                   <p className="text-2xl font-black text-primary">{groupA.length}</p>
-                  <p className="text-xs text-muted-foreground">Top Tier</p>
+                  <p className="text-xs text-muted-foreground">Favorites</p>
                 </div>
                 <div className="bg-accent/10 rounded-lg p-3 border border-accent/20">
-                  <p className="text-xs font-bold text-accent tracking-widest uppercase mb-1">GROUP B</p>
+                  <p className="text-xs font-bold text-accent tracking-widest uppercase mb-1">BTM TIER</p>
                   <p className="text-2xl font-black text-accent">{groupB.length}</p>
-                  <p className="text-xs text-muted-foreground">Bottom Tier</p>
+                  <p className="text-xs text-muted-foreground">Longshots</p>
                 </div>
               </div>
 
@@ -424,7 +428,7 @@ export default function DrawTab({ poolId }) {
                     <div className="p-3 space-y-2">
                       <div>
                         <label className="text-[10px] font-bold text-primary tracking-widest uppercase mb-1 block">
-                          GROUP A — Top Tier
+                          TOP TIER
                         </label>
                         <Select
                           value={pick.golferAId || ''}
@@ -446,7 +450,7 @@ export default function DrawTab({ poolId }) {
 
                       <div>
                         <label className="text-[10px] font-bold text-accent tracking-widest uppercase mb-1 block">
-                          GROUP B — Bottom Tier
+                          BTM TIER
                         </label>
                         <Select
                           value={pick.golferBId || ''}
@@ -501,7 +505,7 @@ export default function DrawTab({ poolId }) {
       {phase === 'animating' && (
         <div className="text-center space-y-4">
           <div className="w-48 h-48 mx-auto rounded-full bg-gradient-to-br from-secondary to-primary border-4 border-accent/50 shadow-2xl flex flex-col items-center justify-center">
-            <span className="text-5xl mb-1">🎩</span>
+            <Shuffle className="w-12 h-12 text-accent mb-1 animate-pulse" />
             {currentFlash && (
               <div className="text-xs text-primary-foreground font-semibold px-4 text-center animate-pulse">
                 <p className="text-accent">{currentFlash.a}</p>
@@ -530,13 +534,13 @@ export default function DrawTab({ poolId }) {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2 p-3">
-                <div className="bg-primary/10 rounded-lg p-2 border border-primary/20">
-                  <p className="text-xs font-bold text-primary tracking-widest">GRP A</p>
-                  <p className="text-sm font-bold text-foreground">{pair.golferA.name}</p>
-                  <p className="text-xs text-muted-foreground">{pair.golferA.betting_odds || ''}</p>
-                </div>
+              <div className="bg-primary/10 rounded-lg p-2 border border-primary/20">
+                <p className="text-xs font-bold text-primary tracking-widest">TOP TIER</p>
+                <p className="text-sm font-bold text-foreground">{pair.golferA.name}</p>
+                <p className="text-xs text-muted-foreground">{pair.golferA.betting_odds || ''}</p>
+              </div>
                 <div className="bg-accent/10 rounded-lg p-2 border border-accent/20">
-                  <p className="text-xs font-bold text-accent tracking-widest">GRP B</p>
+                  <p className="text-xs font-bold text-accent tracking-widest">BTM TIER</p>
                   <p className="text-sm font-bold text-foreground">{pair.golferB.name}</p>
                   <p className="text-xs text-muted-foreground">{pair.golferB.betting_odds || ''}</p>
                 </div>
@@ -558,7 +562,7 @@ export default function DrawTab({ poolId }) {
       {/* Complete Phase */}
       {phase === 'complete' && (
         <div className="bg-card rounded-xl p-6 border border-primary/10 text-center space-y-4">
-          <div className="text-6xl">🎉</div>
+          <Trophy className="w-12 h-12 text-accent mx-auto" />
           <h3 className="text-2xl font-bold text-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
             Draw Complete!
           </h3>

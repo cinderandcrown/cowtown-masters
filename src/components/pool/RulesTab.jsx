@@ -65,8 +65,9 @@ const RULES = [
     Icon: Trophy,
     title: 'Payout',
     items: [
-      '1st Place: 90% of final pot',
-      '2nd Place: 10% of final pot',
+      '1st Place: 60% of final pot',
+      '2nd Place: 25% of final pot',
+      '3rd Place: 15% of final pot',
     ],
   },
 ];
@@ -84,7 +85,7 @@ export default function RulesTab() {
       {RULES.map((rule, i) => (
         <div
           key={i}
-          className="animate-fade-in-up bg-card rounded-xl p-4 border border-border hover:border-primary/30 hover:shadow-sm transition"
+          className={`animate-fade-in-up rounded-xl p-4 border hover:shadow-sm transition ${i % 3 === 0 ? 'bg-primary/8 border-primary/15' : i % 3 === 1 ? 'bg-muted/30 border-border' : 'bg-accent/8 border-accent/15'}`}
           style={{ animationDelay: `${i * 60}ms` }}
         >
           <div className="flex items-center gap-2.5 mb-2">
