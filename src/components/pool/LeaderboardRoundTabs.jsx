@@ -9,9 +9,11 @@ const ROUNDS = [
 ];
 
 export default function LeaderboardRoundTabs({ activeRound, onRoundChange }) {
-  // Determine current active round based on day of week (Thu=R1, Fri=R2, Sat=R3, Sun=R4)
-  const day = new Date().getDay();
-  const liveRound = day === 4 ? 'r1' : day === 5 ? 'r2' : day === 6 ? 'r3' : day === 0 ? 'r4' : null;
+  // Determine current live round based on 2026 Masters dates
+  // R1: Apr 9, R2: Apr 10, R3: Apr 11, R4: Apr 12
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const liveRound = dateStr === '2026-04-09' ? 'r1' : dateStr === '2026-04-10' ? 'r2' : dateStr === '2026-04-11' ? 'r3' : dateStr === '2026-04-12' ? 'r4' : null;
 
   return (
     <div className="flex gap-1 bg-primary/5 rounded-lg p-1 border border-primary/10">
