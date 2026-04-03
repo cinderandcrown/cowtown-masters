@@ -3,6 +3,31 @@ import { useQuery } from '@tanstack/react-query';
 
 import { base44 } from '@/api/base44Client';
 import { Trophy, RefreshCw, Star, Share2, Download, TrendingUp, TrendingDown } from 'lucide-react';
+import { POOL_HISTORY } from '@/lib/poolHistoryData';
+
+const MASTERS_PATCH = 'https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/444bc63fb_AugustaGolfMasterGreenJacketPatch.png';
+
+// Alias map for matching abbreviated historical names to current full names
+const NAME_ALIASES = {
+  'will h.': 'will hudson', 'alex t.': 'alex thomas', 'charlie b.': 'charlie brown',
+  'nick w.': 'nicholas will', 'n. will': 'nicholas will', 'c. brown': 'charlie brown',
+  'clay': 'clay collier', 'sanders': 'sanders johnston', 's. johnston': 'sanders johnston',
+  'chandler': 'chandler mitchell', 'c. mitchell': 'chandler mitchell',
+  'zac': 'zac hansen', 'z. hanson': 'zac hansen', 'hanson': 'zac hansen',
+  'w. hudson': 'will hudson',
+};
+const canonName = (n) => { const l = n.toLowerCase(); return NAME_ALIASES[l] || l; };
+
+// Build past champion lookup: canonical name -> [years]
+const PAST_CHAMPIONS = {};
+for (const [year, data] of Object.entries(POOL_HISTORY)) {
+  const cn = canonName(data.winner);
+  if (!PAST_CHAMPIONS[cn]) PAST_CHAMPIONS[cn] = [];
+  PAST_CHAMPIONS[cn].push(Number(year));
+}
+function getChampionYears(name) {
+  return PAST_CHAMPIONS[canonName(name)] || null;
+}
 import LeaderboardRoundTabs from '@/components/pool/LeaderboardRoundTabs';
 import LeaderboardSearch from '@/components/pool/LeaderboardSearch';
 import ScoringAlertBanner from '@/components/pool/ScoringAlertBanner';
@@ -331,6 +356,14 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
                   <span className="text-sm font-semibold text-foreground truncate">
                     {entry.team_name || entry.participant_name}
                   </span>
+                  {getChampionYears(entry.participant_name) && (
+                    <img
+                      src={MASTERS_PATCH}
+                      alt="Past Champion"
+                      className="w-4 h-4 rounded-full flex-shrink-0"
+                      title={`Champion: ${getChampionYears(entry.participant_name).join(', ')}`}
+                    />
+                  )}
                   {hasCut && <span className="text-[8px] font-bold text-destructive bg-destructive/10 px-1 rounded">CUT</span>}
                   {hasWD && <span className="text-[8px] font-bold text-orange-600 bg-orange-500/15 px-1 rounded">WD</span>}
                 </div>
