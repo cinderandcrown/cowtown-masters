@@ -5,8 +5,9 @@ import { base44 } from '@/api/base44Client';
 import { assignGroups } from '@/lib/groupUtils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatScore, scoreColor } from '@/lib/scoreUtils';
-import { Flag, Search } from 'lucide-react';
+import { Flag, Search, ChevronDown, ChevronUp, UserX } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { MASTERS_WITHDRAWN_2026 } from '@/lib/mastersField2026';
 
 function GolfersSkeleton() {
   return (
@@ -202,11 +203,55 @@ export default function GolfersTab({ poolId }) {
         })}
       </div>
 
+      {/* Withdrawn Section */}
+      <WithdrawnSection />
+
       <GolferDetailModal
         golfer={selectedGolfer}
         open={!!selectedGolfer}
         onOpenChange={(open) => !open && setSelectedGolfer(null)}
       />
+    </div>
+  );
+}
+
+function WithdrawnSection() {
+  const [open, setOpen] = useState(false);
+
+  if (!MASTERS_WITHDRAWN_2026 || MASTERS_WITHDRAWN_2026.length === 0) return null;
+
+  return (
+    <div className="mt-4">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between bg-muted/40 rounded-lg px-3 py-2.5 border border-border hover:bg-muted/60 transition"
+      >
+        <div className="flex items-center gap-2">
+          <UserX className="w-4 h-4 text-muted-foreground" />
+          <span className="text-xs font-bold text-muted-foreground tracking-wide uppercase">Not Competing This Year</span>
+          <span className="text-[10px] text-muted-foreground/60 bg-muted rounded-full px-1.5 py-0.5">{MASTERS_WITHDRAWN_2026.length}</span>
+        </div>
+        {open ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+      </button>
+
+      {open && (
+        <div className="mt-1.5 bg-card rounded-lg border border-border overflow-hidden">
+          {MASTERS_WITHDRAWN_2026.map((g, i) => (
+            <div
+              key={g.name}
+              className={`flex items-center justify-between px-3 py-2 ${i < MASTERS_WITHDRAWN_2026.length - 1 ? 'border-b border-border' : ''}`}
+            >
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-muted-foreground/70 line-through">{g.name}</p>
+                {g.masters_history?.wins > 0 && (
+                  <span className="text-[8px] font-black text-accent/50 bg-accent/10 px-1 rounded">🏆{g.masters_history.wins > 1 ? `×${g.masters_history.wins}` : ''}</span>
+                )}
+              </div>
+              <span className="text-[10px] text-muted-foreground/50 italic flex-shrink-0 ml-2">{g.note}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

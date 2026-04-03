@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useEffect, useLayoutEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import PoolLayout from '@/components/layout/PoolLayout';
 import Leaderboard from '@/components/pool/Leaderboard.jsx';

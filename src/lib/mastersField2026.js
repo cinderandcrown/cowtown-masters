@@ -1,6 +1,7 @@
-// 2026 Masters Tournament Field — Official invitees expected to play
+// 2026 Masters Tournament Field — Official invitees
 // Source: masters.com, PGA Tour, DraftKings odds (as of April 2, 2026)
-// Removed: Past champions NOT expected to play (Tiger Woods, Jack Nicklaus, Gary Player, etc.)
+// Withdrawn players are stored in MASTERS_WITHDRAWN_2026 and excluded from the draw.
+// They can be moved back to active for future tournaments.
 // Groups will be assigned dynamically based on participant count
 
 import { MASTERS_HISTORY } from './mastersHistoryData';
@@ -91,20 +92,30 @@ const RAW_FIELD = [
   { name: 'Johnny Keefer', betting_odds: '+15000', world_ranking: 83 },
   { name: 'Michael Kim', betting_odds: '+15000', world_ranking: 84 },
   { name: 'Haotong Li', betting_odds: '+15000', world_ranking: 85 },
-  { name: 'Gary Woodland', betting_odds: '+15000', world_ranking: 86 },
-  { name: 'Bubba Watson', betting_odds: '+25000', world_ranking: 87 },
-  { name: 'Charl Schwartzel', betting_odds: '+35000', world_ranking: 88 },
-  { name: 'Zach Johnson', betting_odds: '+40000', world_ranking: 89 },
-  { name: 'Ángel Cabrera', betting_odds: '+50000', world_ranking: 90 },
-  { name: 'Danny Willett', betting_odds: '+50000', world_ranking: 91 },
-  { name: 'Fred Couples', betting_odds: '+100000', world_ranking: 92 },
-  { name: 'Vijay Singh', betting_odds: '+100000', world_ranking: 93 },
-  { name: 'Mike Weir', betting_odds: '+100000', world_ranking: 94 },
-  { name: 'José María Olazábal', betting_odds: '+200000', world_ranking: 95 },
+  { name: 'Bubba Watson', betting_odds: '+25000', world_ranking: 86 },
+  { name: 'Charl Schwartzel', betting_odds: '+35000', world_ranking: 87 },
+  { name: 'Zach Johnson', betting_odds: '+40000', world_ranking: 88 },
+  { name: 'Danny Willett', betting_odds: '+50000', world_ranking: 89 },
 ];
 
-// Merge history data into each golfer
+const RAW_WITHDRAWN = [
+  { name: 'Tiger Woods', betting_odds: 'N/A', world_ranking: null, status: 'withdrawn', note: 'Not competing in 2026 - recovery' },
+  { name: 'Ángel Cabrera', betting_odds: 'N/A', world_ranking: null, status: 'withdrawn', note: 'Not competing' },
+  { name: 'Fred Couples', betting_odds: 'N/A', world_ranking: null, status: 'withdrawn', note: 'Past champion - not competing' },
+  { name: 'Vijay Singh', betting_odds: 'N/A', world_ranking: null, status: 'withdrawn', note: 'Past champion - not competing' },
+  { name: 'Mike Weir', betting_odds: 'N/A', world_ranking: null, status: 'withdrawn', note: 'Past champion - not competing' },
+  { name: 'José María Olazábal', betting_odds: 'N/A', world_ranking: null, status: 'withdrawn', note: 'Past champion - not competing' },
+  { name: 'Gary Woodland', betting_odds: 'N/A', world_ranking: null, status: 'withdrawn', note: 'Medical - not competing' },
+];
+
+// Active field with history merged
 export const MASTERS_FIELD_2026 = RAW_FIELD.map(g => ({
+  ...g,
+  masters_history: MASTERS_HISTORY[g.name] || null,
+}));
+
+// Withdrawn players with history merged
+export const MASTERS_WITHDRAWN_2026 = RAW_WITHDRAWN.map(g => ({
   ...g,
   masters_history: MASTERS_HISTORY[g.name] || null,
 }));

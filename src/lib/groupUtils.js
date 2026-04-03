@@ -8,7 +8,7 @@
  */
 
 function parseOdds(oddsStr) {
-  if (!oddsStr) return 99999;
+  if (!oddsStr || oddsStr === 'N/A') return 99999;
   const num = parseInt(oddsStr, 10);
   return isNaN(num) ? 99999 : num;
 }
@@ -16,8 +16,11 @@ function parseOdds(oddsStr) {
 export function assignGroups(golfers, entryCount) {
   if (!golfers || golfers.length === 0) return [];
 
+  // Exclude withdrawn/disqualified golfers from the draw pool
+  const activeGolfers = golfers.filter(g => g.status !== 'withdrawn' && g.status !== 'disqualified');
+
   // Sort by betting odds (best/lowest first)
-  const sorted = [...golfers].sort((a, b) => parseOdds(a.betting_odds) - parseOdds(b.betting_odds));
+  const sorted = [...activeGolfers].sort((a, b) => parseOdds(a.betting_odds) - parseOdds(b.betting_odds));
 
   const groupSize = Math.max(1, entryCount || 0);
 

@@ -125,16 +125,10 @@ const MASTERS_FIELD = [
   { name: 'Johnny Keefer', betting_odds: '+15000', world_ranking: 83 },
   { name: 'Michael Kim', betting_odds: '+15000', world_ranking: 84 },
   { name: 'Haotong Li', betting_odds: '+15000', world_ranking: 85 },
-  { name: 'Gary Woodland', betting_odds: '+15000', world_ranking: 86 },
-  { name: 'Bubba Watson', betting_odds: '+25000', world_ranking: 87 },
-  { name: 'Charl Schwartzel', betting_odds: '+35000', world_ranking: 88 },
-  { name: 'Zach Johnson', betting_odds: '+40000', world_ranking: 89 },
-  { name: 'Ángel Cabrera', betting_odds: '+50000', world_ranking: 90 },
-  { name: 'Danny Willett', betting_odds: '+50000', world_ranking: 91 },
-  { name: 'Fred Couples', betting_odds: '+100000', world_ranking: 92 },
-  { name: 'Vijay Singh', betting_odds: '+100000', world_ranking: 93 },
-  { name: 'Mike Weir', betting_odds: '+100000', world_ranking: 94 },
-  { name: 'José María Olazábal', betting_odds: '+200000', world_ranking: 95 },
+  { name: 'Bubba Watson', betting_odds: '+25000', world_ranking: 86 },
+  { name: 'Charl Schwartzel', betting_odds: '+35000', world_ranking: 87 },
+  { name: 'Zach Johnson', betting_odds: '+40000', world_ranking: 88 },
+  { name: 'Danny Willett', betting_odds: '+50000', world_ranking: 89 },
 ];
 
 // Deduplicate by name
