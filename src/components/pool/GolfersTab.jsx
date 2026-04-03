@@ -195,8 +195,8 @@ export default function GolfersTab({ poolId }) {
                   {formatScore(r)}
                 </span>
               ))}
-              <span className={`text-center font-black text-sm tabular-nums rounded px-0.5 ${scoreColor(g.score_to_par)} ${(g.score_to_par || 0) < 0 ? 'bg-red-500/10' : ''}`}>
-                {formatScore(g.score_to_par)}
+              <span className={`text-center font-black text-sm tabular-nums rounded px-0.5 ${scoreColor(g.round_1 == null && g.round_2 == null && g.round_3 == null && g.round_4 == null ? null : g.score_to_par)} ${(g.score_to_par || 0) < 0 ? 'bg-red-500/10' : ''}`}>
+                {g.round_1 == null && g.round_2 == null && g.round_3 == null && g.round_4 == null ? '–' : formatScore(g.score_to_par)}
               </span>
             </div>
           );

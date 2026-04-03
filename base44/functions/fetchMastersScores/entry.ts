@@ -156,6 +156,17 @@ Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
 
   try {
+    // Hard gate: do NOT poll before the Masters actually starts
+    // 2026 Masters Round 1 tees off Thursday April 10, ~8am ET (12:00 UTC)
+    const MASTERS_START = new Date('2026-04-10T12:00:00Z');
+    if (new Date() < MASTERS_START) {
+      return Response.json({
+        message: 'Masters has not started yet. Polling disabled until April 10.',
+        starts: MASTERS_START.toISOString(),
+        updated: 0,
+      });
+    }
+
     // Find the active pool
     const pools = await base44.asServiceRole.entities.Pool.filter({});
     const pool = pools.find(p => p.status === 'live' || p.status === 'draft' || p.status === 'setup');
@@ -196,17 +207,25 @@ Deno.serve(async (req) => {
       console.log(`Masters.com feed error: ${e.message}, trying ESPN fallback...`);
     }
 
-    // Fallback: ESPN
+    // Fallback: ESPN — but ONLY if the event is actually the Masters
     if (Object.keys(scoreMap).length === 0) {
       try {
         const espnRes = await fetch(ESPN_SCOREBOARD_URL);
         if (espnRes.ok) {
           const espnData = await espnRes.json();
-          const result = parseESPNFeed(espnData);
-          scoreMap = result.scoreMap;
-          tournamentName = result.tournament || tournamentName;
-          source = 'espn';
-          console.log(`ESPN fallback: ${Object.keys(scoreMap).length} players parsed`);
+          // Only use ESPN data if it's actually the Masters tournament
+          const mastersEvent = (espnData?.events || []).find(e =>
+            e.name?.toLowerCase().includes('masters') || e.shortName?.toLowerCase().includes('masters')
+          );
+          if (mastersEvent) {
+            const result = parseESPNFeed(espnData);
+            scoreMap = result.scoreMap;
+            tournamentName = result.tournament || tournamentName;
+            source = 'espn';
+            console.log(`ESPN fallback: ${Object.keys(scoreMap).length} players parsed`);
+          } else {
+            console.log('ESPN scoreboard does not contain a Masters event — skipping');
+          }
         }
       } catch (e) {
         console.log(`ESPN fallback error: ${e.message}`);
