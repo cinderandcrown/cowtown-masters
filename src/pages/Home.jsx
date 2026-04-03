@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Settings, Trophy, Shuffle, Tv, Flag, ChevronRight, Users, Sparkles, Zap, MessageCircle } from 'lucide-react';
+import MastersCountdown from '@/components/MastersCountdown';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -114,6 +115,11 @@ export default function Home() {
             >
               The ultimate Masters golf pool experience. Hat draw, live leaderboards, and year-long bragging rights.
             </p>
+          </div>
+
+          {/* Masters Countdown */}
+          <div className="w-full max-w-xs mb-8">
+            <MastersCountdown />
           </div>
 
           {/* CTA Buttons */}
