@@ -42,18 +42,21 @@ export default function ChatTab({ poolId, participantIdentity }) {
 
   const [message, setMessage] = useState('');
   const [identity, setIdentity] = useState(() => {
-    // Use logged-in participant identity if available, fallback to localStorage
     if (participantIdentity) return participantIdentity;
     return typeof window !== 'undefined' ? localStorage.getItem(IDENTITY_KEY(poolId)) || '' : '';
   });
-  const [showIdentityPicker, setShowIdentityPicker] = useState(!identity && !participantIdentity);
+  const [showIdentityPicker, setShowIdentityPicker] = useState(false);
 
   // Sync identity when participantIdentity prop changes (e.g., after login)
   useEffect(() => {
-    if (participantIdentity && participantIdentity !== identity) {
+    if (participantIdentity) {
       setIdentity(participantIdentity);
       setShowIdentityPicker(false);
       localStorage.setItem(IDENTITY_KEY(poolId), participantIdentity);
+    } else if (!identity) {
+      // Only show picker if no participantIdentity AND no stored identity
+      const stored = localStorage.getItem(IDENTITY_KEY(poolId));
+      if (!stored) setShowIdentityPicker(true);
     }
   }, [participantIdentity]);
   const [showMentionPicker, setShowMentionPicker] = useState(false);
