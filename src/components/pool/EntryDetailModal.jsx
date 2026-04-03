@@ -3,6 +3,27 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { formatScore, scoreColor } from '@/lib/scoreUtils';
 import GolferDetailModal from '@/components/pool/GolferDetailModal';
 import { Share2, Crown, TrendingUp } from 'lucide-react';
+import { POOL_HISTORY } from '@/lib/poolHistoryData';
+
+const MASTERS_PATCH = 'https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/444bc63fb_AugustaGolfMasterGreenJacketPatch.png';
+
+const NAME_ALIASES = {
+  'will h.': 'will hudson', 'alex t.': 'alex thomas', 'charlie b.': 'charlie brown',
+  'nick w.': 'nicholas will', 'n. will': 'nicholas will', 'c. brown': 'charlie brown',
+  'clay': 'clay collier', 'sanders': 'sanders johnston', 's. johnston': 'sanders johnston',
+  'chandler': 'chandler mitchell', 'c. mitchell': 'chandler mitchell',
+  'zac': 'zac hansen', 'z. hanson': 'zac hansen', 'hanson': 'zac hansen',
+  'w. hudson': 'will hudson',
+};
+const canonName = (n) => { const l = n.toLowerCase(); return NAME_ALIASES[l] || l; };
+
+function getChampionYears(name) {
+  const years = [];
+  for (const [year, data] of Object.entries(POOL_HISTORY)) {
+    if (canonName(data.winner) === canonName(name)) years.push(Number(year));
+  }
+  return years.length > 0 ? years : null;
+}
 import { fireGoldRain } from '@/lib/useConfetti';
 import { hapticSuccess } from '@/lib/haptics';
 import { useEffect } from 'react';
@@ -82,11 +103,21 @@ export default function EntryDetailModal({ entry, open, onOpenChange, rank, tota
                   {isLeader ? '👑 LEADER' : isMoneyZone ? '💰 MONEY ZONE' : `#${rank || '?'} OF ${totalEntries || '?'}`}
                 </span>
               </div>
-              <h2 className="text-2xl font-bold text-primary-foreground mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-                {entry.team_name || entry.participant_name}
-              </h2>
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <h2 className="text-2xl font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  {entry.team_name || entry.participant_name}
+                </h2>
+                {getChampionYears(entry.participant_name) && (
+                  <img src={MASTERS_PATCH} alt="Past Champion" className="w-7 h-7 rounded-full flex-shrink-0" />
+                )}
+              </div>
               {entry.team_name && (
-                <p className="text-xs text-primary-foreground/60 mb-2">{entry.participant_name}</p>
+                <p className="text-xs text-primary-foreground/60 mb-1">{entry.participant_name}</p>
+              )}
+              {getChampionYears(entry.participant_name) && (
+                <p className="text-[10px] font-bold text-accent tracking-widest uppercase mb-1">
+                  🏆 Champion: {getChampionYears(entry.participant_name).join(', ')}
+                </p>
               )}
               <div className={`text-4xl font-black ${entry.total_score < 0 ? 'text-red-400' : entry.total_score > 0 ? 'text-primary-foreground' : 'text-accent'}`}>{formatScore(entry.total_score)}</div>
               <p className="text-[10px] text-primary-foreground/50 mt-1">Combined Score to Par</p>
