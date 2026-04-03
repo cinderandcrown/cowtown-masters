@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Calendar, ChevronDown, ChevronUp, Users, Crown } from 'lucide-react';
+import { Trophy, Calendar, ChevronDown, ChevronUp, Users } from 'lucide-react';
+
+const MASTERS_PATCH = 'https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/444bc63fb_AugustaGolfMasterGreenJacketPatch.png';
 import { POOL_HISTORY } from '@/lib/poolHistoryData';
 import { fireGoldRain } from '@/lib/useConfetti';
 import { hapticTap } from '@/lib/haptics';
@@ -36,7 +38,7 @@ function ChampionCard({ year, data, isExpanded, onToggle }) {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-start gap-2">
-              <Crown className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
+              <img src={MASTERS_PATCH} alt="Masters" className="w-6 h-6 rounded-full flex-shrink-0 mt-0.5" />
               <div className="min-w-0">
                 <p className="text-lg font-bold text-card-foreground truncate" style={{ fontFamily: "'Playfair Display', serif" }}>
                   {data.winner}
