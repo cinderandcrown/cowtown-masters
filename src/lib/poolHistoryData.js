@@ -1,4 +1,5 @@
 // Centralized pool history data — used by HistoryTab and ParticipantProfile
+// Full standings data from spreadsheets where available; summary-only for older years
 export const POOL_HISTORY = {
   2025: {
     winner: 'Clay Coiller',
@@ -36,8 +37,8 @@ export const POOL_HISTORY = {
       { name: 'B. Watkins', golferA: 'Rory McIlroy', scoreA: -7, golferB: 'Christian Bezuidenhout', scoreB: 9, total: 2, rank: 5 },
       { name: 'R. Daniels', golferA: 'Dustin Johnson', scoreA: 1, golferB: 'Jason Kokrak', scoreB: 2, total: 3, rank: 6 },
       { name: 'S. Johnston', golferA: 'Shane Lowry', scoreA: -5, golferB: 'Justin Rose', scoreB: 8, total: 3, rank: 6 },
-      { name: 'Longhair', golferA: 'Sam Burns', scoreA: 5, golferB: 'Sungae Im', scoreB: -1, total: 4, rank: 8 },
-      { name: 'J. Vickers', golferA: 'Corey Connors', scoreA: -3, golferB: 'Luke List', scoreB: 8, total: 5, rank: 9 },
+      { name: 'Longhair', golferA: 'Sam Burns', scoreA: 5, golferB: 'Sungjae Im', scoreB: -1, total: 4, rank: 8 },
+      { name: 'J. Vickers', golferA: 'Corey Conners', scoreA: -3, golferB: 'Luke List', scoreB: 8, total: 5, rank: 9 },
       { name: 'T. Page', golferA: 'Collin Morikawa', scoreA: -4, golferB: 'Cameron Young', scoreB: 10, total: 6, rank: 10 },
       { name: 'T. Ownings', golferA: 'Louis Oosthuizen', scoreA: 4, golferB: 'Harold Varner III', scoreB: 3, total: 7, rank: 11 },
       { name: 'W. Odom', golferA: 'Russell Henley', scoreA: 5, golferB: 'Sergio Garcia', scoreB: 3, total: 8, rank: 12 },
@@ -45,7 +46,7 @@ export const POOL_HISTORY = {
       { name: 'A. Ardet', golferA: 'Joaquin Niemann', scoreA: 6, golferB: 'Tommy Fleetwood', scoreB: 3, total: 9, rank: 13 },
       { name: 'C. Costanza', golferA: 'Viktor Hovland', scoreA: 4, golferB: 'Abraham Ancer', scoreB: 7, total: 11, rank: 15 },
       { name: 'A. Thomas', golferA: 'Jon Rahm', scoreA: 4, golferB: 'Tom Hoge', scoreB: 7, total: 11, rank: 15 },
-      { name: 'C. Brown', golferA: 'Jordan Spieth', scoreA: 6, golferB: 'Brian Harmon', scoreB: 5, total: 11, rank: 15 },
+      { name: 'C. Brown', golferA: 'Jordan Spieth', scoreA: 6, golferB: 'Brian Harman', scoreB: 5, total: 11, rank: 15 },
       { name: 'J. Fisher', golferA: 'Tony Finau', scoreA: 6, golferB: 'Gary Woodland', scoreB: 8, total: 14, rank: 18 },
       { name: 'J. Karr', golferA: 'Brooks Koepka', scoreA: 6, golferB: 'Billy Horschel', scoreB: 8, total: 14, rank: 18 },
       { name: 'Z. Hanson', golferA: 'Xander Schauffele', scoreA: 7, golferB: 'Kevin Kisner', scoreB: 9, total: 16, rank: 20 },
@@ -55,7 +56,7 @@ export const POOL_HISTORY = {
       { name: 'M. Belew', golferA: 'Daniel Berger', scoreA: 15, golferB: 'Seamus Power', scoreB: 4, total: 19, rank: 23 },
       { name: 'J. Howard', golferA: 'Tiger Woods', scoreA: 13, golferB: 'Bubba Watson', scoreB: 7, total: 20, rank: 25 },
       { name: 'W. Hudson', golferA: 'Tyrrell Hatton', scoreA: 17, golferB: 'Robert MacIntyre', scoreB: 3, total: 20, rank: 25 },
-      { name: 'C. Platt', golferA: 'Patrick Cantley', scoreA: 7, golferB: 'Max Homa', scoreB: 14, total: 21, rank: 27 },
+      { name: 'C. Platt', golferA: 'Patrick Cantlay', scoreA: 7, golferB: 'Max Homa', scoreB: 14, total: 21, rank: 27 },
     ],
   },
   2021: {

@@ -14,6 +14,7 @@ import EntryDetailModal from '@/components/pool/EntryDetailModal';
 import usePullToRefresh from '@/hooks/usePullToRefresh.jsx';
 import AddToHomeScreen from '@/components/pool/AddToHomeScreen';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import ScoreFlashOverlay from '@/components/pool/ScoreFlashOverlay';
 
 const VALID_TABS = ['leaderboard', 'teams', 'golfers', 'draw', 'messages', 'history', 'rules'];
 
@@ -80,8 +81,17 @@ export default function PoolDashboard() {
     navigate(`/pool/${poolId}/${tab}`);
   }, [navigate, poolId]);
 
+  // Get golfers for score flash overlay
+  const { data: flashGolfers = [] } = useQuery({
+    queryKey: ['poolGolfers', poolId],
+    queryFn: () => base44.entities.Golfer.filter({ pool_id: poolId }),
+    enabled: !!poolId,
+    refetchInterval: 60000,
+  });
+
   return (
     <PoolLayout>
+      <ScoreFlashOverlay poolId={poolId} golfers={flashGolfers} />
       <div {...pullProps} className="min-h-[60vh]">
         <PullIndicator />
         {activeTab === 'leaderboard' && (

@@ -2,10 +2,25 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { formatScore, scoreColor } from '@/lib/scoreUtils';
 import GolferDetailModal from '@/components/pool/GolferDetailModal';
-import { Share2 } from 'lucide-react';
+import { Share2, Crown, TrendingUp } from 'lucide-react';
+import { fireGoldRain } from '@/lib/useConfetti';
+import { hapticSuccess } from '@/lib/haptics';
+import { useEffect } from 'react';
 
 export default function EntryDetailModal({ entry, open, onOpenChange, rank, totalEntries }) {
   const [selectedGolfer, setSelectedGolfer] = useState(null);
+
+  const isLeader = rank === 1;
+  const isMoneyZone = rank <= 3;
+
+  // Fire gold rain when viewing leader's card
+  useEffect(() => {
+    if (open && isLeader && entry) {
+      fireGoldRain();
+      hapticSuccess();
+    }
+  }, [open, isLeader, entry]);
+
   if (!entry) return null;
 
   const golferA = entry.golferA;
@@ -55,9 +70,16 @@ export default function EntryDetailModal({ entry, open, onOpenChange, rank, tota
           <div className="bg-gradient-to-br from-[#0a3d0a] to-primary rounded-t-2xl p-5 text-center relative overflow-hidden">
             <div className="absolute inset-0 animate-shimmer pointer-events-none opacity-20" />
             <div className="relative">
-              <div className="inline-flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full border border-white/15 mb-3">
-                <span className="text-[10px] font-bold tracking-widest text-accent">
-                  #{rank || '?'} OF {totalEntries || '?'}
+              {isLeader && (
+                <Crown className="w-8 h-8 text-accent mx-auto mb-2 animate-bounce-in" />
+              )}
+              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border mb-3 ${
+                isLeader ? 'bg-accent/20 border-accent/40' : isMoneyZone ? 'bg-white/15 border-accent/30' : 'bg-white/10 border-white/15'
+              }`}>
+                <span className={`text-[10px] font-bold tracking-widest ${
+                  isLeader ? 'text-accent' : 'text-accent'
+                }`}>
+                  {isLeader ? '👑 LEADER' : isMoneyZone ? '💰 MONEY ZONE' : `#${rank || '?'} OF ${totalEntries || '?'}`}
                 </span>
               </div>
               <h2 className="text-2xl font-bold text-primary-foreground mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>

@@ -4,7 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Settings, Trophy, Shuffle, Tv, Flag, ChevronRight, Users, Sparkles, Zap, MessageCircle, Copy, Check, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { hapticTap } from '@/lib/haptics';
+import { hapticTap, hapticSuccess } from '@/lib/haptics';
+import { fireJackpot } from '@/lib/useConfetti';
 import MastersCountdown from '@/components/MastersCountdown';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,6 +42,8 @@ export default function Home() {
     setCreating(false);
     setShowCreatePool(false);
     if (response.data?.pool?.id) {
+      fireJackpot();
+      hapticSuccess();
       navigate(`/pool/${response.data.pool.id}`);
     }
   };

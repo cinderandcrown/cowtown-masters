@@ -2,12 +2,13 @@ import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { base44 } from '@/api/base44Client';
-import { Trophy, RefreshCw, Star, Share2, Download } from 'lucide-react';
+import { Trophy, RefreshCw, Star, Share2, Download, TrendingUp, TrendingDown } from 'lucide-react';
 import LeaderboardRoundTabs from '@/components/pool/LeaderboardRoundTabs';
 import LeaderboardSearch from '@/components/pool/LeaderboardSearch';
 import ScoringAlertBanner from '@/components/pool/ScoringAlertBanner';
 import { toast } from 'sonner';
-import { hapticTap } from '@/lib/haptics';
+import { hapticTap, hapticSuccess } from '@/lib/haptics';
+import { fireGoldRain } from '@/lib/useConfetti';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useParticipant } from '@/lib/ParticipantContext';
 import { Button } from '@/components/ui/button';
@@ -205,21 +206,43 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
 
       {/* Leader Hero */}
       {standings.length > 0 && (
-        <div className="animate-fade-in-up bg-gradient-to-br from-secondary to-primary rounded-xl p-4 mb-4 border border-accent/30 shadow-lg shadow-primary/20 relative overflow-hidden">
+        <div
+          className="animate-fade-in-up bg-gradient-to-br from-secondary to-primary rounded-xl p-4 mb-4 border border-accent/30 shadow-lg shadow-primary/20 relative overflow-hidden cursor-pointer group"
+          onClick={() => {
+            onSelectEntry({ ...standings[0], _rank: standings[0].rank, _totalEntries: standings.length });
+            hapticSuccess();
+          }}
+        >
           <div className="absolute inset-0 animate-shimmer pointer-events-none" />
+          {/* Pulsing gold border glow */}
+          <div className="absolute inset-0 rounded-xl animate-score-glow pointer-events-none" />
           <div className="flex items-start gap-3 mb-3 relative">
-            <Trophy className="w-7 h-7 text-accent flex-shrink-0" />
+            <div className="relative">
+              <Trophy className="w-7 h-7 text-accent flex-shrink-0" />
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-accent rounded-full animate-pulse" />
+            </div>
             <div className="flex-1">
               <p className="text-[10px] font-bold tracking-widest text-accent uppercase">Pool Leader</p>
-              <h2 className="text-xl font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
+              <h2 className="text-xl font-bold text-primary-foreground group-hover:text-accent transition-colors" style={{ fontFamily: "'Playfair Display', serif" }}>
                 {standings[0].team_name || standings[0].participant_name}
               </h2>
               {standings[0].team_name && (
                 <p className="text-xs text-primary-foreground/60">{standings[0].participant_name}</p>
               )}
             </div>
-            <div className={`text-3xl font-black tabular-nums ${standings[0].total_score < 0 ? 'text-red-400' : standings[0].total_score > 0 ? 'text-primary-foreground' : 'text-accent'}`}>
-              {formatScore(standings[0].total_score)}
+            <div className="text-right">
+              <div className={`text-3xl font-black tabular-nums ${standings[0].total_score < 0 ? 'text-red-400' : standings[0].total_score > 0 ? 'text-primary-foreground' : 'text-accent'}`}>
+                {formatScore(standings[0].total_score)}
+              </div>
+              {standings.length > 1 && (
+                <p className="text-[9px] text-primary-foreground/40 mt-0.5">
+                  {standings[0].total_score < standings[1].total_score
+                    ? `${standings[1].total_score - standings[0].total_score} ahead`
+                    : standings[0].total_score === standings[1].total_score
+                    ? 'Tied at top'
+                    : ''}
+                </p>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2 relative">
@@ -292,10 +315,10 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
               style={{ animationDelay: `${Math.min(i * 50, 500)}ms` }}
             >
               {entry.rank <= 3 ? (
-                <span className={`flex items-center justify-center text-xs font-black rounded-full w-7 h-7 mx-auto ${
-                  entry.rank === 1 ? 'bg-accent text-white' : entry.rank === 2 ? 'bg-muted text-muted-foreground' : 'bg-amber-600/80 text-white'
+                <span className={`flex items-center justify-center text-xs font-black rounded-full w-7 h-7 mx-auto transition-transform hover:scale-110 ${
+                  entry.rank === 1 ? 'bg-accent text-white shadow-md shadow-accent/40 animate-score-glow' : entry.rank === 2 ? 'bg-gray-300 text-gray-700 shadow-sm' : 'bg-amber-600/80 text-white shadow-sm'
                 }`}>
-                  {entry.displayRank}
+                  {entry.rank === 1 ? '🏆' : entry.displayRank}
                 </span>
               ) : (
                 <span className="text-center text-xs font-black text-muted-foreground self-center">

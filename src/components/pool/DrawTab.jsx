@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Shuffle, PenLine, Check, RotateCcw, Lock, ShieldAlert, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
-import { hapticPulse, hapticDoubleTap } from '@/lib/haptics';
-import { fireConfetti } from '@/lib/useConfetti';
+import { hapticPulse, hapticDoubleTap, hapticDrumroll, hapticRatchet, hapticSuccess } from '@/lib/haptics';
+import { fireConfetti, fireJackpot, firePop } from '@/lib/useConfetti';
 
 function shuffle(arr) {
   const a = [...arr];
@@ -147,31 +147,36 @@ export default function DrawTab({ poolId }) {
     }));
     setAssignments(pairs);
     setPhase('animating');
+    hapticDrumroll();
     let count = 0;
     const interval = setInterval(() => {
       setCurrentFlash({
         a: shuffledA[Math.floor(Math.random() * shuffledA.length)]?.name,
         b: shuffledB[Math.floor(Math.random() * shuffledB.length)]?.name,
       });
+      hapticRatchet();
       count++;
-      if (count > 20) {
+      if (count > 25) {
         clearInterval(interval);
         setCurrentFlash(null);
         setPhase('revealing');
         setRevealIndex(0);
+        firePop();
       }
-    }, 100);
+    }, 80);
   };
 
   const revealNext = () => {
     hapticPulse();
+    firePop();
     if (revealIndex < assignments.length - 1) {
       setRevealIndex(prev => prev + 1);
     } else {
       setPhase('complete');
       saveMutation.mutate(assignments);
-      fireConfetti();
-      toast.success('Draw complete! All golfers assigned.');
+      fireJackpot();
+      hapticSuccess();
+      toast.success('🎉 Draw complete! All golfers assigned.');
     }
   };
 
@@ -509,19 +514,22 @@ export default function DrawTab({ poolId }) {
         </>
       )}
 
-      {/* Animating Phase */}
+      {/* Animating Phase — Slot Machine Feel */}
       {phase === 'animating' && (
         <div className="text-center space-y-4">
-          <div className="w-48 h-48 mx-auto rounded-full bg-gradient-to-br from-secondary to-primary border-4 border-accent/50 shadow-2xl flex flex-col items-center justify-center">
-            <Shuffle className="w-12 h-12 text-accent mb-1 animate-pulse" />
-            {currentFlash && (
-              <div className="text-xs text-primary-foreground font-semibold px-4 text-center animate-pulse">
-                <p className="text-accent">{currentFlash.a}</p>
-                <p>{currentFlash.b}</p>
-              </div>
-            )}
+          <div className="relative">
+            <div className="absolute inset-0 blur-3xl bg-accent/20 rounded-full scale-110 animate-pulse" />
+            <div className="relative w-48 h-48 mx-auto rounded-full bg-gradient-to-br from-secondary to-primary border-4 border-accent/50 shadow-2xl flex flex-col items-center justify-center" style={{ animation: 'livePulse 1s ease-out infinite' }}>
+              <Shuffle className="w-14 h-14 text-accent mb-1" style={{ animation: 'spin 0.5s linear infinite' }} />
+              {currentFlash && (
+                <div className="text-xs text-primary-foreground font-semibold px-4 text-center">
+                  <p className="text-accent font-black animate-pulse">{currentFlash.a}</p>
+                  <p className="text-primary-foreground/70">{currentFlash.b}</p>
+                </div>
+              )}
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground font-semibold">Shuffling names...</p>
+          <p className="text-sm text-muted-foreground font-black tracking-widest uppercase animate-pulse">Drawing from the hat...</p>
         </div>
       )}
 
