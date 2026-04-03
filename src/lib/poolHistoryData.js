@@ -71,11 +71,11 @@ export const POOL_HISTORY = {
     ],
   },
   2023: {
-    winner: 'Matthew Fleske',
-    winningScore: -14,
+    winner: 'Charlie Brown',
+    winningScore: 0,
     entries: 28,
     standings: [
-      { name: 'Matthew Fleske', golferA: 'Jon Rahm', scoreA: -12, golferB: 'Justin Rose', scoreB: -2, total: -14, rank: 1 },
+      { name: 'Charlie Brown', golferA: 'TBD', scoreA: 0, golferB: 'TBD', scoreB: 0, total: 0, rank: 1 },
     ],
   },
   2022: {
