@@ -70,9 +70,14 @@ export default function Home() {
     e.preventDefault();
     e.stopPropagation();
     const url = `${window.location.origin}/pool/${pool.id}`;
-    if (navigator.share) {
-      navigator.share({ title: pool.name, text: `Join my pool: ${pool.invite_code}`, url });
-    } else {
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: pool.name, text: `Join my pool: ${pool.invite_code}`, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success('Pool link copied!');
+      }
+    } catch {
       await navigator.clipboard.writeText(url);
       toast.success('Pool link copied!');
     }
