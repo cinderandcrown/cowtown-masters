@@ -33,6 +33,7 @@ import LeaderboardSearch from '@/components/pool/LeaderboardSearch';
 import ScoringAlertBanner from '@/components/pool/ScoringAlertBanner';
 import { toast } from 'sonner';
 import { hapticTap, hapticSuccess, hapticDoubleTap } from '@/lib/haptics';
+import { soundPop, soundSweepUp, soundCashRegister, soundJackpot, soundTap } from '@/lib/sounds';
 import { fireGoldRain, fireMoneyZone, firePop } from '@/lib/useConfetti';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useParticipant } from '@/lib/ParticipantContext';
@@ -237,6 +238,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
           onSelectEntry({ ...standings[0], _rank: standings[0].rank, _totalEntries: standings.length });
           hapticSuccess();
           fireGoldRain();
+          soundJackpot();
           }}
         >
           <div className="absolute inset-0 animate-shimmer pointer-events-none" />
@@ -334,8 +336,8 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
               tabIndex={0}
               onClick={() => {
                 onSelectEntry({ ...entry, _rank: entry.rank, _totalEntries: standings.length });
-                if (entry.rank <= 3) { fireMoneyZone(); hapticDoubleTap(); }
-                else { hapticTap(); }
+                if (entry.rank <= 3) { fireMoneyZone(); hapticDoubleTap(); soundCashRegister(); }
+                else { hapticTap(); soundPop(); }
               }}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelectEntry({ ...entry, _rank: entry.rank, _totalEntries: standings.length }); } }}
               aria-label={`View details for ${entry.team_name || entry.participant_name}, position ${entry.displayRank}`}

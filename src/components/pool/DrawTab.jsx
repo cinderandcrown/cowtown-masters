@@ -9,6 +9,7 @@ import { Shuffle, PenLine, Check, RotateCcw, Lock, ShieldAlert, Trophy } from 'l
 import { toast } from 'sonner';
 import { hapticPulse, hapticDoubleTap, hapticDrumroll, hapticRatchet, hapticSuccess } from '@/lib/haptics';
 import { fireConfetti, fireJackpot, firePop } from '@/lib/useConfetti';
+import { soundTick, soundReveal, soundDrumroll, soundJackpot, soundLock } from '@/lib/sounds';
 
 function shuffle(arr) {
   const a = [...arr];
@@ -148,6 +149,7 @@ export default function DrawTab({ poolId }) {
     setAssignments(pairs);
     setPhase('animating');
     hapticDrumroll();
+    soundDrumroll();
     let count = 0;
     const interval = setInterval(() => {
       setCurrentFlash({
@@ -155,6 +157,7 @@ export default function DrawTab({ poolId }) {
         b: shuffledB[Math.floor(Math.random() * shuffledB.length)]?.name,
       });
       hapticRatchet();
+      soundTick();
       count++;
       if (count > 25) {
         clearInterval(interval);
@@ -162,6 +165,7 @@ export default function DrawTab({ poolId }) {
         setPhase('revealing');
         setRevealIndex(0);
         firePop();
+        soundReveal();
       }
     }, 80);
   };
@@ -169,6 +173,7 @@ export default function DrawTab({ poolId }) {
   const revealNext = () => {
     hapticPulse();
     firePop();
+    soundReveal();
     if (revealIndex < assignments.length - 1) {
       setRevealIndex(prev => prev + 1);
     } else {
@@ -176,6 +181,7 @@ export default function DrawTab({ poolId }) {
       saveMutation.mutate(assignments);
       fireJackpot();
       hapticSuccess();
+      soundJackpot();
       toast.success('🎉 Draw complete! All golfers assigned.');
     }
   };
@@ -221,6 +227,7 @@ export default function DrawTab({ poolId }) {
     }]);
     setLockedEntries(prev => ({ ...prev, [entry.id]: true }));
     hapticDoubleTap();
+    soundLock();
     toast.success(`${entry.participant_name} locked in!`);
   };
 

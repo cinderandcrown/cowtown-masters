@@ -25,6 +25,7 @@ function getChampionYears(name) {
   return years.length > 0 ? years : null;
 }
 import { fireGoldRain, fireMoneyZone, fireJackpot } from '@/lib/useConfetti';
+import { soundJackpot, soundCashRegister, soundSweepUp } from '@/lib/sounds';
 import { hapticSuccess, hapticTripleBuzz } from '@/lib/haptics';
 import { useEffect } from 'react';
 
@@ -41,9 +42,13 @@ export default function EntryDetailModal({ entry, open, onOpenChange, rank, tota
     if (isLeader || isPastChamp) {
       fireJackpot();
       hapticTripleBuzz();
+      soundJackpot();
     } else if (isMoneyZone) {
       fireMoneyZone();
       hapticSuccess();
+      soundCashRegister();
+    } else {
+      soundSweepUp();
     }
   }, [open, isLeader, isMoneyZone, isPastChamp, entry]);
 

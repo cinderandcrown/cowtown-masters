@@ -71,6 +71,7 @@ function getPastChampions() {
 import { POOL_HISTORY } from '@/lib/poolHistoryData';
 import { fireGoldRain, fireJackpot, fireMoneyZone } from '@/lib/useConfetti';
 import { hapticTap, hapticSuccess, hapticDoubleTap } from '@/lib/haptics';
+import { soundChampion, soundJackpot, soundShimmer } from '@/lib/sounds';
 
 const formatScore = (s) => (s === 0 ? 'E' : s > 0 ? `+${s}` : `${s}`);
 const scoreColor = (s) => {
@@ -92,8 +93,8 @@ function ChampionCard({ year, data, isExpanded, onToggle, pastChampions }) {
         onClick={() => {
           hapticDoubleTap();
           onToggle();
-          if (!isExpanded && data.winningScore <= -10) fireJackpot();
-          else if (!isExpanded) fireMoneyZone();
+          if (!isExpanded && data.winningScore <= -10) { fireJackpot(); soundJackpot(); }
+          else if (!isExpanded) { fireMoneyZone(); soundChampion(); }
         }}
       >
         <div className="flex items-start gap-3">
@@ -197,7 +198,7 @@ export default function HistoryTab({ poolId }) {
 
   // Fire gold rain when viewing champions wall
   useEffect(() => {
-    const timer = setTimeout(() => fireGoldRain(), 500);
+    const timer = setTimeout(() => { fireGoldRain(); soundShimmer(); }, 500);
     return () => clearTimeout(timer);
   }, []);
 

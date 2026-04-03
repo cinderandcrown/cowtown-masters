@@ -4,6 +4,7 @@ import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, LogIn, LogOut, P
 import { useTheme } from '@/lib/ThemeProvider';
 import { toast } from 'sonner';
 import { hapticTap } from '@/lib/haptics';
+import { soundTap } from '@/lib/sounds';
 import NotificationBell from '@/components/pool/NotificationBell';
 import { useParticipant } from '@/lib/ParticipantContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -349,7 +350,7 @@ export function PoolBottomNav({ poolId }) {
             key={tab.id}
             to={`/pool/${poolId}/${tab.id}`}
             replace
-            aria-label={tab.label}
+            onClick={() => soundTap()}
             className={({ isActive }) =>
               `flex flex-col items-center justify-center gap-0.5 py-2 min-h-[48px] rounded-lg transition-all relative focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 ${
                 isActive

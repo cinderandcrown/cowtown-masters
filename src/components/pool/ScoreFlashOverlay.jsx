@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { fireBirdie, fireEagle } from '@/lib/useConfetti';
 import { hapticSuccess, hapticTripleBuzz } from '@/lib/haptics';
+import { soundBirdie, soundEagle } from '@/lib/sounds';
 
 // Casino-style score change overlay — flashes briefly when scores update
 export default function ScoreFlashOverlay({ poolId, golfers }) {
@@ -34,9 +35,11 @@ export default function ScoreFlashOverlay({ poolId, golfers }) {
       if (isEagle) {
         hapticTripleBuzz();
         fireEagle();
+        soundEagle();
       } else {
         hapticSuccess();
         fireBirdie();
+        soundBirdie();
       }
       setTimeout(() => setFlash(null), 4000);
     }
