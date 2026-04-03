@@ -1,47 +1,9 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { formatScore, scoreColor } from '@/lib/scoreUtils';
 import { Flame, Snowflake, TrendingDown, TrendingUp, Minus, Target, BarChart3 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid, ReferenceLine, Area, AreaChart } from 'recharts';
 
-// Simulated historical Masters data keyed by normalized name
-// In a real app this would come from an API or entity
-const MASTERS_HISTORY = {
-  'scottie scheffler': [
-    { year: 2022, position: 'T15', score: -5 },
-    { year: 2023, position: '1', score: -10 },
-    { year: 2024, position: '1', score: -11 },
-    { year: 2025, position: 'T3', score: -8 },
-  ],
-  'rory mcilroy': [
-    { year: 2021, position: 'T7', score: -2 },
-    { year: 2022, position: '2', score: -7 },
-    { year: 2023, position: 'T13', score: -3 },
-    { year: 2024, position: 'T22', score: 1 },
-    { year: 2025, position: 'T9', score: -4 },
-  ],
-  'jon rahm': [
-    { year: 2021, position: '5', score: -6 },
-    { year: 2022, position: 'T27', score: 3 },
-    { year: 2023, position: 'T3', score: -12 },
-    { year: 2024, position: 'T45', score: 5 },
-  ],
-  'tiger woods': [
-    { year: 2019, position: '1', score: -13 },
-    { year: 2020, position: 'T38', score: -1 },
-    { year: 2022, position: '47', score: 13 },
-    { year: 2023, position: 'CUT', score: null },
-  ],
-  'brooks koepka': [
-    { year: 2019, position: '2', score: -12 },
-    { year: 2023, position: '2', score: -14 },
-    { year: 2024, position: 'T26', score: 2 },
-    { year: 2025, position: 'T12', score: -5 },
-  ],
-};
 
-function normKey(name) {
-  return (name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
-}
 
 function HotColdIndicator({ golfer }) {
   const rounds = [golfer.round_1, golfer.round_2, golfer.round_3, golfer.round_4].filter(r => r != null);
@@ -198,10 +160,10 @@ function ScoringTrendChart({ golfer }) {
 }
 
 function HistoricalPerformance({ golfer }) {
-  const key = normKey(golfer.name);
-  const history = MASTERS_HISTORY[key];
+  const mh = golfer.masters_history;
 
-  if (!history || history.length === 0) {
+  // Build chart data from the entity's masters_history.recent_results
+  if (!mh || !mh.recent_results || mh.recent_results.length === 0) {
     return (
       <div className="bg-muted/30 rounded-xl border border-border p-4 text-center">
         <Target className="w-6 h-6 text-muted-foreground/40 mx-auto mb-2" />
@@ -210,15 +172,15 @@ function HistoricalPerformance({ golfer }) {
     );
   }
 
+  const history = [...mh.recent_results].sort((a, b) => a.year - b.year);
+
   const chartData = history.filter(h => h.score != null).map(h => ({
     year: h.year.toString(),
     score: h.score,
   }));
 
-  const bestFinish = history.filter(h => h.score != null).reduce((best, h) => (!best || h.score < best.score ? h : best), null);
-  const avgScore = history.filter(h => h.score != null).length > 0
-    ? (history.filter(h => h.score != null).reduce((sum, h) => sum + h.score, 0) / history.filter(h => h.score != null).length)
-    : null;
+  const bestScore = mh.best_finish;
+  const avgScore = mh.avg_score ? mh.avg_score - 72 : null; // convert stroke avg to relative-to-par
 
   return (
     <div>
@@ -252,7 +214,7 @@ function HistoricalPerformance({ golfer }) {
             <span className="text-xs font-bold text-foreground">{h.year}</span>
             <div className="flex items-center gap-3">
               <span className="text-[10px] text-muted-foreground font-semibold">
-                {h.position === '1' ? '🏆 Winner' : `Pos: ${h.position}`}
+                {h.finish === '1st' ? '🏆 Winner' : h.finish ? `Pos: ${h.finish}` : 'MC'}
               </span>
               <span className={`text-sm font-black tabular-nums ${scoreColor(h.score)}`}>
                 {h.score != null ? formatScore(h.score) : 'CUT'}
@@ -266,18 +228,18 @@ function HistoricalPerformance({ golfer }) {
       <div className="grid grid-cols-3 gap-2 mt-3">
         <div className="bg-primary/5 rounded-lg p-2 border border-primary/10 text-center">
           <p className="text-[9px] font-bold text-muted-foreground tracking-widest">APPEARANCES</p>
-          <p className="text-lg font-black text-foreground">{history.length}</p>
+          <p className="text-lg font-black text-foreground">{mh.appearances}</p>
         </div>
         <div className="bg-accent/5 rounded-lg p-2 border border-accent/10 text-center">
           <p className="text-[9px] font-bold text-muted-foreground tracking-widest">BEST</p>
-          <p className={`text-lg font-black ${scoreColor(bestFinish?.score)}`}>
-            {bestFinish?.score != null ? formatScore(bestFinish.score) : '—'}
+          <p className="text-lg font-black text-accent">
+            {bestScore || '—'}
           </p>
         </div>
         <div className="bg-muted/50 rounded-lg p-2 border border-border text-center">
-          <p className="text-[9px] font-bold text-muted-foreground tracking-widest">AVG</p>
-          <p className={`text-lg font-black ${scoreColor(avgScore)}`}>
-            {avgScore != null ? (avgScore > 0 ? '+' : '') + avgScore.toFixed(1) : '—'}
+          <p className="text-[9px] font-bold text-muted-foreground tracking-widest">AVG SCORE</p>
+          <p className="text-lg font-black text-foreground">
+            {mh.avg_score ? mh.avg_score.toFixed(1) : '—'}
           </p>
         </div>
       </div>
