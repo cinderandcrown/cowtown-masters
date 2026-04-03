@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useParams, useNavigate, useLocation, NavLink } from 'react-router-dom';
-import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, LogIn, LogOut, Pencil, Check, X, ArrowLeft } from 'lucide-react';
+import React, { useState } from 'react';
+import { useParams, useNavigate, NavLink } from 'react-router-dom';
+import { Trophy, Users, Flag, Shuffle, MoreHorizontal, MessageCircle, BookOpen, Clock, Share2, LogIn, LogOut, Pencil, Check, X, ArrowLeft, Copy, QrCode, ExternalLink } from 'lucide-react';
 import NotificationBell from '@/components/pool/NotificationBell';
 import { useParticipant } from '@/lib/ParticipantContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -8,15 +8,20 @@ import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 const TABS = [
   { id: 'leaderboard', label: 'Board', Icon: Trophy },
   { id: 'teams', label: 'Teams', Icon: Users },
-  { id: 'golfers', label: 'Golfers', Icon: Flag },
+  { id: 'golfers', label: 'Field', Icon: Flag },
   { id: 'draw', label: 'Draw', Icon: Shuffle },
-  { id: 'messages', label: 'Smack', Icon: MessageCircle },
-  { id: 'history', label: 'History', Icon: Trophy },
-  { id: 'rules', label: 'Rules', Icon: BookOpen },
+  { id: 'more', label: 'More', Icon: MoreHorizontal },
+];
+
+const MORE_ITEMS = [
+  { id: 'messages', label: 'Smack Talk', desc: 'Group chat & direct messages', Icon: MessageCircle, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+  { id: 'history', label: 'Champions Wall', desc: 'Past winners & pool stats', Icon: Clock, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+  { id: 'rules', label: 'Pool Rules', desc: 'Scoring, payouts & tiebreakers', Icon: BookOpen, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
 ];
 
 function ParticipantBadge({ poolId }) {
@@ -25,11 +30,9 @@ function ParticipantBadge({ poolId }) {
   const [showPanel, setShowPanel] = useState(false);
   const [editingTeamName, setEditingTeamName] = useState(false);
   const [teamNameValue, setTeamNameValue] = useState('');
-  const panelRef = useRef(null);
 
   const { isLoggedIn, participant, logout } = useParticipant();
 
-  // Reactively fetch entries so team name updates are reflected
   const { data: entries = [] } = useQuery({
     queryKey: ['poolEntries', poolId],
     queryFn: () => base44.entities.PoolEntry.filter({ pool_id: poolId }),
@@ -37,19 +40,6 @@ function ParticipantBadge({ poolId }) {
   });
 
   const myEntry = entries.find(e => e.id === participant?.entry_id);
-
-  // Close panel on Escape key
-  useEffect(() => {
-    if (!showPanel) return;
-    const handleKey = (e) => {
-      if (e.key === 'Escape') {
-        setShowPanel(false);
-        setEditingTeamName(false);
-      }
-    };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [showPanel]);
 
   const updateTeamName = useMutation({
     mutationFn: async (newTeamName) => {
@@ -71,42 +61,43 @@ function ParticipantBadge({ poolId }) {
         <button
           onClick={() => setShowPanel(!showPanel)}
           aria-expanded={showPanel}
-          aria-haspopup="dialog"
           aria-label={`Account menu for ${participant.participant_name}`}
-          className="text-[10px] font-bold text-primary-foreground bg-white/15 rounded-lg px-2 py-1 border border-white/20 hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 transition truncate max-w-[100px]"
+          className="flex items-center gap-1.5 text-[10px] font-bold text-primary-foreground bg-white/15 rounded-lg px-2.5 py-1.5 border border-white/20 hover:bg-white/25 transition truncate max-w-[120px]"
         >
-          {displayTeamName}
+          <div className="w-5 h-5 rounded-full bg-accent/30 flex items-center justify-center flex-shrink-0">
+            <span className="text-[8px] font-black text-accent">{(displayTeamName || '?')[0].toUpperCase()}</span>
+          </div>
+          <span className="truncate">{displayTeamName}</span>
         </button>
 
         {showPanel && (
           <>
+            <div className="fixed inset-0 z-[60]" onClick={() => { setShowPanel(false); setEditingTeamName(false); }} />
             <div
-              className="fixed inset-0 z-[60]"
-              onClick={() => { setShowPanel(false); setEditingTeamName(false); }}
-              aria-hidden="true"
-            />
-            <div
-              ref={panelRef}
               role="dialog"
               aria-label="Account settings"
-              className="fixed right-3 top-14 z-[70] w-64 bg-card rounded-xl shadow-xl border border-border overflow-hidden animate-fade-in-up"
+              className="fixed right-3 top-14 z-[70] w-72 bg-card rounded-2xl shadow-2xl border border-border overflow-hidden animate-fade-in-up"
             >
-              <div className="px-4 py-3 bg-gradient-to-r from-primary/5 to-accent/5 border-b border-border">
-                <p className="text-sm font-bold text-foreground">{participant.participant_name}</p>
-                <p className="text-xs text-muted-foreground">{participant.email}</p>
+              <div className="px-4 py-3.5 bg-gradient-to-r from-primary/8 to-accent/8 border-b border-border">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                    <span className="text-sm font-black text-accent">{(participant.participant_name || '?')[0].toUpperCase()}</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-foreground">{participant.participant_name}</p>
+                    <p className="text-[11px] text-muted-foreground">{participant.email}</p>
+                  </div>
+                </div>
               </div>
 
-              <div className="px-4 py-3 border-b border-border bg-card">
+              <div className="px-4 py-3 border-b border-border">
                 <div className="flex items-center justify-between mb-1.5">
-                  <label id="team-name-label" className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase">Team Name</label>
+                  <label className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase">Team Name</label>
                   {!editingTeamName && (
                     <button
-                      onClick={() => {
-                        setTeamNameValue(myEntry?.team_name || '');
-                        setEditingTeamName(true);
-                      }}
+                      onClick={() => { setTeamNameValue(myEntry?.team_name || ''); setEditingTeamName(true); }}
                       aria-label="Edit team name"
-                      className="p-1 hover:bg-muted rounded transition focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="p-1 hover:bg-muted rounded transition"
                     >
                       <Pencil className="w-3.5 h-3.5 text-primary" />
                     </button>
@@ -119,27 +110,13 @@ function ParticipantBadge({ poolId }) {
                       onChange={(e) => setTeamNameValue(e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter') updateTeamName.mutate(teamNameValue); }}
                       placeholder="e.g. The Outlaws"
-                      className="h-8 text-sm flex-1 bg-card"
-                      aria-labelledby="team-name-label"
+                      className="h-8 text-sm flex-1"
                       autoFocus
                     />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 flex-shrink-0"
-                      onClick={() => updateTeamName.mutate(teamNameValue)}
-                      disabled={updateTeamName.isPending}
-                      aria-label="Save team name"
-                    >
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => updateTeamName.mutate(teamNameValue)} disabled={updateTeamName.isPending}>
                       <Check className="w-4 h-4 text-green-600" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 flex-shrink-0"
-                      onClick={() => setEditingTeamName(false)}
-                      aria-label="Cancel editing"
-                    >
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setEditingTeamName(false)}>
                       <X className="w-4 h-4 text-muted-foreground" />
                     </Button>
                   </div>
@@ -152,9 +129,9 @@ function ParticipantBadge({ poolId }) {
 
               <button
                 onClick={() => { logout(); setShowPanel(false); }}
-                className="w-full px-4 py-3 text-left text-sm font-medium text-red-600 hover:bg-destructive/10 transition flex items-center gap-2 bg-card focus:outline-none focus:ring-2 focus:ring-inset focus:ring-red-500"
+                className="w-full px-4 py-3 text-left text-sm font-medium text-red-600 hover:bg-destructive/10 transition flex items-center gap-2"
               >
-                <LogOut className="w-4 h-4" aria-hidden="true" />
+                <LogOut className="w-4 h-4" />
                 Sign Out
               </button>
             </div>
@@ -167,10 +144,11 @@ function ParticipantBadge({ poolId }) {
   return (
     <button
       onClick={() => navigate(`/pool/${poolId}/login`)}
-      className="p-1.5 hover:bg-white/10 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-accent"
-      aria-label="Sign in to your account"
+      className="flex items-center gap-1.5 text-[10px] font-bold text-primary-foreground bg-white/10 rounded-lg px-2.5 py-1.5 border border-white/15 hover:bg-white/20 transition"
+      aria-label="Sign in"
     >
-      <LogIn className="w-4 h-4 text-primary-foreground" aria-hidden="true" />
+      <LogIn className="w-3.5 h-3.5" />
+      Sign In
     </button>
   );
 }
@@ -189,8 +167,7 @@ export function PoolHeader() {
 
   const isLive = pool?.status === 'live';
 
-  // Determine current round day based on tournament schedule (Thu-Sun)
-  const day = new Date().getDay(); // 0=Sun, 4=Thu, 5=Fri, 6=Sat
+  const day = new Date().getDay();
   const roundInfo = day === 4 ? { round: 'R1', day: 'THU' }
     : day === 5 ? { round: 'R2', day: 'FRI' }
     : day === 6 ? { round: 'R3', day: 'SAT' }
@@ -199,30 +176,22 @@ export function PoolHeader() {
 
   return (
     <header className="sticky top-0 z-40" role="banner">
-      {/* Main Header */}
-      <div className="bg-gradient-to-r from-secondary to-primary border-b border-accent/40 px-4 py-3 md:py-4 relative overflow-hidden">
-        <div className="absolute inset-0 animate-shimmer pointer-events-none" aria-hidden="true" />
-        <div className="max-w-md mx-auto flex items-center justify-between relative">
-          <div className="flex items-center gap-2">
+      <div className="bg-gradient-to-r from-[#0a3d0a] via-primary to-secondary border-b border-accent/40 px-4 py-2.5 relative overflow-hidden">
+        <div className="absolute inset-0 animate-shimmer pointer-events-none opacity-20" />
+        <div className="max-w-lg mx-auto flex items-center justify-between relative">
+          <div className="flex items-center gap-2.5">
             <button
-              onClick={() => {
-                if (window.history.length > 1) {
-                  navigate(-1);
-                } else {
-                  navigate('/');
-                }
-              }}
-              className="p-1.5 hover:bg-white/10 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-accent"
+              onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/')}
+              className="p-1.5 hover:bg-white/10 rounded-lg transition"
               aria-label="Go back"
             >
               <ArrowLeft className="w-4 h-4 text-primary-foreground" />
             </button>
-            <img src="https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/1752bc3ba_CowtownMastersLogo.png" alt="Cowtown Masters logo" className="w-8 h-8 object-contain" />
+            <img src="https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/1752bc3ba_CowtownMastersLogo.png" alt="" className="w-7 h-7 object-contain" />
             <div>
-              <h1 className="text-xl font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
-                COWTOWN MASTERS
+              <h1 className="text-lg font-bold text-primary-foreground leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+                COWTOWN <span className="text-accent">MASTERS</span>
               </h1>
-              <p className="text-[10px] tracking-[0.2em] text-accent uppercase font-medium" aria-label="Tagline: A Tradition Unlike Any Other">A Tradition Unlike Any Other</p>
             </div>
           </div>
           <div className="flex items-center gap-1.5">
@@ -230,79 +199,187 @@ export function PoolHeader() {
             {(user?.role === 'admin' || user?.email === pool?.admin_user_id || user?.email === pool?.created_by) && (
               <button
                 onClick={() => navigate(`/pool/${poolId}/admin`)}
-                className="text-[10px] font-bold text-accent bg-accent/10 rounded-lg px-2 py-1 border border-accent/30 hover:bg-accent/20 transition focus:outline-none focus:ring-2 focus:ring-accent"
-                aria-label="Open admin panel"
+                className="text-[10px] font-bold text-accent bg-accent/15 rounded-lg px-2 py-1 border border-accent/30 hover:bg-accent/25 transition"
               >
                 Admin
               </button>
             )}
-            {isLive ? (
-              <div className="flex items-center gap-1.5 bg-black/20 rounded-lg px-2 py-1 border border-red-500/30" role="status" aria-label="Tournament is live">
-                <span className="text-[10px] font-black tracking-widest text-red-400 uppercase">LIVE</span>
-                <span className="w-2 h-2 rounded-full bg-red-500 animate-live-pulse" aria-hidden="true" />
+            {isLive && (
+              <div className="flex items-center gap-1 bg-red-500/20 rounded-lg px-2 py-1 border border-red-500/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-live-pulse" />
+                <span className="text-[9px] font-black tracking-widest text-red-400">LIVE</span>
               </div>
-            ) : pool?.status === 'complete' ? (
-              <div className="flex items-center gap-1.5 bg-black/20 rounded-lg px-2 py-1 border border-accent/30" role="status" aria-label="Tournament complete">
-                <span className="text-[10px] font-black tracking-widest text-accent uppercase">FINAL</span>
+            )}
+            {pool?.status === 'complete' && (
+              <div className="bg-accent/15 rounded-lg px-2 py-1 border border-accent/30">
+                <span className="text-[9px] font-black tracking-widest text-accent">FINAL</span>
               </div>
-            ) : null}
+            )}
             <ParticipantBadge poolId={poolId} />
           </div>
         </div>
       </div>
 
-      {/* Tournament Status Banner */}
-      <div className="bg-gradient-to-r from-primary via-secondary to-primary border-b-2 border-accent" role="status" aria-label="Tournament round information">
-        <div className="max-w-md mx-auto flex items-center justify-center gap-3 px-4 py-1.5">
-          {roundInfo ? (
-            <>
-              <span className="text-[10px] font-black tracking-widest text-accent">{roundInfo.round}</span>
-              <span className="w-1 h-1 rounded-full bg-accent/40" aria-hidden="true" />
-              <span className="text-[10px] font-bold tracking-widest text-primary-foreground/70">{roundInfo.day}</span>
-              <span className="w-1 h-1 rounded-full bg-accent/40" aria-hidden="true" />
-              <span className="text-[10px] font-semibold text-accent/70">The Masters Tournament</span>
-            </>
-          ) : (
-            <>
-              <span className="text-[10px] font-bold tracking-widest text-primary-foreground/70">TOURNAMENT</span>
-              <span className="w-1 h-1 rounded-full bg-accent/40" aria-hidden="true" />
-              <span className="text-[10px] font-semibold text-accent/70">The Masters · Augusta National</span>
-            </>
-          )}
+      {/* Tournament Status - slimmer */}
+      {(isLive || roundInfo) && (
+        <div className="bg-gradient-to-r from-primary via-secondary to-primary border-b border-accent/30">
+          <div className="max-w-lg mx-auto flex items-center justify-center gap-2.5 px-4 py-1">
+            {roundInfo ? (
+              <>
+                <span className="text-[9px] font-black tracking-widest text-accent">{roundInfo.round}</span>
+                <span className="w-0.5 h-0.5 rounded-full bg-accent/40" />
+                <span className="text-[9px] font-bold tracking-wider text-primary-foreground/60">{roundInfo.day}</span>
+                <span className="w-0.5 h-0.5 rounded-full bg-accent/40" />
+                <span className="text-[9px] font-semibold text-accent/60">Augusta National Golf Club</span>
+              </>
+            ) : (
+              <span className="text-[9px] font-semibold text-accent/60">The Masters Tournament · Augusta National</span>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </header>
+  );
+}
+
+function MoreSheet({ poolId }) {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const { data: pool } = useQuery({
+    queryKey: ['pool', poolId],
+    queryFn: () => base44.entities.Pool.filter({ id: poolId }),
+    enabled: !!poolId,
+    select: (data) => data[0],
+  });
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyInvite = async () => {
+    const code = pool?.invite_code || '';
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback
+      const el = document.createElement('textarea');
+      el.value = code;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleShare = async () => {
+    const shareUrl = window.location.origin + `/pool/${poolId}/leaderboard`;
+    const shareData = {
+      title: pool?.name || 'Cowtown Masters Pool',
+      text: `Join my Masters pool! Use invite code: ${pool?.invite_code || ''}`,
+      url: shareUrl,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch {}
+  };
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <button className="flex flex-col items-center justify-center gap-0.5 py-2 min-h-[48px] rounded-lg transition-all relative text-primary-foreground/50 hover:text-primary-foreground/70">
+          <MoreHorizontal className="w-5 h-5 stroke-[1.5]" />
+          <span className="text-[9px] tracking-wide uppercase font-medium">More</span>
+        </button>
+      </SheetTrigger>
+      <SheetContent side="bottom" className="rounded-t-3xl border-t-2 border-accent/30 pb-8 max-h-[80vh]">
+        <SheetHeader className="pb-2">
+          <SheetTitle className="text-lg font-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
+            More Options
+          </SheetTitle>
+        </SheetHeader>
+
+        <div className="space-y-2 mt-2">
+          {MORE_ITEMS.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => { setOpen(false); navigate(`/pool/${poolId}/${item.id}`); }}
+              className="w-full flex items-center gap-3.5 p-3.5 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-sm transition-all text-left group"
+            >
+              <div className={`w-10 h-10 rounded-xl ${item.bg} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
+                <item.Icon className={`w-5 h-5 ${item.color}`} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-foreground text-sm">{item.label}</p>
+                <p className="text-[11px] text-muted-foreground">{item.desc}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {/* Share & Invite Section */}
+        <div className="mt-4 pt-4 border-t border-border">
+          <p className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase mb-2.5">Share Pool</p>
+          <div className="flex gap-2">
+            <button
+              onClick={handleCopyInvite}
+              className="flex-1 flex items-center justify-center gap-2 p-3 rounded-xl bg-primary/5 border border-primary/15 hover:bg-primary/10 transition text-sm font-semibold text-primary"
+            >
+              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              {copied ? 'Copied!' : pool?.invite_code || 'Code'}
+            </button>
+            <button
+              onClick={handleShare}
+              className="flex-1 flex items-center justify-center gap-2 p-3 rounded-xl bg-accent/10 border border-accent/20 hover:bg-accent/15 transition text-sm font-semibold text-accent"
+            >
+              <Share2 className="w-4 h-4" />
+              Share Link
+            </button>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
 
 export function PoolBottomNav({ poolId }) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-secondary to-primary border-t border-accent/30 backdrop-blur-lg" role="navigation" aria-label="Pool navigation">
-      <div className="max-w-md mx-auto grid grid-cols-7 px-1 py-1 pb-[env(safe-area-inset-bottom,0.5rem)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-[#0a3d0a] to-primary border-t border-accent/30 backdrop-blur-lg" role="navigation" aria-label="Pool navigation">
+      <div className="max-w-lg mx-auto grid grid-cols-5 px-2 py-1 pb-[env(safe-area-inset-bottom,0.5rem)]">
         {TABS.map((tab) => (
-          <NavLink
-            key={tab.id}
-            to={`/pool/${poolId}/${tab.id}`}
-            replace
-            aria-label={tab.label}
-            className={({ isActive }) =>
-              `flex flex-col items-center justify-center gap-0.5 py-2 min-h-[48px] rounded-lg transition-all relative focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 ${
-                isActive
-                  ? 'text-accent'
-                  : 'text-primary-foreground/50 hover:text-primary-foreground/70 active:text-primary-foreground/90'
-              }`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                {isActive && (
-                  <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-accent" aria-hidden="true" />
-                )}
-                <tab.Icon className={`w-5 h-5 transition-all ${isActive ? 'stroke-[2.5] scale-110' : 'stroke-[1.5]'}`} aria-hidden="true" />
-                <span className={`text-[9px] tracking-wide uppercase ${isActive ? 'font-bold' : 'font-medium'}`}>{tab.label}</span>
-              </>
-            )}
-          </NavLink>
+          tab.id === 'more' ? (
+            <MoreSheet key={tab.id} poolId={poolId} />
+          ) : (
+            <NavLink
+              key={tab.id}
+              to={`/pool/${poolId}/${tab.id}`}
+              replace
+              aria-label={tab.label}
+              className={({ isActive }) =>
+                `flex flex-col items-center justify-center gap-0.5 py-2 min-h-[48px] rounded-lg transition-all relative ${
+                  isActive
+                    ? 'text-accent'
+                    : 'text-primary-foreground/50 hover:text-primary-foreground/70'
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-accent" />
+                  )}
+                  <tab.Icon className={`w-5 h-5 transition-all ${isActive ? 'stroke-[2.5] scale-110' : 'stroke-[1.5]'}`} />
+                  <span className={`text-[9px] tracking-wide uppercase ${isActive ? 'font-bold' : 'font-medium'}`}>{tab.label}</span>
+                </>
+              )}
+            </NavLink>
+          )
         ))}
       </div>
     </nav>
@@ -311,17 +388,17 @@ export function PoolBottomNav({ poolId }) {
 
 function CinderCrownFooter() {
   return (
-    <footer className="bg-gradient-to-r from-secondary to-primary border-t border-accent/20 py-3 pb-20 px-4" role="contentinfo">
-      <div className="max-w-md mx-auto flex items-center justify-center gap-2">
-        <span className="text-[10px] text-primary-foreground/50 tracking-wide">© {new Date().getFullYear()} Created by</span>
+    <footer className="bg-gradient-to-r from-[#0a3d0a] to-primary border-t border-accent/20 py-3 pb-20 px-4">
+      <div className="max-w-lg mx-auto flex items-center justify-center gap-2">
+        <span className="text-[10px] text-primary-foreground/40 tracking-wide">© {new Date().getFullYear()}</span>
         <a
           href="https://cinderandcrown.com/"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 hover:opacity-80 transition focus:outline-none focus:ring-2 focus:ring-accent rounded"
-          aria-label="Visit Cinder and Crown website (opens in new tab)"
+          className="flex items-center gap-1.5 hover:opacity-80 transition"
+          aria-label="Cinder and Crown"
         >
-          <svg width="18" height="18" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="flex-shrink-0">
+          <svg width="14" height="14" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
             <path d="M38 22L42 16L46 20L50 12L54 20L58 16L62 22" stroke="#E8A838" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M50 28C50 28 44 35 42 42C40 49 42 58 50 68C58 58 60 49 58 42C56 35 50 28 50 28Z" fill="#6B1D2A"/>
             <path d="M42 42C42 42 30 32 22 30C26 36 28 44 32 50C36 56 42 58 42 58C40 52 40 46 42 42Z" fill="#6B1D2A"/>
@@ -332,7 +409,7 @@ function CinderCrownFooter() {
             <path d="M50 72C50 72 48 80 47 86L50 82L53 86C52 80 50 72 50 72Z" fill="#E8A838" opacity="0.7"/>
             <ellipse cx="50" cy="34" rx="3" ry="4" fill="#E8A838"/>
           </svg>
-          <span className="text-[11px] font-bold text-accent tracking-wide">Cinder & Crown</span>
+          <span className="text-[10px] font-bold text-accent/70 tracking-wide">Cinder & Crown</span>
         </a>
       </div>
     </footer>
@@ -347,7 +424,7 @@ export default function PoolLayout({ children }) {
         Skip to main content
       </a>
       <PoolHeader />
-      <main id="main-content" className="max-w-md mx-auto px-0 w-full pb-20" role="main">
+      <main id="main-content" className="max-w-lg mx-auto px-0 w-full pb-20" role="main">
         {children}
       </main>
       <CinderCrownFooter />

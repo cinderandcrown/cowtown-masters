@@ -22,7 +22,6 @@ export default function PoolDashboard() {
   const [selectedEntry, setSelectedEntry] = useState(null);
   const queryClient = useQueryClient();
 
-  // Redirect to /pool/:poolId/leaderboard if no valid tab
   useEffect(() => {
     if (!tabParam || !VALID_TABS.includes(tabParam)) {
       navigate(`/pool/${poolId}/leaderboard`, { replace: true });
@@ -40,36 +39,26 @@ export default function PoolDashboard() {
 
   const { pullProps, PullIndicator } = usePullToRefresh(handleRefresh);
 
-  // Scroll to top on initial load
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
   }, []);
 
   useEffect(() => {
     const tabNames = {
       leaderboard: 'Leaderboard',
       teams: 'Teams',
-      golfers: 'Golfers',
+      golfers: 'Field',
       draw: 'Draw',
       messages: 'Smack Talk',
       rules: 'Rules',
-      history: 'History',
+      history: 'Champions',
     };
     document.title = `Cowtown Masters - ${tabNames[activeTab] || 'Pool'}`;
   }, [activeTab]);
 
-  // Scroll to top on tab change
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
   }, [activeTab]);
-
-  const handleTabChange = useCallback((tab) => {
-    navigate(`/pool/${poolId}/${tab}`);
-  }, [navigate, poolId]);
 
   return (
     <PoolLayout>
