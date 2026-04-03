@@ -157,8 +157,8 @@ Deno.serve(async (req) => {
 
   try {
     // Hard gate: do NOT poll before the Masters actually starts
-    // 2026 Masters Round 1 tees off Thursday April 10, ~8am ET (12:00 UTC)
-    const MASTERS_START = new Date('2026-04-10T12:00:00Z');
+    // 2026 Masters Round 1 tees off Thursday April 9, ~8am ET (12:00 UTC)
+    const MASTERS_START = new Date('2026-04-09T12:00:00Z');
     if (new Date() < MASTERS_START) {
       return Response.json({
         message: 'Masters has not started yet. Polling disabled until April 10.',
