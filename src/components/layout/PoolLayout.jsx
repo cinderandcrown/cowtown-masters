@@ -210,12 +210,13 @@ export function PoolHeader() {
 
   const isLive = pool?.status === 'live';
 
-  // Determine current round day based on tournament schedule (Thu-Sun)
-  const day = new Date().getDay(); // 0=Sun, 4=Thu, 5=Fri, 6=Sat
-  const roundInfo = day === 4 ? { round: 'R1', day: 'THU' }
-    : day === 5 ? { round: 'R2', day: 'FRI' }
-    : day === 6 ? { round: 'R3', day: 'SAT' }
-    : day === 0 ? { round: 'R4', day: 'SUN' }
+  // Determine current round day based on 2026 Masters schedule (Apr 9-12)
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const roundInfo = dateStr === '2026-04-09' ? { round: 'R1', day: 'THU' }
+    : dateStr === '2026-04-10' ? { round: 'R2', day: 'FRI' }
+    : dateStr === '2026-04-11' ? { round: 'R3', day: 'SAT' }
+    : dateStr === '2026-04-12' ? { round: 'R4', day: 'SUN' }
     : null;
 
   return (

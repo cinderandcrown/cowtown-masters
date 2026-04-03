@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
+const MASTERS_FEED_URL = 'https://www.masters.com/en_US/scores/feeds/2026/scores.json';
 const ESPN_SCOREBOARD_URL = 'https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard';
 
 const PHASE_CONFIG = {
@@ -71,66 +72,9 @@ async function detectPhase(espnData) {
 }
 
 async function fetchAndUpdateScores(base44, poolId) {
-  const espnRes = await fetch(ESPN_SCOREBOARD_URL);
-  if (!espnRes.ok) throw new Error('ESPN API returned ' + espnRes.status);
-  const espnData = await espnRes.json();
-
-  const events = espnData?.events || [];
-  const mastersEvent = events.find(e =>
-    e.name?.toLowerCase().includes('masters') || e.shortName?.toLowerCase().includes('masters')
-  ) || events[0];
-  if (!mastersEvent) return { updated: 0, matched: 0, message: 'No tournament found' };
-
-  const competition = mastersEvent.competitions?.[0];
-  if (!competition) return { updated: 0, matched: 0, message: 'No competition data' };
-
-  const competitors = competition.competitors || [];
-  const espnMap = {};
-
-  for (const c of competitors) {
-    const athlete = c.athlete || {};
-    const name = athlete.displayName || athlete.shortName || '';
-    const normalized = normalizeName(name);
-    const linescores = c.linescores || [];
-    const roundsToPar = [];
-    const roundScores = [];
-    for (let i = 0; i < 4; i++) {
-      roundsToPar.push(linescores[i]?.displayValue !== undefined ? parseScoreToPar(linescores[i].displayValue) : null);
-      roundScores.push(linescores[i]?.value !== undefined ? linescores[i].value : null);
-    }
-
-    const sd = c.status?.type?.name || '';
-    let golferStatus = 'active';
-    if (sd === 'cut') golferStatus = 'cut';
-    else if (sd === 'wd' || sd === 'withdrawn') golferStatus = 'withdrawn';
-    else if (sd === 'dq' || sd === 'disqualified') golferStatus = 'disqualified';
-
-    espnMap[normalized] = {
-      score_to_par: parseScoreToPar(c.score?.displayValue) || parseScoreToPar(c.statistics?.[0]?.displayValue) || 0,
-      round_1: roundsToPar[0], round_2: roundsToPar[1], round_3: roundsToPar[2], round_4: roundsToPar[3],
-      actual_scores: roundScores.filter(s => s !== null),
-      status: golferStatus,
-      position: c.status?.position?.displayName || c.sortOrder?.toString() || null,
-      thru: c.status?.thru?.toString() || c.status?.displayValue || null,
-    };
-  }
-
-  const golfers = await base44.asServiceRole.entities.Golfer.filter({ pool_id: poolId });
-  let updated = 0, matched = 0;
-
-  for (const golfer of golfers) {
-    const normalized = normalizeName(golfer.name);
-    const data = espnMap[normalized];
-    if (data) {
-      matched++;
-      const changed = golfer.score_to_par !== data.score_to_par || golfer.round_1 !== data.round_1 ||
-        golfer.round_2 !== data.round_2 || golfer.round_3 !== data.round_3 || golfer.round_4 !== data.round_4 ||
-        golfer.status !== data.status || golfer.position !== data.position || golfer.thru !== data.thru;
-      if (changed) { await base44.asServiceRole.entities.Golfer.update(golfer.id, data); updated++; }
-    }
-  }
-
-  return { tournament: mastersEvent.name, espn_competitors: competitors.length, pool_golfers: golfers.length, matched, updated };
+  // Delegate to the unified fetchMastersScores function (Masters.com primary + ESPN fallback)
+  const result = await base44.asServiceRole.functions.invoke('fetchMastersScores', {});
+  return result?.data || { matched: 0, updated: 0, source: 'unknown' };
 }
 
 async function log(base44, poolId, action, detail, severity = 'info', metadata = null) {
