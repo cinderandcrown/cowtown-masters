@@ -2,6 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Trophy, Calendar, ChevronDown, ChevronUp, Users } from 'lucide-react';
 
 const MASTERS_PATCH = 'https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/444bc63fb_AugustaGolfMasterGreenJacketPatch.png';
+
+// Build a set of all past champion names (lowercase) and the years they won
+function getPastChampions() {
+  const champs = {};
+  for (const [year, data] of Object.entries(POOL_HISTORY)) {
+    const name = data.winner.toLowerCase();
+    if (!champs[name]) champs[name] = [];
+    champs[name].push(Number(year));
+  }
+  return champs;
+}
 import { POOL_HISTORY } from '@/lib/poolHistoryData';
 import { fireGoldRain } from '@/lib/useConfetti';
 import { hapticTap } from '@/lib/haptics';
@@ -13,9 +24,10 @@ const scoreColor = (s) => {
   return 'text-accent';
 };
 
-function ChampionCard({ year, data, isExpanded, onToggle }) {
+function ChampionCard({ year, data, isExpanded, onToggle, pastChampions }) {
   const standings = data.standings || [];
   const hasFullStandings = standings.length > 1;
+  const currentYear = Number(year);
 
   return (
     <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden group">
@@ -89,8 +101,11 @@ function ChampionCard({ year, data, isExpanded, onToggle }) {
               }`}>
                 {i === 0 ? '🏆' : s.rank}
               </span>
-              <div className="min-w-0">
+              <div className="min-w-0 flex items-center gap-1">
                 <p className={`text-xs font-semibold text-foreground truncate ${i === 0 ? 'font-black' : ''}`}>{s.name}</p>
+                {pastChampions[s.name.toLowerCase()]?.some(y => y !== currentYear) && (
+                  <img src={MASTERS_PATCH} alt="Past Champion" className="w-4 h-4 rounded-full flex-shrink-0" title={`Champion: ${pastChampions[s.name.toLowerCase()].filter(y => y !== currentYear).join(', ')}`} />
+                )}
               </div>
               <div className="text-center">
                 <p className={`text-[10px] font-semibold ${scoreColor(s.scoreA)}`}>{formatScore(s.scoreA)}</p>
@@ -121,6 +136,7 @@ function ChampionCard({ year, data, isExpanded, onToggle }) {
 export default function HistoryTab({ poolId }) {
   const years = Object.keys(POOL_HISTORY).sort((a, b) => Number(b) - Number(a));
   const [expandedYear, setExpandedYear] = useState(null);
+  const pastChampions = getPastChampions();
 
   // Fire gold rain when viewing champions wall
   useEffect(() => {
@@ -181,6 +197,7 @@ export default function HistoryTab({ poolId }) {
             data={POOL_HISTORY[year]}
             isExpanded={expandedYear === year}
             onToggle={() => setExpandedYear(expandedYear === year ? null : year)}
+            pastChampions={pastChampions}
           />
         </div>
       ))}
