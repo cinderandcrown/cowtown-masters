@@ -15,6 +15,7 @@ const TABS = [
   { id: 'teams', label: 'Teams', Icon: Users },
   { id: 'golfers', label: 'Field', Icon: Flag },
   { id: 'draw', label: 'Draw', Icon: Shuffle },
+  { id: 'messages', label: 'Smack', Icon: MessageCircle },
   { id: 'more', label: 'More', Icon: MoreHorizontal },
 ];
 
@@ -304,7 +305,6 @@ export function PoolBottomNav({ poolId }) {
   };
 
   const MORE_ITEMS = [
-    { id: 'messages', label: 'Smack Talk', Icon: MessageCircle },
     { id: 'history', label: 'Champions Wall', Icon: Trophy },
     { id: 'rules', label: 'Pool Rules', Icon: BookOpen },
   ];
@@ -312,7 +312,7 @@ export function PoolBottomNav({ poolId }) {
   return (
     <>
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-secondary to-primary border-t border-accent/30 backdrop-blur-lg" role="navigation" aria-label="Pool navigation">
-      <div className="max-w-lg mx-auto grid grid-cols-5 px-1 py-1 pb-[env(safe-area-inset-bottom,0.5rem)]">
+      <div className="max-w-lg mx-auto grid grid-cols-6 px-1 py-1 pb-[env(safe-area-inset-bottom,0.5rem)]">
         {TABS.map((tab) => (
           tab.id === 'more' ? (
             <button
