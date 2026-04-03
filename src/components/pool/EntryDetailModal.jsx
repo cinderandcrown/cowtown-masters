@@ -39,18 +39,12 @@ export default function EntryDetailModal({ entry, open, onOpenChange, rank, tota
   const isPastChamp = entry ? !!getChampionYears(entry.participant_name) : false;
   useEffect(() => {
     if (!open || !entry) return;
-    if (isLeader || isPastChamp) {
+    if (isPastChamp) {
       fireJackpot();
       hapticTripleBuzz();
       soundJackpot();
-    } else if (isMoneyZone) {
-      fireMoneyZone();
-      hapticSuccess();
-      soundCashRegister();
-    } else {
-      soundSweepUp();
     }
-  }, [open, isLeader, isMoneyZone, isPastChamp, entry]);
+  }, [open, isPastChamp, entry]);
 
   if (!entry) return null;
 

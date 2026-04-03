@@ -237,8 +237,6 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
           onClick={() => {
           onSelectEntry({ ...standings[0], _rank: standings[0].rank, _totalEntries: standings.length });
           hapticSuccess();
-          fireGoldRain();
-          soundJackpot();
           }}
         >
           <div className="absolute inset-0 animate-shimmer pointer-events-none" />
@@ -336,8 +334,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
               tabIndex={0}
               onClick={() => {
                 onSelectEntry({ ...entry, _rank: entry.rank, _totalEntries: standings.length });
-                if (entry.rank <= 3) { fireMoneyZone(); hapticDoubleTap(); soundCashRegister(); }
-                else { hapticTap(); soundPop(); }
+                hapticTap();
               }}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelectEntry({ ...entry, _rank: entry.rank, _totalEntries: standings.length }); } }}
               aria-label={`View details for ${entry.team_name || entry.participant_name}, position ${entry.displayRank}`}

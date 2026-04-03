@@ -196,9 +196,12 @@ export default function HistoryTab({ poolId }) {
   const [expandedYear, setExpandedYear] = useState(null);
   const pastChampions = getPastChampions();
 
-  // Fire gold rain when viewing champions wall
+  // Fire confetti + sound when entering champions wall
   useEffect(() => {
-    const timer = setTimeout(() => { fireGoldRain(); soundShimmer(); }, 500);
+    const timer = setTimeout(() => {
+      fireGoldRain();
+      soundChampion();
+    }, 400);
     return () => clearTimeout(timer);
   }, []);
 
