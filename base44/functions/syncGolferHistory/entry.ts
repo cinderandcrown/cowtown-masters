@@ -1,16 +1,11 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 /**
- * Initializes a new Masters pool with all golfers.
- * 
- * CANONICAL DATA SOURCE: This field list + history MUST match
- * lib/mastersField2026.js + lib/mastersHistoryData.js exactly.
- * If you update one, update the other.
+ * One-time function to sync masters_history on existing Golfer records
+ * to match the canonical data in lib/mastersHistoryData.js.
+ * This fixes the divergence from the old initializePool data.
  */
 
-// ──────────────────────────────────────────────
-// MASTERS HISTORY — synced from lib/mastersHistoryData.js
-// ──────────────────────────────────────────────
 const MASTERS_HISTORY = {
   'Scottie Scheffler': { appearances: 6, cuts_made: 6, wins: 2, top5s: 4, top10s: 5, top25s: 6, best_finish: '1st', best_finish_year: 2022, avg_finish: 5.8, avg_score: 70.3, recent_results: [{ year: 2025, finish: '4th', score: -8 }, { year: 2024, finish: '1st', score: -11 }, { year: 2023, finish: 'T10', score: -5 }] },
   'Rory McIlroy': { appearances: 17, cuts_made: 13, wins: 1, top5s: 6, top10s: 8, top25s: 11, best_finish: '1st', best_finish_year: 2025, avg_finish: 17.2, avg_score: 71.6, recent_results: [{ year: 2025, finish: '1st', score: -11 }, { year: 2024, finish: 'T22', score: +1 }, { year: 2023, finish: 'T16', score: -3 }] },
@@ -103,161 +98,58 @@ const MASTERS_HISTORY = {
   'Danny Willett': { appearances: 8, cuts_made: 6, wins: 1, top5s: 1, top10s: 1, top25s: 3, best_finish: '1st', best_finish_year: 2016, avg_finish: 25.8, avg_score: 72.4, recent_results: [{ year: 2025, finish: 'T42', score: +4 }, { year: 2024, finish: null, score: null }, { year: 2023, finish: null, score: null }] },
 };
 
-// ──────────────────────────────────────────────
-// MASTERS FIELD — synced from lib/mastersField2026.js
-// ──────────────────────────────────────────────
-const MASTERS_FIELD = [
-  { name: 'Scottie Scheffler', betting_odds: '+350', world_ranking: 1 },
-  { name: 'Rory McIlroy', betting_odds: '+700', world_ranking: 2 },
-  { name: 'Jon Rahm', betting_odds: '+1000', world_ranking: 3 },
-  { name: 'Bryson DeChambeau', betting_odds: '+1000', world_ranking: 4 },
-  { name: 'Xander Schauffele', betting_odds: '+1800', world_ranking: 5 },
-  { name: 'Ludvig Åberg', betting_odds: '+1600', world_ranking: 6 },
-  { name: 'Collin Morikawa', betting_odds: '+2200', world_ranking: 7 },
-  { name: 'Hideki Matsuyama', betting_odds: '+3500', world_ranking: 8 },
-  { name: 'Patrick Cantlay', betting_odds: '+2500', world_ranking: 9 },
-  { name: 'Viktor Hovland', betting_odds: '+3000', world_ranking: 10 },
-  { name: 'Tommy Fleetwood', betting_odds: '+3000', world_ranking: 11 },
-  { name: 'Shane Lowry', betting_odds: '+3500', world_ranking: 12 },
-  { name: 'Robert MacIntyre', betting_odds: '+3500', world_ranking: 13 },
-  { name: 'Russell Henley', betting_odds: '+4000', world_ranking: 14 },
-  { name: 'Matt Fitzpatrick', betting_odds: '+3000', world_ranking: 15 },
-  { name: 'Sahith Theegala', betting_odds: '+4000', world_ranking: 16 },
-  { name: 'Sungjae Im', betting_odds: '+4000', world_ranking: 17 },
-  { name: 'Patrick Reed', betting_odds: '+3000', world_ranking: 18 },
-  { name: 'Brian Harman', betting_odds: '+4000', world_ranking: 19 },
-  { name: 'Keegan Bradley', betting_odds: '+4000', world_ranking: 20 },
-  { name: 'Justin Thomas', betting_odds: '+3500', world_ranking: 21 },
-  { name: 'Jordan Spieth', betting_odds: '+4000', world_ranking: 22 },
-  { name: 'Brooks Koepka', betting_odds: '+4500', world_ranking: 23 },
-  { name: 'Sam Burns', betting_odds: '+5000', world_ranking: 24 },
-  { name: 'Cameron Young', betting_odds: '+4000', world_ranking: 25 },
-  { name: 'Tony Finau', betting_odds: '+5000', world_ranking: 26 },
-  { name: 'Corey Conners', betting_odds: '+5000', world_ranking: 27 },
-  { name: 'Justin Rose', betting_odds: '+5000', world_ranking: 28 },
-  { name: 'Tom Kim', betting_odds: '+5000', world_ranking: 29 },
-  { name: 'Min Woo Lee', betting_odds: '+5000', world_ranking: 30 },
-  { name: 'Aaron Rai', betting_odds: '+5000', world_ranking: 31 },
-  { name: 'Wyndham Clark', betting_odds: '+8000', world_ranking: 32 },
-  { name: 'Max Homa', betting_odds: '+5000', world_ranking: 33 },
-  { name: 'Sepp Straka', betting_odds: '+6000', world_ranking: 34 },
-  { name: 'Cameron Smith', betting_odds: '+6600', world_ranking: 35 },
-  { name: 'Adam Scott', betting_odds: '+6600', world_ranking: 36 },
-  { name: 'Jason Day', betting_odds: '+7000', world_ranking: 37 },
-  { name: 'Si Woo Kim', betting_odds: '+7000', world_ranking: 38 },
-  { name: 'Akshay Bhatia', betting_odds: '+5000', world_ranking: 39 },
-  { name: 'Chris Kirk', betting_odds: '+7000', world_ranking: 40 },
-  { name: 'Tyrrell Hatton', betting_odds: '+4500', world_ranking: 41 },
-  { name: 'Nick Taylor', betting_odds: '+8000', world_ranking: 42 },
-  { name: 'Harris English', betting_odds: '+7000', world_ranking: 43 },
-  { name: 'Daniel Berger', betting_odds: '+6000', world_ranking: 44 },
-  { name: 'Billy Horschel', betting_odds: '+8000', world_ranking: 45 },
-  { name: 'Davis Thompson', betting_odds: '+6000', world_ranking: 46 },
-  { name: 'Maverick McNealy', betting_odds: '+6000', world_ranking: 47 },
-  { name: 'Chris Gotterup', betting_odds: '+4500', world_ranking: 48 },
-  { name: 'Kurt Kitayama', betting_odds: '+7000', world_ranking: 49 },
-  { name: 'Ben Griffin', betting_odds: '+7000', world_ranking: 50 },
-  { name: 'Nicolai Hojgaard', betting_odds: '+5000', world_ranking: 51 },
-  { name: 'Ryan Fox', betting_odds: '+6000', world_ranking: 52 },
-  { name: 'J.J. Spaun', betting_odds: '+9000', world_ranking: 53 },
-  { name: 'Jacob Bridgeman', betting_odds: '+8000', world_ranking: 54 },
-  { name: 'Joaquín Niemann', betting_odds: '+5000', world_ranking: 55 },
-  { name: 'Dustin Johnson', betting_odds: '+9000', world_ranking: 56 },
-  { name: 'Michael Brennan', betting_odds: '+8000', world_ranking: 57 },
-  { name: 'Denny McCarthy', betting_odds: '+8000', world_ranking: 58 },
-  { name: 'Andrew Novak', betting_odds: '+9000', world_ranking: 59 },
-  { name: 'Ryan Gerard', betting_odds: '+9000', world_ranking: 60 },
-  { name: 'Alex Noren', betting_odds: '+10000', world_ranking: 61 },
-  { name: 'Kristoffer Reitan', betting_odds: '+10000', world_ranking: 62 },
-  { name: 'Sam Stevens', betting_odds: '+10000', world_ranking: 63 },
-  { name: 'Max Greyserman', betting_odds: '+8000', world_ranking: 64 },
-  { name: 'Nick Dunlap', betting_odds: '+7000', world_ranking: 65 },
-  { name: 'Rasmus Hojgaard', betting_odds: '+8000', world_ranking: 66 },
-  { name: 'Harry Hall', betting_odds: '+10000', world_ranking: 67 },
-  { name: 'Sergio Garcia', betting_odds: '+10000', world_ranking: 68 },
-  { name: 'Phil Mickelson', betting_odds: '+20000', world_ranking: 69 },
-  { name: 'Nico Echavarria', betting_odds: '+10000', world_ranking: 70 },
-  { name: 'Marco Penge', betting_odds: '+15000', world_ranking: 71 },
-  { name: 'Carlos Ortiz', betting_odds: '+15000', world_ranking: 72 },
-  { name: 'Davis Riley', betting_odds: '+10000', world_ranking: 73 },
-  { name: 'Aldrich Potgieter', betting_odds: '+12000', world_ranking: 74 },
-  { name: 'Sami Valimaki', betting_odds: '+12000', world_ranking: 75 },
-  { name: 'Brian Campbell', betting_odds: '+15000', world_ranking: 76 },
-  { name: 'Naoyuki Kataoka', betting_odds: '+20000', world_ranking: 77 },
-  { name: 'Tom McKibbin', betting_odds: '+10000', world_ranking: 78 },
-  { name: 'Casey Jarvis', betting_odds: '+20000', world_ranking: 79 },
-  { name: 'Rasmus Neergaard-Petersen', betting_odds: '+15000', world_ranking: 80 },
-  { name: 'Matt McCarty', betting_odds: '+12000', world_ranking: 81 },
-  { name: 'Jake Knapp', betting_odds: '+8000', world_ranking: 82 },
-  { name: 'Johnny Keefer', betting_odds: '+15000', world_ranking: 83 },
-  { name: 'Michael Kim', betting_odds: '+15000', world_ranking: 84 },
-  { name: 'Haotong Li', betting_odds: '+15000', world_ranking: 85 },
-  { name: 'Bubba Watson', betting_odds: '+25000', world_ranking: 86 },
-  { name: 'Charl Schwartzel', betting_odds: '+35000', world_ranking: 87 },
-  { name: 'Zach Johnson', betting_odds: '+40000', world_ranking: 88 },
-  { name: 'Danny Willett', betting_odds: '+50000', world_ranking: 89 },
-];
-
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { poolName, year, entryFee, maxEntries } = await req.json();
+    // Fetch all golfers in the pool
+    const pools = await base44.asServiceRole.entities.Pool.filter({});
+    const pool = pools[0];
+    if (!pool) {
+      return Response.json({ error: 'No pool found' }, { status: 404 });
+    }
 
-    // Create the pool
-    const pool = await base44.asServiceRole.entities.Pool.create({
-      name: poolName || 'Cowtown Masters 2026',
-      year: year || 2026,
-      status: 'setup',
-      entry_fee: entryFee || 50,
-      payout_structure: { first: 60, second: 25, third: 15 },
-      admin_user_id: user.email,
-      invite_code: Math.random().toString(36).substring(2, 8).toUpperCase(),
-      max_entries: maxEntries || 30,
-      golfers_per_group: Math.floor((maxEntries || 30) / 2),
-    });
+    const golfers = await base44.asServiceRole.entities.Golfer.filter({ pool_id: pool.id });
+    let updated = 0;
+    let skipped = 0;
 
-    // Bulk create all golfers (group assignment is dynamic based on entry count)
-    const golferRecords = MASTERS_FIELD.map((g) => ({
-      pool_id: pool.id,
-      name: g.name,
-      group: 'A', // Will be reassigned dynamically by frontend
-      betting_odds: g.betting_odds,
-      world_ranking: g.world_ranking,
-      score_to_par: 0,
-      round_1: null,
-      round_2: null,
-      round_3: null,
-      round_4: null,
-      status: 'active',
-      is_drafted: false,
-      masters_history: MASTERS_HISTORY[g.name] || null,
-    }));
+    for (const golfer of golfers) {
+      const canonical = MASTERS_HISTORY[golfer.name];
+      if (canonical) {
+        // Compare to see if update is needed
+        const current = golfer.masters_history;
+        const needsUpdate = !current ||
+          current.appearances !== canonical.appearances ||
+          current.wins !== canonical.wins ||
+          current.best_finish !== canonical.best_finish ||
+          current.best_finish_year !== canonical.best_finish_year ||
+          JSON.stringify(current.recent_results) !== JSON.stringify(canonical.recent_results);
 
-    // BulkCreate in batches of 25
-    let totalCreated = 0;
-    for (let i = 0; i < golferRecords.length; i += 25) {
-      const batch = golferRecords.slice(i, i + 25);
-      const created = await base44.asServiceRole.entities.Golfer.bulkCreate(batch);
-      totalCreated += created.length;
+        if (needsUpdate) {
+          await base44.asServiceRole.entities.Golfer.update(golfer.id, {
+            masters_history: canonical,
+          });
+          updated++;
+        } else {
+          skipped++;
+        }
+      } else {
+        skipped++;
+      }
     }
 
     return Response.json({
       success: true,
-      pool: {
-        id: pool.id,
-        name: pool.name,
-        invite_code: pool.invite_code,
-      },
-      golfers_created: totalCreated,
+      pool_id: pool.id,
+      total_golfers: golfers.length,
+      updated,
+      skipped,
     });
   } catch (error) {
-    console.error('Pool initialization error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
