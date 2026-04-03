@@ -1,0 +1,94 @@
+{
+  "name": "Golfer",
+  "type": "object",
+  "properties": {
+    "pool_id": {
+      "type": "string",
+      "description": "Reference to Pool entity"
+    },
+    "name": {
+      "type": "string",
+      "description": "Golfer full name"
+    },
+    "group": {
+      "type": "string",
+      "enum": [
+        "A",
+        "B"
+      ],
+      "description": "Assigned group (A=favorites, B=longshots)"
+    },
+    "betting_odds": {
+      "type": "string",
+      "description": "Betting odds (e.g., '+1400')"
+    },
+    "world_ranking": {
+      "type": "number",
+      "description": "Current world golf ranking"
+    },
+    "score_to_par": {
+      "type": "number",
+      "description": "Current tournament score to par"
+    },
+    "round_1": {
+      "type": "number",
+      "description": "Round 1 score to par"
+    },
+    "round_2": {
+      "type": "number",
+      "description": "Round 2 score to par"
+    },
+    "round_3": {
+      "type": "number",
+      "description": "Round 3 score to par"
+    },
+    "round_4": {
+      "type": "number",
+      "description": "Round 4 score to par"
+    },
+    "actual_scores": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "description": "Raw strokes per round [68, 71, 72, 69]"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "cut",
+        "withdrawn",
+        "disqualified"
+      ],
+      "default": "active",
+      "description": "Tournament status"
+    },
+    "position": {
+      "type": "string",
+      "description": "Final position (e.g., 'T5', '1', 'CUT')"
+    },
+    "thru": {
+      "type": "string",
+      "description": "Holes completed (e.g., 'F', '12', '\u2014')"
+    },
+    "is_drafted": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether golfer has been drafted"
+    },
+    "drafted_by": {
+      "type": "string",
+      "description": "PoolEntry ID that drafted this golfer"
+    },
+    "masters_history": {
+      "type": "object",
+      "description": "Historical Masters tournament data: { appearances, cuts_made, wins, top5s, top10s, top25s, best_finish, best_finish_year, avg_finish, avg_score, recent_results: [{year, finish, score}] }"
+    }
+  },
+  "required": [
+    "pool_id",
+    "name",
+    "group"
+  ]
+}

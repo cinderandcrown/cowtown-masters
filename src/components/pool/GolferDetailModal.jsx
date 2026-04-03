@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { formatScore, scoreColor } from '@/lib/scoreUtils';
-import { TrendingDown, TrendingUp, Minus, BarChart3, Activity } from 'lucide-react';
+import { TrendingDown, TrendingUp, Minus, BarChart3, Activity, History } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from 'recharts';
 import GolferAnalyticsTab from './GolferAnalyticsTab';
+import GolferHistorySection from './GolferHistorySection';
 
 function RoundRow({ label, scoreToPar, strokes, isComplete }) {
   return (
@@ -144,10 +145,25 @@ export default function GolferDetailModal({ golfer, open, onOpenChange }) {
             <Activity className="w-3.5 h-3.5" />
             Analytics
           </button>
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition ${
+              activeTab === 'history'
+                ? 'bg-primary text-white'
+                : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+            }`}
+          >
+            <History className="w-3.5 h-3.5" />
+            History
+          </button>
         </div>
 
         {/* Tab Content */}
-        {activeTab === 'analytics' ? (
+        {activeTab === 'history' ? (
+          <div className="p-4">
+            <GolferHistorySection history={golfer.masters_history} />
+          </div>
+        ) : activeTab === 'analytics' ? (
           <div className="p-4">
             <GolferAnalyticsTab golfer={golfer} />
           </div>

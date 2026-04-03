@@ -178,6 +178,15 @@ export default function GolfersTab({ poolId }) {
                     {g.group === 'A' ? 'TOP' : 'BTM'}
                   </span>
                   {g.betting_odds && <span className="text-[9px] text-muted-foreground">{g.betting_odds}</span>}
+                  {g.masters_history?.wins > 0 && (
+                    <span className="text-[8px] font-black text-accent bg-accent/15 px-1 rounded">🏆{g.masters_history.wins > 1 ? `×${g.masters_history.wins}` : ''}</span>
+                  )}
+                  {g.masters_history?.appearances > 0 && !g.masters_history?.wins && (
+                    <span className="text-[8px] text-muted-foreground/70">{g.masters_history.appearances}x</span>
+                  )}
+                  {(!g.masters_history || g.masters_history.appearances === 0) && (
+                    <span className="text-[8px] text-muted-foreground/50 italic">debut</span>
+                  )}
                 </div>
               </div>
               {[g.round_1, g.round_2, g.round_3, g.round_4].map((r, j) => (

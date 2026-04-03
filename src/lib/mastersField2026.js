@@ -3,7 +3,9 @@
 // Removed: Past champions NOT expected to play (Tiger Woods, Jack Nicklaus, Gary Player, etc.)
 // Groups will be assigned dynamically based on participant count
 
-export const MASTERS_FIELD_2026 = [
+import { MASTERS_HISTORY } from './mastersHistoryData';
+
+const RAW_FIELD = [
   { name: 'Scottie Scheffler', betting_odds: '+350', world_ranking: 1 },
   { name: 'Rory McIlroy', betting_odds: '+700', world_ranking: 2 },
   { name: 'Jon Rahm', betting_odds: '+1000', world_ranking: 3 },
@@ -100,3 +102,9 @@ export const MASTERS_FIELD_2026 = [
   { name: 'Mike Weir', betting_odds: '+100000', world_ranking: 94 },
   { name: 'José María Olazábal', betting_odds: '+200000', world_ranking: 95 },
 ];
+
+// Merge history data into each golfer
+export const MASTERS_FIELD_2026 = RAW_FIELD.map(g => ({
+  ...g,
+  masters_history: MASTERS_HISTORY[g.name] || null,
+}));

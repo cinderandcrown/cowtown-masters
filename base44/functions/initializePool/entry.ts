@@ -1,4 +1,43 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+
+// Historical Masters data keyed by golfer name
+const MASTERS_HISTORY = {
+  'Scottie Scheffler': { appearances: 5, cuts_made: 5, wins: 2, top5s: 3, top10s: 4, top25s: 5, best_finish: '1st', best_finish_year: 2022, avg_finish: 5.4, avg_score: 70.1, recent_results: [{ year: 2025, finish: '1st', score: -12 }, { year: 2024, finish: '1st', score: -11 }, { year: 2023, finish: 'T10', score: -5 }] },
+  'Rory McIlroy': { appearances: 17, cuts_made: 13, wins: 0, top5s: 6, top10s: 8, top25s: 11, best_finish: 'T2', best_finish_year: 2022, avg_finish: 18.5, avg_score: 71.8, recent_results: [{ year: 2025, finish: 'T6', score: -7 }, { year: 2024, finish: 'T22', score: 1 }, { year: 2023, finish: 'T16', score: -3 }] },
+  'Jon Rahm': { appearances: 7, cuts_made: 6, wins: 1, top5s: 3, top10s: 5, top25s: 6, best_finish: '1st', best_finish_year: 2023, avg_finish: 10.2, avg_score: 70.8, recent_results: [{ year: 2025, finish: 'T5', score: -8 }, { year: 2024, finish: 'T45', score: 9 }, { year: 2023, finish: '1st', score: -12 }] },
+  'Bryson DeChambeau': { appearances: 6, cuts_made: 5, wins: 0, top5s: 1, top10s: 2, top25s: 3, best_finish: 'T5', best_finish_year: 2025, avg_finish: 25.3, avg_score: 72.1, recent_results: [{ year: 2025, finish: 'T5', score: -8 }, { year: 2024, finish: 'T6', score: -5 }] },
+  'Xander Schauffele': { appearances: 8, cuts_made: 7, wins: 0, top5s: 3, top10s: 4, top25s: 6, best_finish: 'T2', best_finish_year: 2019, avg_finish: 14.1, avg_score: 71.2, recent_results: [{ year: 2025, finish: 'T3', score: -10 }, { year: 2024, finish: 'T8', score: -5 }, { year: 2023, finish: 'T24', score: -1 }] },
+  'Ludvig Åberg': { appearances: 2, cuts_made: 2, wins: 0, top5s: 1, top10s: 2, top25s: 2, best_finish: 'T2', best_finish_year: 2024, avg_finish: 6.5, avg_score: 70.5, recent_results: [{ year: 2025, finish: 'T11', score: -5 }, { year: 2024, finish: 'T2', score: -7 }] },
+  'Collin Morikawa': { appearances: 5, cuts_made: 5, wins: 0, top5s: 2, top10s: 3, top25s: 4, best_finish: 'T3', best_finish_year: 2024, avg_finish: 13.2, avg_score: 71.3, recent_results: [{ year: 2025, finish: 'T3', score: -10 }, { year: 2024, finish: 'T3', score: -7 }, { year: 2023, finish: 'T16', score: -3 }] },
+  'Hideki Matsuyama': { appearances: 12, cuts_made: 11, wins: 1, top5s: 4, top10s: 6, top25s: 9, best_finish: '1st', best_finish_year: 2021, avg_finish: 14.8, avg_score: 71.5, recent_results: [{ year: 2025, finish: 'T8', score: -6 }, { year: 2024, finish: 'T30', score: 2 }, { year: 2023, finish: 'T14', score: -4 }] },
+  'Patrick Cantlay': { appearances: 7, cuts_made: 6, wins: 0, top5s: 1, top10s: 3, top25s: 5, best_finish: 'T3', best_finish_year: 2019, avg_finish: 17.1, avg_score: 71.6, recent_results: [{ year: 2025, finish: 'T14', score: -4 }, { year: 2024, finish: 'T9', score: -5 }, { year: 2023, finish: 'T30', score: 0 }] },
+  'Viktor Hovland': { appearances: 5, cuts_made: 4, wins: 0, top5s: 1, top10s: 2, top25s: 3, best_finish: 'T4', best_finish_year: 2023, avg_finish: 19.6, avg_score: 72.0, recent_results: [{ year: 2025, finish: 'T18', score: -3 }, { year: 2023, finish: 'T4', score: -9 }] },
+  'Tommy Fleetwood': { appearances: 7, cuts_made: 6, wins: 0, top5s: 1, top10s: 3, top25s: 5, best_finish: 'T4', best_finish_year: 2023, avg_finish: 18.3, avg_score: 71.7, recent_results: [{ year: 2025, finish: 'T14', score: -4 }, { year: 2024, finish: 'T11', score: -4 }, { year: 2023, finish: 'T4', score: -9 }] },
+  'Shane Lowry': { appearances: 7, cuts_made: 5, wins: 0, top5s: 1, top10s: 2, top25s: 4, best_finish: 'T3', best_finish_year: 2025, avg_finish: 21.4, avg_score: 72.2, recent_results: [{ year: 2025, finish: 'T3', score: -10 }, { year: 2024, finish: 'T25', score: 0 }] },
+  'Jordan Spieth': { appearances: 12, cuts_made: 11, wins: 1, top5s: 5, top10s: 7, top25s: 9, best_finish: '1st', best_finish_year: 2015, avg_finish: 11.5, avg_score: 70.9, recent_results: [{ year: 2025, finish: 'T14', score: -4 }, { year: 2024, finish: 'T38', score: 5 }, { year: 2023, finish: 'T30', score: 0 }] },
+  'Justin Thomas': { appearances: 8, cuts_made: 7, wins: 0, top5s: 2, top10s: 3, top25s: 5, best_finish: '4th', best_finish_year: 2020, avg_finish: 16.1, avg_score: 71.4, recent_results: [{ year: 2025, finish: 'T22', score: -2 }, { year: 2024, finish: 'T16', score: -2 }, { year: 2023, finish: 'T24', score: -1 }] },
+  'Patrick Reed': { appearances: 9, cuts_made: 7, wins: 1, top5s: 2, top10s: 3, top25s: 5, best_finish: '1st', best_finish_year: 2018, avg_finish: 17.6, avg_score: 71.5, recent_results: [{ year: 2025, finish: 'T30', score: -1 }, { year: 2024, finish: 'T36', score: 4 }, { year: 2023, finish: 'T16', score: -3 }] },
+  'Brooks Koepka': { appearances: 8, cuts_made: 6, wins: 0, top5s: 2, top10s: 3, top25s: 5, best_finish: 'T2', best_finish_year: 2023, avg_finish: 17.5, avg_score: 71.6, recent_results: [{ year: 2025, finish: 'T22', score: -2 }, { year: 2024, finish: 'T45', score: 9 }, { year: 2023, finish: 'T2', score: -11 }] },
+  'Justin Rose': { appearances: 16, cuts_made: 12, wins: 0, top5s: 4, top10s: 7, top25s: 10, best_finish: '2nd', best_finish_year: 2017, avg_finish: 16.7, avg_score: 71.5, recent_results: [{ year: 2025, finish: 'T45', score: 2 }, { year: 2024, finish: 'T30', score: 2 }, { year: 2023, finish: 'T14', score: -4 }] },
+  'Tony Finau': { appearances: 7, cuts_made: 6, wins: 0, top5s: 2, top10s: 4, top25s: 5, best_finish: 'T5', best_finish_year: 2019, avg_finish: 16.3, avg_score: 71.5, recent_results: [{ year: 2025, finish: 'T14', score: -4 }, { year: 2024, finish: 'T14', score: -3 }, { year: 2023, finish: 'T10', score: -6 }] },
+  'Adam Scott': { appearances: 22, cuts_made: 17, wins: 1, top5s: 5, top10s: 8, top25s: 13, best_finish: '1st', best_finish_year: 2013, avg_finish: 18.2, avg_score: 71.7, recent_results: [{ year: 2025, finish: 'T22', score: -2 }, { year: 2024, finish: 'T9', score: -5 }, { year: 2023, finish: 'T24', score: -1 }] },
+  'Dustin Johnson': { appearances: 13, cuts_made: 11, wins: 1, top5s: 4, top10s: 6, top25s: 9, best_finish: '1st', best_finish_year: 2020, avg_finish: 13.4, avg_score: 71.1, recent_results: [{ year: 2025, finish: 'T45', score: 2 }, { year: 2024, finish: 'T30', score: 2 }, { year: 2023, finish: 'T42', score: 4 }] },
+  'Cameron Smith': { appearances: 7, cuts_made: 6, wins: 0, top5s: 2, top10s: 3, top25s: 5, best_finish: 'T3', best_finish_year: 2020, avg_finish: 16.0, avg_score: 71.3, recent_results: [{ year: 2025, finish: 'T30', score: -1 }, { year: 2024, finish: 'T36', score: 4 }, { year: 2023, finish: 'T30', score: 0 }] },
+  'Sergio Garcia': { appearances: 24, cuts_made: 21, wins: 1, top5s: 7, top10s: 11, top25s: 16, best_finish: '1st', best_finish_year: 2017, avg_finish: 15.3, avg_score: 71.3, recent_results: [{ year: 2025, finish: 'T45', score: 2 }, { year: 2024, finish: 'T36', score: 4 }, { year: 2023, finish: 'T30', score: 0 }] },
+  'Phil Mickelson': { appearances: 30, cuts_made: 27, wins: 3, top5s: 11, top10s: 16, top25s: 22, best_finish: '1st', best_finish_year: 2010, avg_finish: 13.1, avg_score: 71.1, recent_results: [] },
+  'Bubba Watson': { appearances: 15, cuts_made: 12, wins: 2, top5s: 4, top10s: 6, top25s: 9, best_finish: '1st', best_finish_year: 2014, avg_finish: 16.5, avg_score: 71.5, recent_results: [] },
+  'Fred Couples': { appearances: 35, cuts_made: 25, wins: 1, top5s: 5, top10s: 10, top25s: 17, best_finish: '1st', best_finish_year: 1992, avg_finish: 19.7, avg_score: 71.8, recent_results: [] },
+  'José María Olazábal': { appearances: 23, cuts_made: 17, wins: 2, top5s: 6, top10s: 8, top25s: 12, best_finish: '1st', best_finish_year: 1999, avg_finish: 18.1, avg_score: 71.6, recent_results: [] },
+  'Ángel Cabrera': { appearances: 11, cuts_made: 7, wins: 1, top5s: 3, top10s: 4, top25s: 5, best_finish: '1st', best_finish_year: 2009, avg_finish: 22.0, avg_score: 72.2, recent_results: [{ year: 2013, finish: 'T2', score: -8 }] },
+  'Vijay Singh': { appearances: 23, cuts_made: 16, wins: 0, top5s: 3, top10s: 5, top25s: 10, best_finish: 'T2', best_finish_year: 2003, avg_finish: 23.5, avg_score: 72.3, recent_results: [] },
+  'Mike Weir': { appearances: 18, cuts_made: 11, wins: 1, top5s: 3, top10s: 5, top25s: 8, best_finish: '1st', best_finish_year: 2003, avg_finish: 24.2, avg_score: 72.3, recent_results: [] },
+  'Charl Schwartzel': { appearances: 13, cuts_made: 9, wins: 1, top5s: 2, top10s: 4, top25s: 6, best_finish: '1st', best_finish_year: 2011, avg_finish: 22.5, avg_score: 72.0, recent_results: [] },
+  'Danny Willett': { appearances: 8, cuts_made: 5, wins: 1, top5s: 1, top10s: 1, top25s: 3, best_finish: '1st', best_finish_year: 2016, avg_finish: 27.4, avg_score: 72.6, recent_results: [] },
+  'Zach Johnson': { appearances: 16, cuts_made: 12, wins: 1, top5s: 3, top10s: 5, top25s: 9, best_finish: '1st', best_finish_year: 2007, avg_finish: 21.4, avg_score: 72.0, recent_results: [] },
+  'Jason Day': { appearances: 13, cuts_made: 10, wins: 0, top5s: 2, top10s: 4, top25s: 7, best_finish: 'T2', best_finish_year: 2011, avg_finish: 19.3, avg_score: 71.8, recent_results: [{ year: 2025, finish: 'T36', score: 0 }, { year: 2024, finish: 'T22', score: 1 }, { year: 2023, finish: 'T42', score: 4 }] },
+  'Tyrrell Hatton': { appearances: 6, cuts_made: 5, wins: 0, top5s: 0, top10s: 2, top25s: 3, best_finish: 'T6', best_finish_year: 2025, avg_finish: 22.3, avg_score: 72.2, recent_results: [{ year: 2025, finish: 'T6', score: -7 }, { year: 2024, finish: 'T16', score: -2 }] },
+  'Haotong Li': { appearances: 3, cuts_made: 2, wins: 0, top5s: 0, top10s: 1, top25s: 1, best_finish: 'T3', best_finish_year: 2020, avg_finish: 23.3, avg_score: 72.3, recent_results: [{ year: 2020, finish: 'T3', score: -11 }] },
+};
 
 const MASTERS_FIELD = [
   { name: 'Scottie Scheffler', betting_odds: '+350', world_ranking: 1 },
@@ -146,6 +185,7 @@ Deno.serve(async (req) => {
       round_4: null,
       status: 'active',
       is_drafted: false,
+      masters_history: MASTERS_HISTORY[g.name] || null,
     }));
 
     // BulkCreate in batches of 25
