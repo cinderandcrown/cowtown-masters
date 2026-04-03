@@ -3,11 +3,66 @@ import { Trophy, Calendar, ChevronDown, ChevronUp, Users } from 'lucide-react';
 
 const MASTERS_PATCH = 'https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/444bc63fb_AugustaGolfMasterGreenJacketPatch.png';
 
-// Build a set of all past champion names (lowercase) and the years they won
+// Alias map: maps short/abbreviated names to their canonical full name
+const NAME_ALIASES = {
+  'will h.': 'will hudson',
+  'alex t.': 'alex thomas',
+  'charlie b.': 'charlie brown',
+  'nick w.': 'nicholas will',
+  'n. will': 'nicholas will',
+  'c. brown': 'charlie brown',
+  'brown jr.': 'charlie brown jr.',
+  'clay': 'clay collier',
+  'sanders': 'sanders johnston',
+  's. johnston': 'sanders johnston',
+  'chandler': 'chandler mitchell',
+  'c. mitchell': 'chandler mitchell',
+  'fleske': 'matthew fleske',
+  'fisher': 'josh fisher',
+  'j. fisher': 'josh fisher',
+  'vickers': 'jake vickers',
+  'j. vickers': 'jake vickers',
+  'teppe': 'adam teppe',
+  'a. tepe': 'adam teppe',
+  'cole': 'cole platt',
+  'c. platt': 'cole platt',
+  'tobias': 'john tobias',
+  'j. tobias': 'john tobias',
+  'josh h.': 'josh howard',
+  'j. howard': 'josh howard',
+  'zac': 'zac hansen',
+  'z. hanson': 'zac hansen',
+  'karr': 'james karr',
+  'j. karr': 'james karr',
+  'billy': 'billy watkins',
+  'b. watkins': 'billy watkins',
+  'gray': 'gray gomez',
+  'g. gomez': 'gray gomez',
+  'ross': 'ross daniels',
+  'r. daniels': 'ross daniels',
+  'tate': 'tate ownings',
+  't. ownings': 'tate ownings',
+  'jake': 'jake vickers',
+  'platt': 'cole platt',
+  'mitchell jr.': 'chandler mitchell',
+  'hanson': 'zac hansen',
+  'odom': 'w. odom',
+  'belew': 'm. belew',
+  'downs': 'r. downs',
+  'r. downs': 'r. downs',
+  'w. hudson': 'will hudson',
+};
+
+function canonicalName(name) {
+  const lower = name.toLowerCase();
+  return NAME_ALIASES[lower] || lower;
+}
+
+// Build a set of all past champion canonical names and the years they won
 function getPastChampions() {
   const champs = {};
   for (const [year, data] of Object.entries(POOL_HISTORY)) {
-    const name = data.winner.toLowerCase();
+    const name = canonicalName(data.winner);
     if (!champs[name]) champs[name] = [];
     champs[name].push(Number(year));
   }
@@ -103,8 +158,8 @@ function ChampionCard({ year, data, isExpanded, onToggle, pastChampions }) {
               </span>
               <div className="min-w-0 flex items-center gap-1">
                 <p className={`text-xs font-semibold text-foreground truncate ${i === 0 ? 'font-black' : ''}`}>{s.name}</p>
-                {pastChampions[s.name.toLowerCase()]?.some(y => y !== currentYear) && (
-                  <img src={MASTERS_PATCH} alt="Past Champion" className="w-4 h-4 rounded-full flex-shrink-0" title={`Champion: ${pastChampions[s.name.toLowerCase()].filter(y => y !== currentYear).join(', ')}`} />
+                {pastChampions[canonicalName(s.name)]?.some(y => y !== currentYear) && (
+                  <img src={MASTERS_PATCH} alt="Past Champion" className="w-4 h-4 rounded-full flex-shrink-0" title={`Champion: ${pastChampions[canonicalName(s.name)].filter(y => y !== currentYear).join(', ')}`} />
                 )}
               </div>
               <div className="text-center">

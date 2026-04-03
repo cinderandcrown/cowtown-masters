@@ -2,11 +2,11 @@
 // Full standings data from spreadsheets where available; summary-only for older years
 export const POOL_HISTORY = {
   2025: {
-    winner: 'Clay Coiller',
+    winner: 'Clay Collier',
     winningScore: -15,
     entries: 23,
     standings: [
-      { name: 'Clay Coiller', golferA: 'Ludvig Åberg', scoreA: -9, golferB: 'Patrick Reed', scoreB: -6, total: -15, rank: 1 },
+      { name: 'Clay Collier', golferA: 'Ludvig Åberg', scoreA: -9, golferB: 'Patrick Reed', scoreB: -6, total: -15, rank: 1 },
       { name: 'Sanders Johnston', golferA: 'Jon Rahm', scoreA: -7, golferB: 'Sungjae Im', scoreB: -3, total: -10, rank: 2 },
       { name: 'Charlie Brown', golferA: 'Patrick Cantlay', scoreA: -11, golferB: 'Justin Rose', scoreB: 2, total: -9, rank: 3 },
       { name: 'Adam Teppe', golferA: 'Rory McIlroy', scoreA: 3, golferB: 'Dustin Johnson', scoreB: -11, total: -8, rank: 4 },
