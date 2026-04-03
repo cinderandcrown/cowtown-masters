@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { formatScore, scoreColor } from '@/lib/scoreUtils';
 import { TrendingDown, TrendingUp, Minus, BarChart3, Activity, History } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from 'recharts';
 import GolferAnalyticsTab from './GolferAnalyticsTab';
 import GolferHistorySection from './GolferHistorySection';
+import { fireJackpot } from '@/lib/useConfetti';
+import { soundJackpot } from '@/lib/sounds';
+import { hapticTripleBuzz } from '@/lib/haptics';
 
 function RoundRow({ label, scoreToPar, strokes, isComplete }) {
   return (
@@ -46,6 +49,16 @@ function ProgressBar({ scoreToPar }) {
 
 export default function GolferDetailModal({ golfer, open, onOpenChange }) {
   const [activeTab, setActiveTab] = useState('overview');
+
+  // Fire confetti + sound for past Masters winners
+  const isMastersChampion = golfer?.masters_history?.wins >= 1;
+  useEffect(() => {
+    if (open && isMastersChampion) {
+      fireJackpot();
+      soundJackpot();
+      hapticTripleBuzz();
+    }
+  }, [open, isMastersChampion]);
 
   if (!golfer) return null;
 
