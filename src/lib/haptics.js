@@ -22,6 +22,11 @@ export function hapticSuccess() {
   if (isMobile && navigator.vibrate) navigator.vibrate([15, 40, 30]);
 }
 
+// Triple buzz for big moments
+export function hapticTripleBuzz() {
+  if (isMobile && navigator.vibrate) navigator.vibrate([20, 30, 20, 30, 40]);
+}
+
 // Exciting buildup
 export function hapticDrumroll() {
   if (isMobile && navigator.vibrate) {

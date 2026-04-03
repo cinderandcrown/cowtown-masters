@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { firePop } from '@/lib/useConfetti';
-import { hapticSuccess } from '@/lib/haptics';
+import { fireBirdie, fireEagle } from '@/lib/useConfetti';
+import { hapticSuccess, hapticTripleBuzz } from '@/lib/haptics';
 
 // Casino-style score change overlay — flashes briefly when scores update
 export default function ScoreFlashOverlay({ poolId, golfers }) {
@@ -28,21 +28,34 @@ export default function ScoreFlashOverlay({ poolId, golfers }) {
     prevScoresRef.current = newScores;
 
     if (bestChange && bestChange.diff <= -1) {
-      const label = bestChange.diff <= -2 ? '🦅 EAGLE!' : '🐦 BIRDIE!';
-      setFlash({ label, name: bestChange.name, score: bestChange.newScore });
-      hapticSuccess();
-      if (bestChange.diff <= -2) firePop();
-      setTimeout(() => setFlash(null), 3000);
+      const isEagle = bestChange.diff <= -2;
+      const label = isEagle ? '🦅 EAGLE!' : '🐦 BIRDIE!';
+      setFlash({ label, name: bestChange.name, score: bestChange.newScore, isEagle });
+      if (isEagle) {
+        hapticTripleBuzz();
+        fireEagle();
+      } else {
+        hapticSuccess();
+        fireBirdie();
+      }
+      setTimeout(() => setFlash(null), 4000);
     }
   }, [golfers]);
 
   if (!flash) return null;
 
   return (
-    <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] animate-fade-in-up pointer-events-none">
-      <div className="bg-gradient-to-r from-accent via-yellow-500 to-accent text-white px-6 py-3 rounded-2xl shadow-2xl shadow-accent/40 border border-white/20">
-        <p className="text-lg font-black text-center tracking-wide">{flash.label}</p>
-        <p className="text-sm font-bold text-center text-white/80">{flash.name}</p>
+    <div className="fixed top-16 left-1/2 -translate-x-1/2 z-[100] animate-bounce-in pointer-events-none">
+      <div className={`px-8 py-4 rounded-2xl shadow-2xl border border-white/30 text-center ${
+        flash.isEagle
+          ? 'bg-gradient-to-r from-yellow-500 via-accent to-yellow-500 shadow-yellow-500/50'
+          : 'bg-gradient-to-r from-primary via-secondary to-primary shadow-primary/40'
+      }`}>
+        <p className="text-2xl font-black text-white tracking-wider animate-pulse">{flash.label}</p>
+        <p className="text-sm font-bold text-white/90 mt-1">{flash.name}</p>
+        <p className="text-[10px] text-white/60 mt-0.5 tracking-widest uppercase">
+          {flash.isEagle ? '2 under on the hole!' : 'Dropped a shot!'}
+        </p>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { base44 } from '@/api/base44Client';
-import { Trophy, RefreshCw, Star, Share2, Download, TrendingUp, TrendingDown } from 'lucide-react';
+import { Trophy, RefreshCw, Star, Share2, Download, TrendingUp, TrendingDown, Flame } from 'lucide-react';
 import { POOL_HISTORY } from '@/lib/poolHistoryData';
 
 const MASTERS_PATCH = 'https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/444bc63fb_AugustaGolfMasterGreenJacketPatch.png';
@@ -32,8 +32,8 @@ import LeaderboardRoundTabs from '@/components/pool/LeaderboardRoundTabs';
 import LeaderboardSearch from '@/components/pool/LeaderboardSearch';
 import ScoringAlertBanner from '@/components/pool/ScoringAlertBanner';
 import { toast } from 'sonner';
-import { hapticTap, hapticSuccess } from '@/lib/haptics';
-import { fireGoldRain } from '@/lib/useConfetti';
+import { hapticTap, hapticSuccess, hapticDoubleTap } from '@/lib/haptics';
+import { fireGoldRain, fireMoneyZone, firePop } from '@/lib/useConfetti';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useParticipant } from '@/lib/ParticipantContext';
 import { Button } from '@/components/ui/button';
@@ -234,8 +234,9 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
         <div
           className="animate-fade-in-up bg-gradient-to-br from-secondary to-primary rounded-xl p-4 mb-4 border border-accent/30 shadow-lg shadow-primary/20 relative overflow-hidden cursor-pointer group"
           onClick={() => {
-            onSelectEntry({ ...standings[0], _rank: standings[0].rank, _totalEntries: standings.length });
-            hapticSuccess();
+          onSelectEntry({ ...standings[0], _rank: standings[0].rank, _totalEntries: standings.length });
+          hapticSuccess();
+          fireGoldRain();
           }}
         >
           <div className="absolute inset-0 animate-shimmer pointer-events-none" />
@@ -331,7 +332,11 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
               key={entry.id}
               role="button"
               tabIndex={0}
-              onClick={() => onSelectEntry({ ...entry, _rank: entry.rank, _totalEntries: standings.length })}
+              onClick={() => {
+                onSelectEntry({ ...entry, _rank: entry.rank, _totalEntries: standings.length });
+                if (entry.rank <= 3) { fireMoneyZone(); hapticDoubleTap(); }
+                else { hapticTap(); }
+              }}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelectEntry({ ...entry, _rank: entry.rank, _totalEntries: standings.length }); } }}
               aria-label={`View details for ${entry.team_name || entry.participant_name}, position ${entry.displayRank}`}
               className={`animate-fade-in-up grid grid-cols-[36px_1fr_56px_56px_52px] gap-1 px-3 py-2 border-b border-primary/5 cursor-pointer hover:bg-accent/5 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-inset focus:ring-accent ${

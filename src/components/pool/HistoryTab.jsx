@@ -69,8 +69,8 @@ function getPastChampions() {
   return champs;
 }
 import { POOL_HISTORY } from '@/lib/poolHistoryData';
-import { fireGoldRain } from '@/lib/useConfetti';
-import { hapticTap } from '@/lib/haptics';
+import { fireGoldRain, fireJackpot, fireMoneyZone } from '@/lib/useConfetti';
+import { hapticTap, hapticSuccess, hapticDoubleTap } from '@/lib/haptics';
 
 const formatScore = (s) => (s === 0 ? 'E' : s > 0 ? `+${s}` : `${s}`);
 const scoreColor = (s) => {
@@ -90,8 +90,10 @@ function ChampionCard({ year, data, isExpanded, onToggle, pastChampions }) {
       <div
         className="p-4 cursor-pointer hover:bg-accent/5 transition-all active:scale-[0.995]"
         onClick={() => {
-          hapticTap();
+          hapticDoubleTap();
           onToggle();
+          if (!isExpanded && data.winningScore <= -10) fireJackpot();
+          else if (!isExpanded) fireMoneyZone();
         }}
       >
         <div className="flex items-start gap-3">

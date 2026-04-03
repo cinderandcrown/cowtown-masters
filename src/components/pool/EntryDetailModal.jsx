@@ -24,8 +24,8 @@ function getChampionYears(name) {
   }
   return years.length > 0 ? years : null;
 }
-import { fireGoldRain } from '@/lib/useConfetti';
-import { hapticSuccess } from '@/lib/haptics';
+import { fireGoldRain, fireMoneyZone, fireJackpot } from '@/lib/useConfetti';
+import { hapticSuccess, hapticTripleBuzz } from '@/lib/haptics';
 import { useEffect } from 'react';
 
 export default function EntryDetailModal({ entry, open, onOpenChange, rank, totalEntries }) {
@@ -34,14 +34,18 @@ export default function EntryDetailModal({ entry, open, onOpenChange, rank, tota
   const isLeader = rank === 1;
   const isMoneyZone = rank <= 3;
 
-  // Fire gold rain when viewing leader's or past champion's card
+  // Fire effects when viewing leader's, money zone, or past champion's card
   const isPastChamp = entry ? !!getChampionYears(entry.participant_name) : false;
   useEffect(() => {
-    if (open && (isLeader || isPastChamp) && entry) {
-      fireGoldRain();
+    if (!open || !entry) return;
+    if (isLeader || isPastChamp) {
+      fireJackpot();
+      hapticTripleBuzz();
+    } else if (isMoneyZone) {
+      fireMoneyZone();
       hapticSuccess();
     }
-  }, [open, isLeader, isPastChamp, entry]);
+  }, [open, isLeader, isMoneyZone, isPastChamp, entry]);
 
   if (!entry) return null;
 
