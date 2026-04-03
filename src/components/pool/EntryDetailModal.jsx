@@ -34,13 +34,14 @@ export default function EntryDetailModal({ entry, open, onOpenChange, rank, tota
   const isLeader = rank === 1;
   const isMoneyZone = rank <= 3;
 
-  // Fire gold rain when viewing leader's card
+  // Fire gold rain when viewing leader's or past champion's card
+  const isPastChamp = entry ? !!getChampionYears(entry.participant_name) : false;
   useEffect(() => {
-    if (open && isLeader && entry) {
+    if (open && (isLeader || isPastChamp) && entry) {
       fireGoldRain();
       hapticSuccess();
     }
-  }, [open, isLeader, entry]);
+  }, [open, isLeader, isPastChamp, entry]);
 
   if (!entry) return null;
 
