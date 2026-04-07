@@ -12,6 +12,7 @@ import AdminEntryList from '@/components/admin/AdminEntryList';
 import AddGolferForm from '@/components/admin/AddGolferForm';
 import AddEntryForm from '@/components/admin/AddEntryForm';
 import PoolSettingsCard from '@/components/admin/PoolSettingsCard';
+import AdminExcelDownloads from '@/components/admin/AdminExcelDownloads';
 import { useParticipant } from '@/lib/ParticipantContext';
 
 export default function PoolAdmin() {
@@ -151,6 +152,7 @@ export default function PoolAdmin() {
         )}
         {activeSection === 'golfers' && (
           <div className="space-y-4">
+            <AdminExcelDownloads poolId={poolId} />
             <AddGolferForm poolId={poolId} />
             <AdminGolferList poolId={poolId} />
           </div>

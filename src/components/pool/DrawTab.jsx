@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { hapticPulse, hapticDoubleTap, hapticDrumroll, hapticRatchet, hapticSuccess } from '@/lib/haptics';
 import { fireConfetti, fireJackpot, firePop } from '@/lib/useConfetti';
 import { soundTick, soundReveal, soundDrumroll, soundJackpot, soundLock } from '@/lib/sounds';
+import { useParticipant } from '@/lib/ParticipantContext';
 
 function shuffle(arr) {
   const a = [...arr];
@@ -23,6 +24,7 @@ function shuffle(arr) {
 export default function DrawTab({ poolId }) {
   const queryClient = useQueryClient();
   const { user } = useAuth() || {};
+  const { isLoggedIn: participantLoggedIn, participant } = useParticipant();
   const [drawMode, setDrawMode] = useState('random');
   const [phase, setPhase] = useState('ready');
   const [assignments, setAssignments] = useState([]);
@@ -40,7 +42,7 @@ export default function DrawTab({ poolId }) {
     select: (data) => data[0],
   });
 
-  const isAdmin = user?.role === 'admin' || user?.email === pool?.admin_user_id || user?.email === pool?.created_by;
+  const isAdmin = user?.role === 'admin' || user?.email === pool?.admin_user_id || user?.email === pool?.created_by || (participantLoggedIn && participant?.email && (participant.email === pool?.admin_user_id || participant.email === pool?.created_by));
 
   const { data: entries = [], isLoading: loadingEntries } = useQuery({
     queryKey: ['poolEntries', poolId],
