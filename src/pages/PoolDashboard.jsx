@@ -16,8 +16,9 @@ import AddToHomeScreen from '@/components/pool/AddToHomeScreen';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import ScoreFlashOverlay from '@/components/pool/ScoreFlashOverlay';
 import { Button } from '@/components/ui/button';
+import GolferNewsTab from '@/components/pool/GolferNewsTab';
 
-const VALID_TABS = ['leaderboard', 'teams', 'golfers', 'draw', 'messages', 'history', 'rules'];
+const VALID_TABS = ['leaderboard', 'teams', 'golfers', 'draw', 'messages', 'news', 'history', 'rules'];
 
 export default function PoolDashboard() {
   const { poolId, activeTab: tabParam } = useParams();
@@ -66,6 +67,7 @@ export default function PoolDashboard() {
       golfers: 'Field',
       draw: 'Draw',
       messages: 'Smack Talk',
+      news: 'News',
       rules: 'Rules',
       history: 'History',
     };
@@ -135,6 +137,11 @@ export default function PoolDashboard() {
         {activeTab === 'teams' && (
           <ErrorBoundary fallbackMessage="Teams couldn't load.">
             <TeamsTab poolId={poolId} />
+          </ErrorBoundary>
+        )}
+        {activeTab === 'news' && (
+          <ErrorBoundary fallbackMessage="News couldn't load.">
+            <GolferNewsTab poolId={poolId} />
           </ErrorBoundary>
         )}
         {activeTab === 'history' && (
