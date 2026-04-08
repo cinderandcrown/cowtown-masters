@@ -160,10 +160,15 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
   const handleShare = async () => {
     if (!myEntry) return;
     const text = `I'm #${myEntry.displayRank} in the Cowtown Masters pool with ${formatScore(myEntry.total_score)}!`;
-    if (navigator.share) {
-      navigator.share({ title: 'Cowtown Masters', text });
-    } else {
-      await navigator.clipboard.writeText(text);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'Cowtown Masters', text });
+      } else {
+        await navigator.clipboard.writeText(text);
+        toast.success('Standing copied!');
+      }
+    } catch {
+      await navigator.clipboard.writeText(text).catch(() => {});
       toast.success('Standing copied!');
     }
     hapticTap();
