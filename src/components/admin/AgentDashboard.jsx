@@ -109,7 +109,8 @@ export default function AgentDashboard({ poolId }) {
   const phase = status?.phase || 'idle';
   const phaseBadge = PHASE_BADGES[phase] || PHASE_BADGES.idle;
   const stats = status?.stats || {};
-  const isLive = status?.pool?.status === 'live';
+  const poolStatus = status?.pool?.status || 'setup';
+  const isLive = poolStatus === 'live';
   const isPending = runAction.isPending;
 
   return (
@@ -125,8 +126,13 @@ export default function AgentDashboard({ poolId }) {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className={`text-[10px] font-black px-2 py-1 rounded-full ${isLive ? 'bg-green-500/15 text-green-600 animate-pulse' : 'bg-muted text-muted-foreground'}`}>
-              {isLive ? '● LIVE' : '○ SETUP'}
+            <span className={`text-[10px] font-black px-2 py-1 rounded-full ${
+              poolStatus === 'live' ? 'bg-green-500/15 text-green-600 animate-pulse' :
+              poolStatus === 'complete' ? 'bg-purple-500/15 text-purple-600' :
+              poolStatus === 'draft' ? 'bg-blue-500/15 text-blue-600' :
+              'bg-muted text-muted-foreground'
+            }`}>
+              {poolStatus === 'live' ? '● LIVE' : poolStatus === 'complete' ? '✓ COMPLETE' : poolStatus === 'draft' ? '◉ DRAFT' : '○ SETUP'}
             </span>
           </div>
         </div>
