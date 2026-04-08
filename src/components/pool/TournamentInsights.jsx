@@ -95,24 +95,25 @@ function PoolSnapshotSection({ standings }) {
     const drafted = standings.filter(e => e._hasDraft && e.golferA && e.golferB);
     const t3 = drafted.slice(0, 3);
 
-    // Parse odds to find team with longest combined odds (biggest underdogs)
-    const parseOdds = (str) => {
-      if (!str) return 99999;
+    // Convert American odds to implied probability (0-1)
+    const oddsToProb = (str) => {
+      if (!str) return 0;
       const n = parseInt(str.replace(/[^-+\d]/g, ''), 10);
-      return isNaN(n) ? 99999 : n;
+      if (isNaN(n) || n === 0) return 0;
+      return n > 0 ? 100 / (n + 100) : Math.abs(n) / (Math.abs(n) + 100);
     };
 
-    // Longest odds = highest positive combined odds number
+    // Longest odds = lowest combined implied probability (biggest underdogs)
     let longestOdds = null;
-    let longestOddsValue = -Infinity;
+    let lowestProb = Infinity;
     for (const e of drafted) {
-      const oddsA = parseOdds(e.golferA?.betting_odds);
-      const oddsB = parseOdds(e.golferB?.betting_odds);
+      const probA = oddsToProb(e.golferA?.betting_odds);
+      const probB = oddsToProb(e.golferB?.betting_odds);
       // Skip if either golfer has no real odds
-      if (oddsA >= 99999 || oddsB >= 99999) continue;
-      const combined = oddsA + oddsB;
-      if (combined > longestOddsValue) {
-        longestOddsValue = combined;
+      if (probA === 0 || probB === 0) continue;
+      const combined = probA * probB; // joint probability
+      if (combined < lowestProb) {
+        lowestProb = combined;
         longestOdds = e;
       }
     }
