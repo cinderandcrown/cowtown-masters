@@ -17,17 +17,29 @@ function PopularGolfersSection({ entries, golfers }) {
     return counts;
   }, [entries]);
 
-  // Top performing golfers sorted by score, with pick counts (only drafted golfers)
+  // Detect if tournament has started
+  const tourneyStarted = golfers.some(g =>
+    (g.score_to_par != null && g.score_to_par !== 0) ||
+    g.round_1 != null
+  );
+
+  // Top performing golfers sorted by score (or odds pre-tournament), with pick counts (only drafted golfers)
   const topGolfers = useMemo(() => {
     return golfers
-      .filter(g => g.status === 'active' && g.score_to_par != null && g.is_drafted)
-      .sort((a, b) => (a.score_to_par ?? 99) - (b.score_to_par ?? 99))
+      .filter(g => g.status === 'active' && g.is_drafted)
+      .sort((a, b) => {
+        if (tourneyStarted) return (a.score_to_par ?? 99) - (b.score_to_par ?? 99);
+        // Pre-tournament: sort by betting odds (favorites first)
+        const oddsA = parseInt((a.betting_odds || '+999999').replace(/[^-+\d]/g, ''), 10) || 999999;
+        const oddsB = parseInt((b.betting_odds || '+999999').replace(/[^-+\d]/g, ''), 10) || 999999;
+        return oddsA - oddsB;
+      })
       .slice(0, 8)
       .map(g => ({
         ...g,
         pickCount: golferPickCounts[g.id] || 0,
       }));
-  }, [golfers, golferPickCounts]);
+  }, [golfers, golferPickCounts, tourneyStarted]);
 
   if (topGolfers.length === 0) return null;
 
@@ -47,9 +59,16 @@ function PopularGolfersSection({ entries, golfers }) {
               </span>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-0.5">
-                  <span className="text-xs font-semibold text-foreground truncate">{g.name}</span>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-xs font-semibold text-foreground truncate">{g.name}</span>
+                    {g.betting_odds && (
+                      <span className="text-[9px] font-bold text-accent/70 bg-accent/10 px-1 py-0.5 rounded flex-shrink-0">
+                        {g.betting_odds}
+                      </span>
+                    )}
+                  </div>
                   <span className="text-[11px] text-muted-foreground flex-shrink-0 ml-2">
-                    {g.pickCount === 0 ? 'Undrafted' : `${g.pickCount} pick${g.pickCount !== 1 ? 's' : ''}`}
+                    {`${g.pickCount} pick${g.pickCount !== 1 ? 's' : ''}`}
                   </span>
                 </div>
                 <div className="h-1.5 bg-muted rounded-full overflow-hidden">
