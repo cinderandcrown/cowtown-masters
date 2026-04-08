@@ -169,31 +169,47 @@ export default function GolferNewsTab({ poolId }) {
 
       {/* Article Modal */}
       <Dialog open={!!openArticle} onOpenChange={(open) => !open && setOpenArticle(null)}>
-        <DialogContent className="max-w-3xl w-[95vw] h-[85vh] p-0 gap-0 overflow-hidden">
+        <DialogContent className="max-w-lg w-[92vw] p-0 gap-0 overflow-hidden">
           {openArticle && (
-            <>
-              <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-card">
-                <div className="flex-1 min-w-0 mr-3">
-                  <h3 className="text-sm font-bold text-foreground truncate">{openArticle.title}</h3>
-                  <p className="text-[11px] text-muted-foreground">{openArticle.source}</p>
+            <div className="flex flex-col">
+              {openArticle.image && (
+                <div className="h-48 bg-muted overflow-hidden">
+                  <img src={openArticle.image} alt="" className="w-full h-full object-cover" />
                 </div>
-                <a
-                  href={openArticle.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-xs font-semibold text-primary hover:underline flex-shrink-0"
-                >
-                  Open <ExternalLink className="w-3 h-3" />
-                </a>
+              )}
+              <div className="p-5 space-y-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {getCategoryBadge(openArticle) && (
+                    <span className={`text-[10px] font-black tracking-wider px-1.5 py-0.5 rounded ${getCategoryBadge(openArticle).color}`}>
+                      {getCategoryBadge(openArticle).label}
+                    </span>
+                  )}
+                  <span className="text-[10px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded">{openArticle.source}</span>
+                  {openArticle.pubDate && (
+                    <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                      <Clock className="w-2.5 h-2.5" />
+                      {timeAgo(openArticle.pubDate)}
+                    </span>
+                  )}
+                </div>
+                <h3 className="text-lg font-bold text-foreground leading-snug" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  {openArticle.title}
+                </h3>
+                {openArticle.description && (
+                  <p className="text-sm text-muted-foreground leading-relaxed">{openArticle.description}</p>
+                )}
+                {openArticle.link && (
+                  <a
+                    href={openArticle.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-primary/90 transition w-full justify-center"
+                  >
+                    Read Full Article <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
               </div>
-              <iframe
-                src={openArticle.link}
-                title={openArticle.title}
-                className="w-full flex-1 border-0"
-                style={{ height: 'calc(85vh - 52px)' }}
-                sandbox="allow-scripts allow-same-origin allow-popups"
-              />
-            </>
+            </div>
           )}
         </DialogContent>
       </Dialog>
