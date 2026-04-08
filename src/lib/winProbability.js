@@ -1,14 +1,12 @@
 /**
- * Calculates win probability for each entry based on current scores
- * and remaining holes. Uses a simple statistical model based on
- * strokes behind the leader and holes remaining.
- *
- * Model: Each remaining hole has ~0.2 strokes standard deviation.
- * We use a normal distribution approximation to estimate the probability
- * that each team can finish with the best score.
+ * Win probability model for Cowtown Masters pool.
+ * 
+ * Pre-tournament: Uses combined golfer betting odds to derive team strength.
+ * During tournament: Blends betting-odds prior with live scoring + remaining holes.
+ * Post-tournament: Pure score comparison.
  */
 
-// Approximate normal CDF using Abramowitz and Stegun
+// Approximate normal CDF (Abramowitz & Stegun)
 function normalCDF(x) {
   const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741;
   const a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
@@ -20,27 +18,53 @@ function normalCDF(x) {
 }
 
 /**
- * Parse holes remaining for a golfer from their "thru" field.
- * "F" or "18" = finished round, null/"—" = hasn't started
- * A number 1-17 means they're on the course with (18 - thru) holes left in current round.
+ * Convert American odds string to implied probability (0-1).
+ * e.g. "+600" → 0.143, "-150" → 0.6, "+200000" → ~0.0005
  */
+function oddsToImpliedProb(oddsStr) {
+  if (!oddsStr) return 0.001; // fallback: very low
+  const n = parseInt(oddsStr.replace(/[^-+\d]/g, ''), 10);
+  if (isNaN(n) || n === 0) return 0.001;
+  if (n > 0) {
+    // Underdog: +600 → 100/(600+100) = 0.143
+    return 100 / (n + 100);
+  }
+  // Favorite: -150 → 150/(150+100) = 0.6
+  return Math.abs(n) / (Math.abs(n) + 100);
+}
+
+/**
+ * Calculate team implied probability from two golfers' betting odds.
+ * We use the product of individual "finish well" probabilities as a proxy.
+ * Better golfers (lower odds) = higher team strength.
+ * 
+ * We use a "top-10 equivalent" approach: a golfer with +600 Masters odds
+ * has roughly a 14% chance to win, but much higher chance to finish top-10.
+ * For team scoring, what matters is how well each golfer performs overall.
+ */
+function teamImpliedStrength(golferA, golferB) {
+  const probA = oddsToImpliedProb(golferA?.betting_odds);
+  const probB = oddsToImpliedProb(golferB?.betting_odds);
+  // Use sqrt to convert "win prob" into a broader "performance quality" metric.
+  // A golfer with 14% win chance performs well ~37% of the time.
+  // This creates more meaningful spread between teams.
+  const strengthA = Math.sqrt(probA);
+  const strengthB = Math.sqrt(probB);
+  return strengthA * strengthB;
+}
+
 function holesRemainingInRound(thru) {
-  if (!thru || thru === '—' || thru === '-') return 18; // hasn't started
-  if (thru === 'F' || thru === '18') return 0; // finished
+  if (!thru || thru === '—' || thru === '-') return 18;
+  if (thru === 'F' || thru === '18') return 0;
   const n = parseInt(thru, 10);
   if (isNaN(n)) return 0;
   return Math.max(0, 18 - n);
 }
 
-/**
- * Estimate total holes remaining for a golfer in the tournament.
- * Uses round scores to determine which round they're in.
- */
 function totalHolesRemaining(golfer) {
-  if (!golfer) return 72; // no golfer assigned
+  if (!golfer) return 72;
   if (golfer.status === 'cut' || golfer.status === 'withdrawn' || golfer.status === 'disqualified') return 0;
 
-  // Count completed rounds
   const rounds = [golfer.round_1, golfer.round_2, golfer.round_3, golfer.round_4];
   let completedRounds = 0;
   for (const r of rounds) {
@@ -49,15 +73,11 @@ function totalHolesRemaining(golfer) {
 
   const holesInRound = holesRemainingInRound(golfer.thru);
 
-  // If they have holes remaining in current round, they're in round (completedRounds + 1)
-  // unless thru=F, meaning they just finished a round
   if (holesInRound > 0) {
-    // Currently playing: remaining = holes in this round + future rounds * 18
     const futureRounds = Math.max(0, 4 - completedRounds - 1);
     return holesInRound + (futureRounds * 18);
   }
 
-  // Finished current round or between rounds
   const futureRounds = Math.max(0, 4 - completedRounds);
   return futureRounds * 18;
 }
@@ -65,34 +85,43 @@ function totalHolesRemaining(golfer) {
 /**
  * Calculate win probabilities for all entries.
  * 
- * @param {Array} standings - entries with golferA, golferB, total_score
- * @returns {Object} map of entry.id -> { winPct, odds }
+ * Strategy:
+ * - Pre-tournament (all 144 holes remaining, all scores 0): pure betting-odds based
+ * - Mid-tournament: blend odds prior with live score differential
+ * - Post-tournament (0 holes remaining): pure score comparison
+ * 
+ * The "blend" weights odds more heavily early and scoring more heavily late.
  */
 export function calculateWinProbabilities(standings) {
   if (!standings || standings.length === 0) return {};
 
-  // Standard deviation per hole (empirical: ~0.18-0.22 for PGA tour)
   const SIGMA_PER_HOLE = 0.20;
+  const MAX_TEAM_HOLES = 144; // 72 per golfer × 2
 
-  // Calculate holes remaining per team (sum of both golfers)
   const teamData = standings.map(entry => {
     const holesA = totalHolesRemaining(entry.golferA);
     const holesB = totalHolesRemaining(entry.golferB);
     const totalHoles = holesA + holesB;
-    // Team variance = sum of individual variances
     const variance = totalHoles * SIGMA_PER_HOLE * SIGMA_PER_HOLE;
+    const impliedStrength = teamImpliedStrength(entry.golferA, entry.golferB);
+
     return {
       id: entry.id,
       score: entry.total_score ?? 0,
       holesRemaining: totalHoles,
       sigma: Math.sqrt(variance),
+      impliedStrength,
     };
   });
 
   const bestScore = Math.min(...teamData.map(t => t.score));
   const probabilities = {};
 
-  // If tournament is complete (all holes = 0), leader wins 100%
+  // Tournament progress: 0 = hasn't started, 1 = complete
+  const maxHolesInPool = Math.max(...teamData.map(t => t.holesRemaining));
+  const progress = maxHolesInPool > 0 ? 1 - (maxHolesInPool / MAX_TEAM_HOLES) : 1;
+
+  // If ALL teams have 0 holes remaining → tournament complete
   const allDone = teamData.every(t => t.holesRemaining === 0);
   if (allDone) {
     const winners = teamData.filter(t => t.score === bestScore);
@@ -103,29 +132,29 @@ export function calculateWinProbabilities(standings) {
     return probabilities;
   }
 
-  // Monte Carlo-inspired analytical approach:
-  // For each team, calculate P(team finishes with lowest score)
-  // Using pairwise comparison with combined variance
-  const rawProbs = teamData.map((team, i) => {
-    if (team.holesRemaining === 0 && team.score > bestScore) {
-      // Already finished and behind — very low but not zero if others have variance
-      // They can still win if leaders collapse
+  // === Calculate odds-based probabilities ===
+  const totalStrength = teamData.reduce((sum, t) => sum + t.impliedStrength, 0);
+  const oddsProbs = teamData.map(t => totalStrength > 0 ? t.impliedStrength / totalStrength : 1 / teamData.length);
+
+  // === Calculate score-based probabilities ===
+  const scoreProbs = teamData.map((team, i) => {
+    // If no variance anywhere (shouldn't happen mid-tournament), fall back
+    if (team.sigma === 0 && teamData.every(t => t.sigma === 0)) {
+      return team.score === bestScore ? 1 : 0;
     }
 
     let logProb = 0;
     for (let j = 0; j < teamData.length; j++) {
       if (i === j) continue;
       const other = teamData[j];
-      const scoreDiff = other.score - team.score; // positive = other is worse
+      const scoreDiff = other.score - team.score;
       const combinedSigma = Math.sqrt(team.sigma * team.sigma + other.sigma * other.sigma);
 
       if (combinedSigma === 0) {
-        // Both done, pure score comparison
-        if (scoreDiff < 0) return 0; // other beat us
+        if (scoreDiff < 0) return 0;
         continue;
       }
 
-      // P(team beats other) = P(team_final < other_final)
       const p = normalCDF(scoreDiff / combinedSigma);
       if (p <= 0) return 0;
       logProb += Math.log(p);
@@ -133,10 +162,19 @@ export function calculateWinProbabilities(standings) {
     return Math.exp(logProb);
   });
 
-  // Normalize probabilities
-  const total = rawProbs.reduce((a, b) => a + b, 0);
+  const scoreProbTotal = scoreProbs.reduce((a, b) => a + b, 0);
+  const normalizedScoreProbs = scoreProbs.map(p => scoreProbTotal > 0 ? p / scoreProbTotal : 1 / teamData.length);
+
+  // === Blend based on tournament progress ===
+  // Early tournament: lean heavily on odds (80% odds, 20% score)
+  // Late tournament: lean heavily on scores (10% odds, 90% score)
+  // The blend uses progress^1.5 to shift faster once scores are meaningful
+  const scoreWeight = Math.pow(progress, 1.5) * 0.8 + 0.2; // ranges from 0.2 to 1.0
+  const oddsWeight = 1 - scoreWeight;
+
   for (let i = 0; i < teamData.length; i++) {
-    const pct = total > 0 ? (rawProbs[i] / total) * 100 : 0;
+    const blended = (oddsWeight * oddsProbs[i]) + (scoreWeight * normalizedScoreProbs[i]);
+    const pct = blended * 100;
     const rounded = Math.round(pct * 10) / 10;
     probabilities[teamData[i].id] = {
       winPct: rounded,
@@ -151,10 +189,8 @@ function pctToOdds(pct) {
   if (pct <= 0) return '—';
   if (pct >= 99.5) return '-10000';
   if (pct >= 50) {
-    // Favorite: negative American odds
     return `-${Math.round((pct / (100 - pct)) * 100)}`;
   }
-  // Underdog: positive American odds
   return `+${Math.round(((100 - pct) / pct) * 100)}`;
 }
 
