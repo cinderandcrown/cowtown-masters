@@ -19,7 +19,9 @@ export function buildGolferMap(golfers) {
   return map;
 }
 
-/** Enrich entries with golfer scores and sort by total (lowest wins). */
+/** Enrich entries with golfer scores and sort by total (lowest wins).
+ *  Withdrawn/DQ golfers use their last recorded score_to_par (fallback 0).
+ *  Entries with no drafted golfers sort to the bottom. */
 export function enrichEntries(entries, golfers) {
   const golferMap = buildGolferMap(golfers);
 
@@ -27,8 +29,10 @@ export function enrichEntries(entries, golfers) {
     .map((entry) => {
       const golferA = entry.golfer_a_id ? golferMap[entry.golfer_a_id] : null;
       const golferB = entry.golfer_b_id ? golferMap[entry.golfer_b_id] : null;
-      const scoreA = golferA?.score_to_par || 0;
-      const scoreB = golferB?.score_to_par || 0;
+      const hasDraft = !!(entry.golfer_a_id || entry.golfer_b_id);
+      // Use last recorded score_to_par regardless of status (wd/dq keep their score)
+      const scoreA = golferA ? (golferA.score_to_par ?? 0) : 0;
+      const scoreB = golferB ? (golferB.score_to_par ?? 0) : 0;
       return {
         ...entry,
         golferA,
@@ -36,9 +40,15 @@ export function enrichEntries(entries, golfers) {
         score_a: scoreA,
         score_b: scoreB,
         total_score: scoreA + scoreB,
+        _hasDraft: hasDraft,
       };
     })
-    .sort((a, b) => a.total_score - b.total_score);
+    .sort((a, b) => {
+      // Undrafted entries always sort last
+      if (a._hasDraft && !b._hasDraft) return -1;
+      if (!a._hasDraft && b._hasDraft) return 1;
+      return a.total_score - b.total_score;
+    });
 }
 
 /** Assign tie-aware positions (T1, T2, etc.) to a sorted standings array. */

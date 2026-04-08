@@ -1,10 +1,14 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
+
+const BACKOFF_SCHEDULE = [5000, 10000, 20000, 40000, 60000];
+const MAX_RETRIES = 5;
 
 export function useScoreUpdates(poolId) {
   const [golfers, setGolfers] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [error, setError] = useState(null);
+  const retryCount = useRef(0);
 
   useEffect(() => {
     if (!poolId) return;
@@ -14,50 +18,47 @@ export function useScoreUpdates(poolId) {
 
     const connect = () => {
       try {
-        // Connect to SSE endpoint
         const url = `/scoreBroadcast?poolId=${encodeURIComponent(poolId)}`;
         eventSource = new EventSource(url);
 
         eventSource.addEventListener('open', () => {
           setIsConnected(true);
           setError(null);
+          retryCount.current = 0;
         });
 
         eventSource.addEventListener('message', (event) => {
           try {
             const data = JSON.parse(event.data);
-
-            if (data.type === 'connected') {
-              console.log('SSE connected to pool:', poolId);
-            } else if (data.type === 'scoreUpdate') {
-              // Update golfer data
+            if (data.type === 'scoreUpdate') {
               setGolfers(data.golfers || []);
               setLastUpdate(data.timestamp);
               setError(null);
             }
-          } catch (e) {
-            console.error('Failed to parse SSE message:', e);
-          }
+          } catch (_) { /* ignore parse errors */ }
         });
 
-        eventSource.addEventListener('error', (e) => {
-          console.error('SSE connection error:', e);
+        eventSource.addEventListener('error', () => {
           setIsConnected(false);
-          setError('Connection lost. Reconnecting...');
           eventSource?.close();
 
-          // Auto-reconnect after 5 seconds
-          reconnectTimeout = setTimeout(connect, 5000);
+          if (retryCount.current >= MAX_RETRIES) {
+            setError('Live scores unavailable. Pull to refresh for latest scores.');
+            return;
+          }
+
+          const delay = BACKOFF_SCHEDULE[retryCount.current] || 60000;
+          retryCount.current += 1;
+          setError('Connection lost. Reconnecting...');
+          reconnectTimeout = setTimeout(connect, delay);
         });
-      } catch (e) {
-        console.error('SSE setup error:', e);
-        setError(e.message);
+      } catch (_) {
+        setError('Live scores unavailable. Pull to refresh for latest scores.');
       }
     };
 
     connect();
 
-    // Cleanup on unmount
     return () => {
       eventSource?.close();
       if (reconnectTimeout) clearTimeout(reconnectTimeout);
@@ -66,16 +67,11 @@ export function useScoreUpdates(poolId) {
 
   const refetch = useCallback(async () => {
     try {
-      // For testing: manually trigger a score update
-      const response = await fetch(`/functions/scorePolling`, {
+      await fetch(`/functions/scorePolling`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
-      const data = await response.json();
-      console.log('Manual refetch:', data);
-    } catch (e) {
-      console.error('Refetch error:', e);
-    }
+    } catch (_) { /* silent */ }
   }, []);
 
   return { golfers, isConnected, lastUpdate, error, refetch };

@@ -87,15 +87,23 @@ export default function AgentDashboard({ poolId }) {
   const handleDiagnose = useCallback(async () => {
     setShowDiagnostics(true);
     setDiagnostics(null);
-    const res = await base44.functions.invoke('masterAgent', { action: 'diagnose' });
-    setDiagnostics(res.data.checks);
+    try {
+      const res = await base44.functions.invoke('masterAgent', { action: 'diagnose' });
+      setDiagnostics(res.data.checks);
+    } catch (err) {
+      setDiagnostics([{ name: 'Diagnostics Failed', status: 'error', detail: err?.response?.data?.error || err.message || 'Could not run diagnostics.' }]);
+    }
   }, []);
 
   const handleSummary = useCallback(async () => {
     setShowSummary(true);
     setSummaryText(null);
-    const res = await base44.functions.invoke('masterAgent', { action: 'summary' });
-    setSummaryText(res.data.summary);
+    try {
+      const res = await base44.functions.invoke('masterAgent', { action: 'summary' });
+      setSummaryText(res.data.summary);
+    } catch (err) {
+      setSummaryText('⚠ Failed to generate summary: ' + (err?.response?.data?.error || err.message || 'Unknown error'));
+    }
   }, []);
 
   if (isLoading) {
