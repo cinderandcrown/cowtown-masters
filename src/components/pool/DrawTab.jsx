@@ -5,7 +5,7 @@ import { assignGroups } from '@/lib/groupUtils';
 import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Shuffle, PenLine, Check, RotateCcw, Lock, ShieldAlert, Trophy } from 'lucide-react';
+import { Shuffle, PenLine, Check, RotateCcw, Lock, ShieldAlert, Trophy, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { hapticPulse, hapticDoubleTap, hapticDrumroll, hapticRatchet, hapticSuccess } from '@/lib/haptics';
 import { fireConfetti, fireJackpot, firePop } from '@/lib/useConfetti';
@@ -394,7 +394,17 @@ export default function DrawTab({ poolId }) {
               </p>
 
               {entries.length === 0 && (
-                <p className="text-sm text-destructive font-semibold">Add participants first in the Admin panel.</p>
+                <div className="bg-gradient-to-br from-accent/10 to-accent/5 rounded-xl p-5 border border-accent/20 text-center space-y-3">
+                  <Shuffle className="w-10 h-10 text-accent/40 mx-auto animate-pulse" />
+                  <p className="text-sm font-bold text-foreground">Add participants before running the hat draw</p>
+                  <p className="text-xs text-muted-foreground">Head to the Admin panel to add pool entries first.</p>
+                  <button
+                    onClick={() => window.location.href = `/pool/${poolId}/admin`}
+                    className="inline-flex items-center gap-2 text-sm font-bold text-white bg-primary hover:bg-primary/90 px-5 py-2.5 rounded-lg transition shadow-md shadow-primary/20"
+                  >
+                    <Users className="w-4 h-4" /> Go to Admin Panel
+                  </button>
+                </div>
               )}
 
               {Object.keys(lockedEntries).length > 0 && (
@@ -422,8 +432,15 @@ export default function DrawTab({ poolId }) {
           {drawMode === 'manual' && (
             <div className="space-y-3">
               {entries.length === 0 && (
-                <div className="bg-card rounded-xl p-6 border border-primary/10 text-center">
-                  <p className="text-sm text-destructive font-semibold">Add participants first in the Admin panel.</p>
+                <div className="bg-gradient-to-br from-accent/10 to-accent/5 rounded-xl p-5 border border-accent/20 text-center space-y-3">
+                  <Shuffle className="w-10 h-10 text-accent/40 mx-auto animate-pulse" />
+                  <p className="text-sm font-bold text-foreground">Add participants before running the hat draw</p>
+                  <button
+                    onClick={() => window.location.href = `/pool/${poolId}/admin`}
+                    className="inline-flex items-center gap-2 text-sm font-bold text-white bg-primary hover:bg-primary/90 px-5 py-2.5 rounded-lg transition shadow-md shadow-primary/20"
+                  >
+                    <Users className="w-4 h-4" /> Go to Admin Panel
+                  </button>
                 </div>
               )}
 

@@ -133,16 +133,19 @@ export default function ChatTab({ poolId, participantIdentity }) {
   if (showIdentityPicker) {
     return (
       <div className="px-3 pt-3 pb-0">
-        <div className="bg-gradient-to-br from-secondary to-primary rounded-xl p-4 mb-4 border border-accent/30 text-center">
-          <MessageCircle className="w-8 h-8 text-accent mx-auto mb-2" />
-          <h2 className="text-xl font-bold text-primary-foreground mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Smack Talk
-          </h2>
-          <p className="text-xs text-accent">Who are you?</p>
+        <div className="bg-gradient-to-br from-[#0a3d0a] to-primary rounded-xl p-6 mb-4 border border-accent/30 text-center relative overflow-hidden">
+          <div className="absolute inset-0 animate-shimmer pointer-events-none opacity-20" />
+          <div className="relative">
+            <MessageCircle className="w-10 h-10 text-accent mx-auto mb-3 animate-pulse" />
+            <h2 className="text-2xl font-bold text-primary-foreground mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Join the Conversation
+            </h2>
+            <p className="text-sm text-primary-foreground/70">Select your name to start talking trash</p>
+          </div>
         </div>
 
-        <div className="bg-card rounded-xl border border-primary/10 p-4 space-y-2">
-          <p className="text-sm text-muted-foreground text-center mb-3">Select your name to start talking trash</p>
+        <div className="bg-card rounded-xl border border-primary/10 p-4 space-y-2 shadow-sm">
+          <p className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase text-center mb-3">Choose Your Identity</p>
           {participantNames.length === 0 && (
             <p className="text-sm text-destructive text-center">No participants yet. Add entries in the Admin panel first.</p>
           )}

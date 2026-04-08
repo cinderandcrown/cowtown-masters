@@ -12,28 +12,40 @@ import { MASTERS_WITHDRAWN_2026 } from '@/lib/mastersField2026';
 function GolfersSkeleton() {
   return (
     <div className="px-3 pt-3 pb-0">
-      <Skeleton className="h-9 w-full rounded-t-xl" />
-      <div className="flex gap-2 bg-card border-x border-primary/10 px-3 py-2">
-        <Skeleton className="h-7 w-14 rounded-full" />
-        <Skeleton className="h-7 w-20 rounded-full" />
-        <Skeleton className="h-7 w-20 rounded-full" />
+      {/* Header skeleton */}
+      <div className="bg-gradient-to-r from-primary/80 to-secondary/80 rounded-t-xl px-3 py-2 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-accent/30 animate-pulse" />
+          <div className="h-4 w-28 rounded bg-white/20 animate-pulse" />
+        </div>
+        <div className="h-3 w-16 rounded bg-white/15 animate-pulse" />
       </div>
-      <Skeleton className="h-7 w-full" />
+      {/* Search skeleton */}
+      <div className="bg-card border-x border-primary/10 px-3 py-2">
+        <div className="h-8 w-full rounded-md bg-muted/30 animate-pulse" />
+      </div>
+      {/* Filter pills skeleton */}
+      <div className="flex gap-2 bg-card border-x border-primary/10 px-3 py-2">
+        <div className="h-7 w-12 rounded-full bg-primary/20 animate-pulse" />
+        <div className="h-7 w-20 rounded-full bg-muted animate-pulse" />
+        <div className="h-7 w-24 rounded-full bg-muted animate-pulse" />
+      </div>
+      {/* Column header skeleton */}
+      <div className="h-7 w-full bg-primary/5 border border-primary/10 animate-pulse" />
+      {/* Row skeletons */}
       <div className="bg-card rounded-b-xl border-x border-b border-primary/10 overflow-hidden">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="px-3 py-1.5 border-b border-primary/5">
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-4 w-7" />
-              <div className="flex-1 space-y-1">
-                <Skeleton className="h-3.5 w-28" />
-                <Skeleton className="h-2.5 w-16" />
-              </div>
-              <Skeleton className="h-3.5 w-6" />
-              <Skeleton className="h-3.5 w-6" />
-              <Skeleton className="h-3.5 w-6" />
-              <Skeleton className="h-3.5 w-6" />
-              <Skeleton className="h-4 w-8" />
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div key={i} className="grid grid-cols-[28px_1fr_36px_36px_36px_36px_44px] gap-1 px-3 py-1.5 border-b border-primary/5">
+            <div className="h-5 w-5 rounded-full bg-muted animate-pulse mx-auto" />
+            <div className="space-y-1">
+              <div className="h-3.5 w-28 rounded bg-muted animate-pulse" />
+              <div className="h-2.5 w-16 rounded bg-muted/50 animate-pulse" />
             </div>
+            <div className="h-3.5 w-6 rounded bg-muted/40 animate-pulse mx-auto" />
+            <div className="h-3.5 w-6 rounded bg-muted/40 animate-pulse mx-auto" />
+            <div className="h-3.5 w-6 rounded bg-muted/40 animate-pulse mx-auto" />
+            <div className="h-3.5 w-6 rounded bg-muted/40 animate-pulse mx-auto" />
+            <div className="h-4 w-9 rounded bg-muted animate-pulse mx-auto" />
           </div>
         ))}
       </div>
@@ -138,10 +150,23 @@ export default function GolfersTab({ poolId }) {
 
       {/* Golfer rows */}
       <div className="bg-card rounded-b-xl border-x border-b border-primary/10 overflow-hidden">
-        {withPosition.length === 0 && (
-          <div className="py-10 text-center">
-            <Flag className="w-10 h-10 text-muted-foreground/20 mx-auto mb-3" />
-            <p className="text-sm font-semibold text-muted-foreground">No golfers found</p>
+        {withPosition.length === 0 && golfers.length === 0 && (
+          <div className="py-10 text-center px-4">
+            <Flag className="w-12 h-12 text-muted-foreground/20 mx-auto mb-3 animate-pulse" />
+            <p className="text-sm font-bold text-muted-foreground">Field Not Set</p>
+            <p className="text-xs text-muted-foreground/70 mt-1">Golfers will appear once the pool is initialized.</p>
+          </div>
+        )}
+        {withPosition.length === 0 && golfers.length > 0 && (
+          <div className="py-8 text-center px-4">
+            <Search className="w-10 h-10 text-muted-foreground/20 mx-auto mb-3" />
+            <p className="text-sm font-bold text-muted-foreground">No golfers match this filter</p>
+            <button
+              onClick={() => { setFilter('all'); setSearch(''); }}
+              className="mt-3 text-xs font-semibold text-primary bg-primary/10 px-4 py-2 rounded-lg hover:bg-primary/20 transition"
+            >
+              Clear Filters
+            </button>
           </div>
         )}
         {withPosition.map((g, i) => {

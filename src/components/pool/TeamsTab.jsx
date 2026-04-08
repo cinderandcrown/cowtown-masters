@@ -200,10 +200,17 @@ export default function TeamsTab({ poolId }) {
       </div>
 
       {teams.length === 0 && (
-        <div className="text-center py-10">
-          <Users className="w-10 h-10 text-muted-foreground/20 mx-auto mb-3" />
-          <p className="text-sm font-semibold text-muted-foreground">No teams yet</p>
-          <p className="text-xs text-muted-foreground mt-1">Run the hat draw to assign golfers</p>
+        <div className="bg-gradient-to-br from-[#0a3d0a] to-primary rounded-xl p-8 text-center relative overflow-hidden border border-accent/30 shadow-lg shadow-primary/20">
+          <div className="absolute inset-0 animate-shimmer pointer-events-none opacity-20" />
+          <div className="relative">
+            <Users className="w-14 h-14 text-accent mx-auto mb-4 animate-pulse" />
+            <h3 className="text-2xl font-bold text-primary-foreground mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Teams Await
+            </h3>
+            <p className="text-sm text-primary-foreground/70 max-w-xs mx-auto leading-relaxed">
+              Run the hat draw to assign golfers and see your team matchups come to life.
+            </p>
+          </div>
         </div>
       )}
 

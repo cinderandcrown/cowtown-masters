@@ -337,10 +337,19 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
 
         {/* Rows */}
         {standings.length === 0 && (
-          <div className="py-10 text-center">
-            <Trophy className="w-10 h-10 text-muted-foreground/20 mx-auto mb-3" />
-            <p className="text-sm font-semibold text-muted-foreground">No entries yet</p>
-            <p className="text-xs text-muted-foreground mt-1">Add participants in the Admin panel</p>
+          <div className="py-0">
+            <div className="bg-gradient-to-br from-[#0a3d0a] to-primary rounded-xl p-8 text-center relative overflow-hidden mx-3 my-4 border border-accent/30 shadow-lg shadow-primary/20">
+              <div className="absolute inset-0 animate-shimmer pointer-events-none opacity-20" />
+              <div className="relative">
+                <Trophy className="w-14 h-14 text-accent mx-auto mb-4 animate-pulse" />
+                <h3 className="text-2xl font-bold text-primary-foreground mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  The Field Awaits
+                </h3>
+                <p className="text-sm text-primary-foreground/70 max-w-xs mx-auto leading-relaxed">
+                  Once the hat draw is complete, your leaderboard will come to life with live scores and rankings.
+                </p>
+              </div>
+            </div>
           </div>
         )}
 

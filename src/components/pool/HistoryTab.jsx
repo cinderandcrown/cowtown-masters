@@ -248,10 +248,22 @@ export default function HistoryTab({ poolId }) {
       )}
 
       {years.length === 0 && (
-        <div className="bg-card rounded-xl p-8 border border-border text-center">
-          <Calendar className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="text-sm font-semibold text-muted-foreground">No Champions Yet</p>
-          <p className="text-xs text-muted-foreground/70 mt-1">Champions will be recorded after each tournament.</p>
+        <div className="rounded-xl border-2 border-accent/30 bg-gradient-to-b from-accent/5 to-transparent p-8 text-center relative overflow-hidden">
+          <div className="absolute inset-0 animate-shimmer pointer-events-none opacity-10" />
+          <div className="relative">
+            <Trophy className="w-14 h-14 text-accent/40 mx-auto mb-4 animate-pulse" />
+            <h3 className="text-2xl font-bold text-foreground mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Champions Wall
+            </h3>
+            <p className="text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed">
+              Previous year winners and pool history will be displayed here after each tournament concludes.
+            </p>
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <span className="w-8 h-px bg-accent/30" />
+              <Calendar className="w-4 h-4 text-accent/40" />
+              <span className="w-8 h-px bg-accent/30" />
+            </div>
+          </div>
         </div>
       )}
 
