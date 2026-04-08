@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Trash2, User, Users, Pencil, Check, X, Plus, KeyRound } from 'lucide-react';
+import { toast } from 'sonner';
 import { parseTeamEmails } from '@/lib/scoreUtils';
 
 export default function AdminEntryList({ poolId }) {
@@ -21,7 +22,11 @@ export default function AdminEntryList({ poolId }) {
 
   const deleteEntry = useMutation({
     mutationFn: (id) => base44.entities.PoolEntry.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['adminEntries', poolId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminEntries', poolId] });
+      toast.success('Entry deleted');
+    },
+    onError: (err) => toast.error('Failed to delete entry: ' + (err?.message || 'Unknown error')),
   });
 
   const resetPassword = useMutation({
@@ -29,7 +34,11 @@ export default function AdminEntryList({ poolId }) {
       const auths = await base44.entities.ParticipantAuth.filter({ entry_id: entryId });
       await Promise.all(auths.map(a => base44.entities.ParticipantAuth.delete(a.id)));
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['adminEntries', poolId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminEntries', poolId] });
+      toast.success('Password reset');
+    },
+    onError: (err) => toast.error('Failed to reset password: ' + (err?.message || 'Unknown error')),
   });
 
   const updateEntry = useMutation({
@@ -39,7 +48,9 @@ export default function AdminEntryList({ poolId }) {
       queryClient.invalidateQueries({ queryKey: ['poolEntries', poolId] });
       setEditingId(null);
       setEmailInput('');
+      toast.success('Entry updated');
     },
+    onError: (err) => toast.error('Failed to update entry: ' + (err?.message || 'Unknown error')),
   });
 
   const startEdit = (entry) => {

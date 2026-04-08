@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Pencil, X, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminGolferList({ poolId }) {
   const queryClient = useQueryClient();
@@ -33,7 +34,9 @@ export default function AdminGolferList({ poolId }) {
       queryClient.invalidateQueries({ queryKey: ['adminGolfers', poolId] });
       queryClient.invalidateQueries({ queryKey: ['poolGolfers', poolId] });
       setEditingId(null);
+      toast.success('Golfer updated');
     },
+    onError: (err) => toast.error('Failed to update golfer: ' + (err?.message || 'Unknown error')),
   });
 
   const startEdit = (golfer) => {

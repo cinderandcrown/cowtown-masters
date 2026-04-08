@@ -13,6 +13,7 @@ import AddGolferForm from '@/components/admin/AddGolferForm';
 import AddEntryForm from '@/components/admin/AddEntryForm';
 import PoolSettingsCard from '@/components/admin/PoolSettingsCard';
 import AdminExcelDownloads from '@/components/admin/AdminExcelDownloads';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { useParticipant } from '@/lib/ParticipantContext';
 
 export default function PoolAdmin() {
@@ -70,21 +71,29 @@ export default function PoolAdmin() {
 
   const handleCopyCode = async () => {
     if (pool?.invite_code) {
-      await navigator.clipboard.writeText(pool.invite_code);
-      setCopied(true);
-      hapticTap();
-      toast.success('Invite code copied!');
-      setTimeout(() => setCopied(false), 1500);
+      try {
+        await navigator.clipboard.writeText(pool.invite_code);
+        setCopied(true);
+        hapticTap();
+        toast.success('Invite code copied!');
+        setTimeout(() => setCopied(false), 1500);
+      } catch {
+        toast.error('Could not copy to clipboard');
+      }
     }
   };
 
   const handleSharePool = async () => {
     const url = `${window.location.origin}/pool/${poolId}`;
-    if (navigator.share) {
-      navigator.share({ title: pool?.name || 'Cowtown Masters Pool', url });
-    } else {
-      await navigator.clipboard.writeText(url);
-      toast.success('Pool link copied!');
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: pool?.name || 'Cowtown Masters Pool', url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success('Pool link copied!');
+      }
+    } catch {
+      toast.error('Could not share pool');
     }
   };
 
@@ -148,20 +157,26 @@ export default function PoolAdmin() {
 
         {/* Content */}
         {activeSection === 'agent' && (
-          <AgentDashboard poolId={poolId} />
+          <ErrorBoundary fallbackMessage="Scoring dashboard couldn't load. Try refreshing.">
+            <AgentDashboard poolId={poolId} />
+          </ErrorBoundary>
         )}
         {activeSection === 'golfers' && (
-          <div className="space-y-4">
-            <AdminExcelDownloads poolId={poolId} />
-            <AddGolferForm poolId={poolId} />
-            <AdminGolferList poolId={poolId} />
-          </div>
+          <ErrorBoundary fallbackMessage="Golfer management couldn't load. Try refreshing.">
+            <div className="space-y-4">
+              <AdminExcelDownloads poolId={poolId} />
+              <AddGolferForm poolId={poolId} />
+              <AdminGolferList poolId={poolId} />
+            </div>
+          </ErrorBoundary>
         )}
         {activeSection === 'participants' && (
-          <div className="space-y-4">
-            <AddEntryForm poolId={poolId} />
-            <AdminEntryList poolId={poolId} />
-          </div>
+          <ErrorBoundary fallbackMessage="Entry management couldn't load. Try refreshing.">
+            <div className="space-y-4">
+              <AddEntryForm poolId={poolId} />
+              <AdminEntryList poolId={poolId} />
+            </div>
+          </ErrorBoundary>
         )}
       </div>
     </div>

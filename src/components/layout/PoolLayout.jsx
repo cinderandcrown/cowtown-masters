@@ -311,19 +311,27 @@ export function PoolBottomNav({ poolId }) {
 
   const handleCopyInvite = async () => {
     if (pool?.invite_code) {
-      await navigator.clipboard.writeText(pool.invite_code);
-      hapticTap();
-      toast.success('Invite code copied!');
+      try {
+        await navigator.clipboard.writeText(pool.invite_code);
+        hapticTap();
+        toast.success('Invite code copied!');
+      } catch {
+        toast.error('Could not copy to clipboard');
+      }
     }
   };
 
   const handleSharePool = async () => {
     const url = `${window.location.origin}/pool/${poolId}`;
-    if (navigator.share) {
-      navigator.share({ title: pool?.name || 'Cowtown Masters Pool', url });
-    } else {
-      await navigator.clipboard.writeText(url);
-      toast.success('Pool link copied!');
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: pool?.name || 'Cowtown Masters Pool', url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success('Pool link copied!');
+      }
+    } catch {
+      toast.error('Could not share pool');
     }
   };
 
@@ -335,7 +343,7 @@ export function PoolBottomNav({ poolId }) {
   return (
     <>
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-secondary to-primary border-t border-accent/30 backdrop-blur-lg" role="navigation" aria-label="Pool navigation">
-      <div className="max-w-lg mx-auto grid grid-cols-6 px-1 py-1 pb-[env(safe-area-inset-bottom,0.5rem)]">
+      <div className="max-w-lg mx-auto grid grid-cols-6 px-1 py-1 pb-[env(safe-area-inset-bottom,1rem)]">
         {TABS.map((tab) => (
           tab.id === 'more' ? (
             <button
@@ -450,7 +458,7 @@ export default function PoolLayout({ children }) {
         Skip to main content
       </a>
       <PoolHeader />
-      <main id="main-content" className="max-w-lg mx-auto px-0 w-full pb-20" role="main">
+      <main id="main-content" className="max-w-lg mx-auto px-0 w-full pb-24" role="main">
         {children}
       </main>
       <CinderCrownFooter />

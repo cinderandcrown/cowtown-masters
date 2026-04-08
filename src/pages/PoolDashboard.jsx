@@ -30,6 +30,8 @@ export default function PoolDashboard() {
     queryFn: () => base44.entities.Pool.filter({ id: poolId }),
     enabled: !!poolId,
     select: (data) => data[0],
+    retry: 2,
+    retryDelay: 1000,
   });
 
   // Redirect to /pool/:poolId/leaderboard if no valid tab

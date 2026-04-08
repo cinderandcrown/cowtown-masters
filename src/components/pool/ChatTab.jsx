@@ -57,7 +57,7 @@ export default function ChatTab({ poolId, participantIdentity }) {
       const stored = localStorage.getItem(IDENTITY_KEY(poolId));
       if (!stored) setShowIdentityPicker(true);
     }
-  }, [participantIdentity]);
+  }, [participantIdentity, poolId, identity]);
   const [showMentionPicker, setShowMentionPicker] = useState(false);
 
   const { data: entries = [] } = useQuery({

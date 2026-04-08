@@ -18,5 +18,7 @@ export function useLivePoolEntries(poolId) {
     },
     refetchInterval: 60000,
     enabled: !!poolId,
+    retry: 2,
+    retryDelay: 1000,
   });
 }

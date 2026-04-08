@@ -139,7 +139,7 @@ export default function DrawTab({ poolId }) {
 
   // --- Random Draw Logic ---
   const runDraw = () => {
-    if (entries.length === 0) return;
+    if (entries.length === 0 || phase === 'animating' || phase === 'revealing') return;
     const shuffledA = shuffle(groupA);
     const shuffledB = shuffle(groupB);
     const pairs = entries.map((entry, i) => ({
@@ -222,15 +222,19 @@ export default function DrawTab({ poolId }) {
     const golferB = golfers.find(g => g.id === pick.golferBId);
     if (!golferA || !golferB) return;
 
-    await saveMutation.mutateAsync([{
-      entryId: entry.id,
-      golferA,
-      golferB,
-    }]);
-    setLockedEntries(prev => ({ ...prev, [entry.id]: true }));
-    hapticDoubleTap();
-    soundLock();
-    toast.success(`${entry.participant_name} locked in!`);
+    try {
+      await saveMutation.mutateAsync([{
+        entryId: entry.id,
+        golferA,
+        golferB,
+      }]);
+      setLockedEntries(prev => ({ ...prev, [entry.id]: true }));
+      hapticDoubleTap();
+      soundLock();
+      toast.success(`${entry.participant_name} locked in!`);
+    } catch (err) {
+      toast.error(`Failed to lock ${entry.participant_name}: ${err?.message || 'Unknown error'}`);
+    }
   };
 
   const allManualPicked = entries.every(e =>
@@ -239,28 +243,38 @@ export default function DrawTab({ poolId }) {
 
   const lockAllEntries = async () => {
     const pairs = entries
-      .filter(e => !lockedEntries[e.id])
+      .filter(e => !lockedEntries[e.id] && manualPicks[e.id])
       .map(entry => {
         const pick = manualPicks[entry.id];
+        if (!pick?.golferAId || !pick?.golferBId) return null;
         return {
           entryId: entry.id,
           golferA: golfers.find(g => g.id === pick.golferAId),
           golferB: golfers.find(g => g.id === pick.golferBId),
         };
       })
-      .filter(p => p.golferA && p.golferB);
+      .filter(p => p && p.golferA && p.golferB);
     if (pairs.length > 0) {
-      await saveMutation.mutateAsync(pairs);
-      const newLocked = {};
-      entries.forEach(e => { newLocked[e.id] = true; });
-      setLockedEntries(newLocked);
+      try {
+        await saveMutation.mutateAsync(pairs);
+        const newLocked = {};
+        entries.forEach(e => { newLocked[e.id] = true; });
+        setLockedEntries(newLocked);
+      } catch (err) {
+        toast.error('Failed to lock entries: ' + (err?.message || 'Unknown error'));
+      }
     }
   };
 
   const isLoading = loadingEntries || loadingGolfers;
 
   if (isLoading) {
-    return <div className="px-3 pt-3 pb-0 text-center text-muted-foreground">Loading...</div>;
+    return (
+      <div className="px-3 pt-6 pb-6 flex flex-col items-center justify-center gap-3">
+        <div className="w-10 h-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+        <p className="text-sm text-muted-foreground">Loading draw data...</p>
+      </div>
+    );
   }
 
   return (

@@ -68,11 +68,15 @@ export default function Home() {
   const handleCopyCode = async (code, e) => {
     e.preventDefault();
     e.stopPropagation();
-    await navigator.clipboard.writeText(code);
-    setCopiedCode(code);
-    hapticTap();
-    toast.success('Invite code copied!');
-    setTimeout(() => setCopiedCode(null), 1500);
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedCode(code);
+      hapticTap();
+      toast.success('Invite code copied!');
+      setTimeout(() => setCopiedCode(null), 1500);
+    } catch {
+      toast.error('Could not copy to clipboard');
+    }
   };
 
   const handleSharePool = async (pool, e) => {
