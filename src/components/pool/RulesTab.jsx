@@ -65,9 +65,9 @@ const RULES = [
     Icon: Trophy,
     title: 'Payout',
     items: [
-      '1st Place: 60% of final pot',
-      '2nd Place: 25% of final pot',
-      '3rd Place: 15% of final pot',
+      '🥇 1st Place: 70% of final pot',
+      '🥈 2nd Place: 20% of final pot',
+      '🥉 3rd Place: 10% of final pot',
     ],
   },
 ];
