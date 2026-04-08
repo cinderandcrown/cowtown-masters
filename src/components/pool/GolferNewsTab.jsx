@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Newspaper, ExternalLink, Clock, AlertTriangle, RefreshCw, Loader2, X } from 'lucide-react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Newspaper, ExternalLink, Clock, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -31,14 +30,13 @@ function getCategoryBadge(article) {
   return null;
 }
 
-function NewsCard({ article, onOpen }) {
+function NewsCard({ article }) {
   const badge = getCategoryBadge(article);
   return (
-    <div
-      role={article.link ? 'button' : undefined}
-      tabIndex={article.link ? 0 : undefined}
-      onClick={() => article.link && onOpen(article)}
-      onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && article.link) { e.preventDefault(); onOpen(article); } }}
+    <a
+      href={article.link || undefined}
+      target={article.link ? '_blank' : undefined}
+      rel="noopener noreferrer"
       className={`block bg-card rounded-xl border border-border overflow-hidden hover:border-primary/30 hover:shadow-md transition-all ${article.link ? 'cursor-pointer' : ''}`}
     >
       {article.image && (
@@ -69,7 +67,7 @@ function NewsCard({ article, onOpen }) {
           )}
         </div>
       </div>
-    </div>
+    </a>
   );
 }
 
@@ -89,8 +87,6 @@ function NewsSkeleton() {
 }
 
 export default function GolferNewsTab({ poolId }) {
-  const [openArticle, setOpenArticle] = useState(null);
-
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ['golferNews', poolId],
     queryFn: async () => {
@@ -162,57 +158,11 @@ export default function GolferNewsTab({ poolId }) {
       <div className="space-y-3">
         {articles.map((article, i) => (
           <div key={i} className="animate-fade-in-up" style={{ animationDelay: `${Math.min(i * 60, 400)}ms` }}>
-            <NewsCard article={article} onOpen={setOpenArticle} />
+            <NewsCard article={article} />
           </div>
         ))}
       </div>
 
-      {/* Article Modal */}
-      <Dialog open={!!openArticle} onOpenChange={(open) => !open && setOpenArticle(null)}>
-        <DialogContent className="max-w-lg w-[92vw] p-0 gap-0 overflow-hidden">
-          {openArticle && (
-            <div className="flex flex-col">
-              {openArticle.image && (
-                <div className="h-48 bg-muted overflow-hidden">
-                  <img src={openArticle.image} alt="" className="w-full h-full object-cover" />
-                </div>
-              )}
-              <div className="p-5 space-y-3">
-                <div className="flex items-center gap-2 flex-wrap">
-                  {getCategoryBadge(openArticle) && (
-                    <span className={`text-[10px] font-black tracking-wider px-1.5 py-0.5 rounded ${getCategoryBadge(openArticle).color}`}>
-                      {getCategoryBadge(openArticle).label}
-                    </span>
-                  )}
-                  <span className="text-[10px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded">{openArticle.source}</span>
-                  {openArticle.pubDate && (
-                    <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                      <Clock className="w-2.5 h-2.5" />
-                      {timeAgo(openArticle.pubDate)}
-                    </span>
-                  )}
-                </div>
-                <h3 className="text-lg font-bold text-foreground leading-snug" style={{ fontFamily: "'Playfair Display', serif" }}>
-                  {openArticle.title}
-                </h3>
-                {openArticle.description && (
-                  <p className="text-sm text-muted-foreground leading-relaxed">{openArticle.description}</p>
-                )}
-                {openArticle.link && (
-                  <a
-                    href={openArticle.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-primary/90 transition w-full justify-center"
-                  >
-                    Read Full Article <ExternalLink className="w-4 h-4" />
-                  </a>
-                )}
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
