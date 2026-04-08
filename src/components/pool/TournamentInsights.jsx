@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { BarChart3, Gem, Scissors, ChevronDown, ChevronUp, Users } from 'lucide-react';
+import { BarChart3, TrendingUp, Scissors, ChevronDown, ChevronUp, Trophy } from 'lucide-react';
 import { formatScore, scoreColor } from '@/lib/scoreUtils';
 
 function PopularGolfersSection({ entries, golfers }) {
@@ -87,53 +87,112 @@ function PopularGolfersSection({ entries, golfers }) {
   );
 }
 
-function BestValueSection({ standings, golfers }) {
-  // "Best value" = entry with best rank relative to their golfers' combined world ranking
-  // Higher combined world ranking (worse odds) but low score = great value
-  const bestValue = useMemo(() => {
-    if (standings.length === 0) return null;
+function PoolSnapshotSection({ standings }) {
+  // Show top 3 teams and the biggest underdog (longest combined odds)
+  const { top3, underdog } = useMemo(() => {
+    if (standings.length === 0) return { top3: [], underdog: null };
 
-    const scored = standings
-      .filter(e => e.golferA && e.golferB && e._hasDraft)
-      .map(e => {
-        const combinedRank = (e.golferA.world_ranking || 999) + (e.golferB.world_ranking || 999);
-        return { ...e, combinedRank };
-      })
-      .sort((a, b) => {
-        // Value = good score from high-ranked (worse odds) golfers
-        // Lower total_score is better, higher combinedRank means worse seeded = more value
-        const valueA = a.total_score - (a.combinedRank / 50);
-        const valueB = b.total_score - (b.combinedRank / 50);
-        return valueA - valueB;
-      });
+    const drafted = standings.filter(e => e._hasDraft && e.golferA && e.golferB);
+    const t3 = drafted.slice(0, 3);
 
-    return scored[0] || null;
+    // Parse odds to find team with longest combined odds (biggest underdogs)
+    const parseOdds = (str) => {
+      if (!str) return 99999;
+      const n = parseInt(str.replace(/[^-+\d]/g, ''), 10);
+      return isNaN(n) ? 99999 : n;
+    };
+
+    // Longest odds = highest positive combined odds number
+    let longestOdds = null;
+    let longestOddsValue = -Infinity;
+    for (const e of drafted) {
+      const oddsA = parseOdds(e.golferA?.betting_odds);
+      const oddsB = parseOdds(e.golferB?.betting_odds);
+      // Skip if either golfer has no real odds
+      if (oddsA >= 99999 || oddsB >= 99999) continue;
+      const combined = oddsA + oddsB;
+      if (combined > longestOddsValue) {
+        longestOddsValue = combined;
+        longestOdds = e;
+      }
+    }
+
+    return { top3: t3, underdog: longestOdds };
   }, [standings]);
 
-  if (!bestValue) return null;
+  if (top3.length === 0) return null;
+
+  // Detect if tournament has real scores
+  const tourneyStarted = top3.some(e =>
+    (e.golferA?.score_to_par != null && e.golferA.score_to_par !== 0) ||
+    (e.golferB?.score_to_par != null && e.golferB.score_to_par !== 0)
+  );
 
   return (
-    <div>
-      <div className="flex items-center gap-2 mb-2">
-        <Gem className="w-3.5 h-3.5 text-accent" />
-        <span className="text-[11px] font-black text-accent tracking-widest uppercase">Best Value Team</span>
-      </div>
-      <div className="bg-accent/8 rounded-xl p-3 border border-accent/20">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-sm font-bold text-foreground truncate">{bestValue.team_name || bestValue.participant_name}</span>
-          <span className={`text-sm font-black tabular-nums ${scoreColor(bestValue.total_score)}`}>
-            {formatScore(bestValue.total_score)}
+    <div className="space-y-3">
+      {/* Top 3 */}
+      <div>
+        <div className="flex items-center gap-2 mb-2">
+          <Trophy className="w-3.5 h-3.5 text-accent" />
+          <span className="text-[11px] font-black text-accent tracking-widest uppercase">
+            {tourneyStarted ? 'Top 3 Teams' : 'Strongest Teams (by Odds)'}
           </span>
         </div>
-        <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-          <span className="truncate">{bestValue.golferA?.name} (#{bestValue.golferA?.world_ranking || '—'})</span>
-          <span className="text-muted-foreground">&</span>
-          <span className="truncate">{bestValue.golferB?.name} (#{bestValue.golferB?.world_ranking || '—'})</span>
+        <div className="space-y-1.5">
+          {top3.map((entry, i) => (
+            <div key={entry.id} className={`flex items-center gap-2 rounded-lg px-3 py-2 border ${
+              i === 0 ? 'bg-accent/10 border-accent/25' : 'bg-card border-border'
+            }`}>
+              <span className={`text-xs font-black w-6 text-center ${
+                i === 0 ? 'text-accent' : 'text-muted-foreground'
+              }`}>{entry.displayRank}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold text-foreground truncate">{entry.team_name || entry.participant_name}</p>
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <span className="truncate">{entry.golferA?.name}</span>
+                  {entry.golferA?.betting_odds && (
+                    <span className="text-[9px] font-bold text-accent/60">({entry.golferA.betting_odds})</span>
+                  )}
+                  <span>&</span>
+                  <span className="truncate">{entry.golferB?.name}</span>
+                  {entry.golferB?.betting_odds && (
+                    <span className="text-[9px] font-bold text-accent/60">({entry.golferB.betting_odds})</span>
+                  )}
+                </div>
+              </div>
+              <span className={`text-sm font-black tabular-nums ${scoreColor(entry.total_score)}`}>
+                {formatScore(entry.total_score)}
+              </span>
+            </div>
+          ))}
         </div>
-        <p className="text-[11px] text-accent font-semibold mt-1">
-          Ranked #{bestValue.displayRank} with combined world ranking of {bestValue.combinedRank}
-        </p>
       </div>
+
+      {/* Longest Odds Team */}
+      {underdog && (
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <TrendingUp className="w-3.5 h-3.5 text-primary" />
+            <span className="text-[11px] font-black text-primary tracking-widest uppercase">Longest Odds Team</span>
+          </div>
+          <div className="bg-primary/5 rounded-xl p-3 border border-primary/15">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-sm font-bold text-foreground truncate">{underdog.team_name || underdog.participant_name}</span>
+              <span className={`text-sm font-black tabular-nums ${scoreColor(underdog.total_score)}`}>
+                {formatScore(underdog.total_score)}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+              <span className="truncate">{underdog.golferA?.name} ({underdog.golferA?.betting_odds || '—'})</span>
+              <span>&</span>
+              <span className="truncate">{underdog.golferB?.name} ({underdog.golferB?.betting_odds || '—'})</span>
+            </div>
+            <p className="text-[11px] text-primary font-semibold mt-1">
+              Currently #{underdog.displayRank} — the biggest long shot in the pool
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -238,7 +297,7 @@ export default function TournamentInsights({ standings, entries, golfers }) {
       {expanded && (
         <div className="px-4 pb-4 space-y-5 border-t border-border pt-3">
           <PopularGolfersSection entries={entries} golfers={golfers} />
-          <BestValueSection standings={standings} golfers={golfers} />
+          <PoolSnapshotSection standings={standings} />
           <CutLineSection standings={standings} golfers={golfers} />
         </div>
       )}
