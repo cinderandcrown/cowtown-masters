@@ -17,10 +17,10 @@ function PopularGolfersSection({ entries, golfers }) {
     return counts;
   }, [entries]);
 
-  // Top performing golfers sorted by score, with pick counts
+  // Top performing golfers sorted by score, with pick counts (only drafted golfers)
   const topGolfers = useMemo(() => {
     return golfers
-      .filter(g => g.status === 'active' && g.score_to_par != null)
+      .filter(g => g.status === 'active' && g.score_to_par != null && g.is_drafted)
       .sort((a, b) => (a.score_to_par ?? 99) - (b.score_to_par ?? 99))
       .slice(0, 8)
       .map(g => ({
