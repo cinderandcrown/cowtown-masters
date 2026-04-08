@@ -140,7 +140,11 @@ Deno.serve(async (req) => {
 
   try {
     // Auth: require platform admin OR pool admin (participant)
-    const user = await base44.auth.me();
+    let user = null;
+    try {
+      user = await base44.auth.me();
+    } catch (_) { /* user may not be a registered platform user */ }
+
     const body = await req.json().catch(() => ({}));
     const action = body.action || 'status';
 
