@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Newspaper, ExternalLink, Clock, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
+import { Newspaper, ExternalLink, Clock, AlertTriangle, RefreshCw, Loader2, X } from 'lucide-react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -30,13 +31,14 @@ function getCategoryBadge(article) {
   return null;
 }
 
-function NewsCard({ article }) {
+function NewsCard({ article, onOpen }) {
   const badge = getCategoryBadge(article);
   return (
-    <a
-      href={article.link || undefined}
-      target={article.link ? '_blank' : undefined}
-      rel="noopener noreferrer"
+    <div
+      role={article.link ? 'button' : undefined}
+      tabIndex={article.link ? 0 : undefined}
+      onClick={() => article.link && onOpen(article)}
+      onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && article.link) { e.preventDefault(); onOpen(article); } }}
       className={`block bg-card rounded-xl border border-border overflow-hidden hover:border-primary/30 hover:shadow-md transition-all ${article.link ? 'cursor-pointer' : ''}`}
     >
       {article.image && (
@@ -67,7 +69,7 @@ function NewsCard({ article }) {
           )}
         </div>
       </div>
-    </a>
+    </div>
   );
 }
 
@@ -87,6 +89,8 @@ function NewsSkeleton() {
 }
 
 export default function GolferNewsTab({ poolId }) {
+  const [openArticle, setOpenArticle] = useState(null);
+
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ['golferNews', poolId],
     queryFn: async () => {
@@ -158,10 +162,41 @@ export default function GolferNewsTab({ poolId }) {
       <div className="space-y-3">
         {articles.map((article, i) => (
           <div key={i} className="animate-fade-in-up" style={{ animationDelay: `${Math.min(i * 60, 400)}ms` }}>
-            <NewsCard article={article} />
+            <NewsCard article={article} onOpen={setOpenArticle} />
           </div>
         ))}
       </div>
+
+      {/* Article Modal */}
+      <Dialog open={!!openArticle} onOpenChange={(open) => !open && setOpenArticle(null)}>
+        <DialogContent className="max-w-3xl w-[95vw] h-[85vh] p-0 gap-0 overflow-hidden">
+          {openArticle && (
+            <>
+              <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-card">
+                <div className="flex-1 min-w-0 mr-3">
+                  <h3 className="text-sm font-bold text-foreground truncate">{openArticle.title}</h3>
+                  <p className="text-[11px] text-muted-foreground">{openArticle.source}</p>
+                </div>
+                <a
+                  href={openArticle.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-xs font-semibold text-primary hover:underline flex-shrink-0"
+                >
+                  Open <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+              <iframe
+                src={openArticle.link}
+                title={openArticle.title}
+                className="w-full flex-1 border-0"
+                style={{ height: 'calc(85vh - 52px)' }}
+                sandbox="allow-scripts allow-same-origin allow-popups"
+              />
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
