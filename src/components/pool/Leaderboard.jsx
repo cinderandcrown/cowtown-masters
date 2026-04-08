@@ -40,6 +40,9 @@ import { useParticipant } from '@/lib/ParticipantContext';
 import { Button } from '@/components/ui/button';
 import { formatScore, scoreColor, enrichEntries, assignPositions } from '@/lib/scoreUtils';
 import TournamentInsights from '@/components/pool/TournamentInsights';
+import { calculateWinProbabilities, isOnCourse } from '@/lib/winProbability';
+import LiveBadge from '@/components/pool/LiveBadge';
+import WinOddsBadge from '@/components/pool/WinOddsBadge';
 
 function LeaderboardSkeleton() {
   return (
@@ -131,6 +134,16 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
     if (isLoading) return [];
     return assignPositions(enrichEntries(entries, golfers));
   }, [entries, golfers, isLoading]);
+
+  // Win probability calculation — recalculates when standings change
+  const winProbs = useMemo(() => {
+    return calculateWinProbabilities(allStandings);
+  }, [allStandings]);
+
+  // Check if any golfer is currently on the course (live round in progress)
+  const isLiveRound = useMemo(() => {
+    return golfers.some(g => isOnCourse(g));
+  }, [golfers]);
 
   // Round-based sorting + search
   const standings = useMemo(() => {
@@ -297,16 +310,30 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
           </div>
           <div className="grid grid-cols-2 gap-2 relative">
             <div className="bg-white/10 rounded-lg p-2 border border-white/10">
-              <p className="text-[10px] font-bold text-accent tracking-widest">TOP TIER</p>
+              <div className="flex items-center justify-between mb-0.5">
+                <p className="text-[10px] font-bold text-accent tracking-widest">TOP TIER</p>
+                <LiveBadge golfer={standings[0].golferA} />
+              </div>
               <p className="text-sm font-semibold text-primary-foreground truncate">{standings[0].golferA?.name || 'Awaiting Draft'}</p>
               <p className={`text-lg font-bold tabular-nums ${standings[0].score_a < 0 ? 'text-red-400' : 'text-primary-foreground'}`}>{formatScore(standings[0].score_a)}</p>
             </div>
             <div className="bg-white/10 rounded-lg p-2 border border-white/10">
-              <p className="text-[10px] font-bold text-accent tracking-widest">BTM TIER</p>
+              <div className="flex items-center justify-between mb-0.5">
+                <p className="text-[10px] font-bold text-accent tracking-widest">BTM TIER</p>
+                <LiveBadge golfer={standings[0].golferB} />
+              </div>
               <p className="text-sm font-semibold text-primary-foreground truncate">{standings[0].golferB?.name || 'Awaiting Draft'}</p>
               <p className={`text-lg font-bold tabular-nums ${standings[0].score_b < 0 ? 'text-red-400' : 'text-primary-foreground'}`}>{formatScore(standings[0].score_b)}</p>
             </div>
           </div>
+          {/* Leader win probability */}
+          {winProbs[standings[0].id]?.winPct > 0 && (
+            <div className="mt-2 flex items-center justify-center gap-2 bg-white/5 rounded-lg px-3 py-1.5 border border-white/10 relative">
+              <span className="text-[10px] font-bold text-accent/80 tracking-widest uppercase">Win Prob</span>
+              <span className="text-sm font-black text-accent tabular-nums">{Math.round(winProbs[standings[0].id].winPct)}%</span>
+              <span className="text-[10px] font-bold text-primary-foreground/50 tabular-nums">{winProbs[standings[0].id].odds}</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -334,12 +361,13 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
         </div>
 
         {/* Header */}
-        <div className="grid grid-cols-[36px_1fr_56px_56px_52px] gap-1 px-3 py-1.5 border-b border-primary/10 bg-primary/5 text-[10px] font-bold text-primary uppercase tracking-wider">
+        <div className="grid grid-cols-[36px_1fr_56px_56px_40px_40px] gap-1 px-3 py-1.5 border-b border-primary/10 bg-primary/5 text-[10px] font-bold text-primary uppercase tracking-wider">
           <span className="text-center">POS</span>
           <span>Player</span>
           <span className="text-center">A</span>
           <span className="text-center">B</span>
           <span className="text-center">{activeRound === 'total' ? 'Tot' : activeRound.toUpperCase()}</span>
+          <span className="text-center">Win</span>
         </div>
 
         {/* Rows */}
@@ -374,7 +402,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
               }}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelectEntry({ ...entry, _rank: entry.rank, _totalEntries: standings.length }); } }}
               aria-label={`View details for ${entry.team_name || entry.participant_name}, position ${entry.displayRank}`}
-              className={`animate-fade-in-up grid grid-cols-[36px_1fr_56px_56px_52px] gap-1 px-3 py-2 border-b border-primary/5 cursor-pointer hover:bg-accent/5 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-inset focus:ring-accent ${
+              className={`animate-fade-in-up grid grid-cols-[36px_1fr_56px_56px_40px_40px] gap-1 px-3 py-2 border-b border-primary/5 cursor-pointer hover:bg-accent/5 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-inset focus:ring-accent ${
                 myEntry?.id === entry.id ? 'bg-accent/8 border-l-2 border-l-accent' : entry.rank === 1 ? 'bg-accent/10' : entry.rank <= 3 ? 'bg-primary/5' : ''
               }`}
               style={{ animationDelay: `${Math.min(i * 50, 500)}ms` }}
@@ -410,15 +438,22 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
                 {entry.team_name && (
                   <p className="text-[11px] text-muted-foreground truncate">{entry.participant_name}</p>
                 )}
-                <p className="text-[11px] text-muted-foreground truncate">
-                  {entry.golferA?.name || 'TBD'} &amp; {entry.golferB?.name || 'TBD'}
-                </p>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    {entry.golferA?.name || 'TBD'} & {entry.golferB?.name || 'TBD'}
+                  </p>
+                  <LiveBadge golfer={entry.golferA} />
+                  <LiveBadge golfer={entry.golferB} />
+                </div>
               </div>
               <span className={`text-center font-bold text-sm tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.score_a)} ${entry.score_a < 0 ? 'bg-red-500/10' : ''}`}>{formatScore(entry.score_a)}</span>
               <span className={`text-center font-bold text-sm tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.score_b)} ${entry.score_b < 0 ? 'bg-red-500/10' : ''}`}>{formatScore(entry.score_b)}</span>
-              <span className={`text-center font-black text-xl tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(getRoundScore(entry))} ${getRoundScore(entry) < 0 ? 'bg-red-500/10' : ''}`}>
+              <span className={`text-center font-black text-lg tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(getRoundScore(entry))} ${getRoundScore(entry) < 0 ? 'bg-red-500/10' : ''}`}>
                 {formatScore(getRoundScore(entry))}
               </span>
+              <div className="flex items-center justify-center self-center">
+                <WinOddsBadge winPct={winProbs[entry.id]?.winPct} odds={winProbs[entry.id]?.odds} />
+              </div>
             </div>
           );
         })}
