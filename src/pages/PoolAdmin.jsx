@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Users, Trophy, ShieldAlert, Bot, Copy, Share2, Check } from 'lucide-react';
+import { ArrowLeft, Users, Trophy, ShieldAlert, Radio, Copy, Share2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { hapticTap } from '@/lib/haptics';
 import AdminGolferList from '@/components/admin/AdminGolferList.jsx';
@@ -63,7 +63,7 @@ export default function PoolAdmin() {
   }
 
   const tabs = [
-    { id: 'agent', label: 'Agent', icon: <Bot className="w-4 h-4" /> },
+    { id: 'agent', label: 'Scoring', icon: <Radio className="w-4 h-4" /> },
     { id: 'golfers', label: 'Golfers', icon: <Trophy className="w-4 h-4" /> },
     { id: 'participants', label: 'Entries', icon: <Users className="w-4 h-4" /> },
   ];

@@ -1,104 +1,145 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-const MASTERS_FEED_URL = 'https://www.masters.com/en_US/scores/feeds/2026/scores.json';
-const ESPN_SCOREBOARD_URL = 'https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard';
+/**
+ * Master Agent — Central scoring controller for Cowtown Masters.
+ * 
+ * Actions (POST body { action, ... }):
+ *   status      — Dashboard status (phase, stats, feed connectivity)
+ *   pollNow     — Manually fetch & update scores from Masters.com/ESPN
+ *   recalculate — Recalculate all entry totals from current golfer scores
+ *   start       — Set pool to "live" + run first poll + recalc
+ *   stop        — Set pool back to "setup"
+ *   diagnose    — Run full system health check
+ *   summary     — Generate text leaderboard for sharing
+ *   resetScores — Zero out all golfer scores (pre-tournament reset)
+ */
 
-const PHASE_CONFIG = {
-  idle:            { polling: null,  label: 'Idle' },
-  pre_tournament:  { polling: 300,   label: 'Pre-Tournament' },
-  live_round:      { polling: 60,    label: 'Live Round' },
-  between_rounds:  { polling: 600,   label: 'Between Rounds' },
-  cut_day:         { polling: 120,   label: 'Cut Day' },
-  final_round:     { polling: 30,    label: 'Final Round' },
-  post_tournament: { polling: null,  label: 'Post-Tournament' },
-};
+const ESPN_SCOREBOARD_URL = 'https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard';
 
 function normalizeName(name) {
   return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z\s]/g, '').toLowerCase().trim();
 }
 
-function parseScoreToPar(val) {
-  if (val === 'E' || val === 0 || val === '0') return 0;
-  if (typeof val === 'number') return val;
-  if (typeof val === 'string') { const n = parseInt(val, 10); return isNaN(n) ? null : n; }
-  return null;
+function formatScore(s) {
+  if (s == null) return '—';
+  return s === 0 ? 'E' : s > 0 ? `+${s}` : `${s}`;
 }
 
-async function detectPhase(espnData) {
+// Detect tournament phase from ESPN data
+function detectPhase(espnData) {
   const events = espnData?.events || [];
   const mastersEvent = events.find(e =>
     e.name?.toLowerCase().includes('masters') || e.shortName?.toLowerCase().includes('masters')
-  ) || events[0];
-
-  if (!mastersEvent) return { phase: 'idle', event: null, detail: 'No tournament found on ESPN' };
+  );
+  if (!mastersEvent) return { phase: 'no_tournament', detail: 'No Masters event on ESPN scoreboard' };
 
   const competition = mastersEvent.competitions?.[0];
   const status = competition?.status || {};
-  const statusType = status?.type?.name || '';
-  const statusState = status?.type?.state || '';
+  const state = status?.type?.state || '';
+  const typeName = status?.type?.name || '';
   const round = competition?.status?.period || 0;
 
   let phase = 'idle';
-
-  if (statusState === 'pre') {
-    phase = 'pre_tournament';
-  } else if (statusState === 'in') {
-    if (round === 4) {
-      phase = 'final_round';
-    } else if (round === 2) {
-      phase = 'cut_day';
-    } else {
-      phase = 'live_round';
-    }
-  } else if (statusState === 'post') {
-    phase = 'post_tournament';
-  } else if (statusType === 'STATUS_SCHEDULED') {
-    phase = 'pre_tournament';
-  } else if (statusType === 'STATUS_PLAY_COMPLETE' || statusType === 'STATUS_DELAYED') {
-    phase = 'between_rounds';
-  } else if (statusType === 'STATUS_FINAL') {
-    phase = 'post_tournament';
-  }
+  if (state === 'pre' || typeName === 'STATUS_SCHEDULED') phase = 'pre_tournament';
+  else if (state === 'in') {
+    if (round === 4) phase = 'final_round';
+    else if (round === 2) phase = 'cut_day';
+    else phase = 'live_round';
+  } else if (typeName === 'STATUS_PLAY_COMPLETE' || typeName === 'STATUS_DELAYED') phase = 'between_rounds';
+  else if (state === 'post' || typeName === 'STATUS_FINAL') phase = 'post_tournament';
 
   return {
     phase,
-    event: mastersEvent.name || 'Unknown',
     round,
-    statusType,
-    statusState,
+    state,
+    typeName,
     competitors: competition?.competitors?.length || 0,
-    detail: `${mastersEvent.name} — Round ${round} — ${statusState || statusType}`,
+    detail: `Round ${round} — ${state || typeName}`,
+    eventName: mastersEvent.name,
   };
 }
 
-async function fetchAndUpdateScores(base44, poolId) {
-  // Delegate to the unified fetchMastersScores function (Masters.com primary + ESPN fallback)
-  const result = await base44.asServiceRole.functions.invoke('fetchMastersScores', {});
-  return result?.data || { matched: 0, updated: 0, source: 'unknown' };
-}
+const PHASE_LABELS = {
+  idle: 'Idle',
+  no_tournament: 'No Tournament Found',
+  pre_tournament: 'Pre-Tournament',
+  live_round: 'Live Round',
+  between_rounds: 'Between Rounds',
+  cut_day: 'Cut Day (Friday)',
+  final_round: 'Final Round (Sunday)',
+  post_tournament: 'Tournament Complete',
+};
 
-async function log(base44, poolId, action, detail, severity = 'info', metadata = null) {
-  await base44.asServiceRole.entities.AgentLog.create({
-    pool_id: poolId, action, detail, severity,
-    ...(metadata ? { metadata } : {}),
-  });
+// Recalculate all entry scores from golfer data
+async function recalculateEntries(base44, poolId) {
+  const golfers = await base44.asServiceRole.entities.Golfer.filter({ pool_id: poolId });
+  const entries = await base44.asServiceRole.entities.PoolEntry.filter({ pool_id: poolId });
+  const golferMap = {};
+  for (const g of golfers) golferMap[g.id] = g;
+
+  let updated = 0;
+  for (const entry of entries) {
+    const gA = golferMap[entry.golfer_a_id];
+    const gB = golferMap[entry.golfer_b_id];
+    if (!gA && !gB) continue;
+
+    const scoreA = gA?.score_to_par ?? 0;
+    const scoreB = gB?.score_to_par ?? 0;
+    const total = scoreA + scoreB;
+
+    if (entry.score_a !== scoreA || entry.score_b !== scoreB || entry.total_score !== total) {
+      await base44.asServiceRole.entities.PoolEntry.update(entry.id, {
+        score_a: scoreA,
+        score_b: scoreB,
+        total_score: total,
+      });
+      updated++;
+    }
+  }
+
+  // Assign ranks
+  const refreshed = await base44.asServiceRole.entities.PoolEntry.filter({ pool_id: poolId });
+  const sorted = refreshed
+    .filter(e => e.golfer_a_id && e.golfer_b_id)
+    .sort((a, b) => (a.total_score ?? 999) - (b.total_score ?? 999));
+
+  for (let i = 0; i < sorted.length; i++) {
+    const rank = i === 0 ? 1 : (sorted[i].total_score === sorted[i - 1].total_score ? sorted[i - 1].rank : i + 1);
+    if (sorted[i].rank !== rank) {
+      await base44.asServiceRole.entities.PoolEntry.update(sorted[i].id, { rank });
+    }
+  }
+
+  return { entriesUpdated: updated, totalEntries: entries.length };
 }
 
 async function getPoolStats(base44, poolId) {
   const golfers = await base44.asServiceRole.entities.Golfer.filter({ pool_id: poolId });
   const entries = await base44.asServiceRole.entities.PoolEntry.filter({ pool_id: poolId });
-  const totalGolfers = golfers.length;
-  const scoredGolfers = golfers.filter(g => g.score_to_par != null && g.score_to_par !== 0 || g.round_1 != null).length;
-  const activeGolfers = golfers.filter(g => g.status === 'active').length;
-  const cutGolfers = golfers.filter(g => g.status === 'cut').length;
-  const wdGolfers = golfers.filter(g => g.status === 'withdrawn' || g.status === 'disqualified').length;
-  return { totalGolfers, scoredGolfers, activeGolfers, cutGolfers, wdGolfers, totalEntries: entries.length, entries, golfers };
+  const active = golfers.filter(g => g.status === 'active');
+  const cut = golfers.filter(g => g.status === 'cut');
+  const wd = golfers.filter(g => g.status === 'withdrawn' || g.status === 'disqualified');
+  const scored = golfers.filter(g => g.round_1 != null);
+  const drafted = entries.filter(e => e.golfer_a_id && e.golfer_b_id);
+
+  return {
+    totalGolfers: golfers.length,
+    activeGolfers: active.length,
+    scoredGolfers: scored.length,
+    cutGolfers: cut.length,
+    wdGolfers: wd.length,
+    totalEntries: entries.length,
+    draftedEntries: drafted.length,
+    golfers,
+    entries,
+  };
 }
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
 
   try {
+    // Auth: require admin user
     const user = await base44.auth.me();
     if (!user || user.role !== 'admin') {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
@@ -109,213 +150,270 @@ Deno.serve(async (req) => {
     if (!pool) return Response.json({ error: 'No pool found' }, { status: 404 });
     const poolId = pool.id;
 
-    // GET = status dashboard
-    if (req.method === 'GET') {
-      let espnData = null;
-      let phaseInfo = { phase: 'idle', detail: 'ESPN not checked yet' };
+    const body = await req.json().catch(() => ({}));
+    const action = body.action || 'status';
+
+    // ─── STATUS ─────────────────────────────────────────
+    if (action === 'status') {
+      let phaseInfo = { phase: 'idle', detail: 'ESPN not checked' };
+      let espnOk = false;
       try {
-        const espnRes = await fetch(ESPN_SCOREBOARD_URL);
-        if (espnRes.ok) {
-          espnData = await espnRes.json();
-          phaseInfo = await detectPhase(espnData);
+        const res = await fetch(ESPN_SCOREBOARD_URL);
+        if (res.ok) {
+          espnOk = true;
+          phaseInfo = detectPhase(await res.json());
         }
-      } catch (e) {
-        phaseInfo = { phase: 'idle', detail: 'ESPN unreachable: ' + e.message };
-      }
+      } catch (_) { /* ESPN down */ }
 
       const stats = await getPoolStats(base44, poolId);
 
       return Response.json({
         pool: { id: pool.id, name: pool.name, status: pool.status, year: pool.year },
         phase: phaseInfo.phase,
-        phaseLabel: PHASE_CONFIG[phaseInfo.phase]?.label || phaseInfo.phase,
+        phaseLabel: PHASE_LABELS[phaseInfo.phase] || phaseInfo.phase,
         phaseDetail: phaseInfo.detail,
-        pollingInterval: PHASE_CONFIG[phaseInfo.phase]?.polling,
-        phaseConfig: PHASE_CONFIG,
-        stats: {
-          totalGolfers: stats.totalGolfers,
-          scoredGolfers: stats.scoredGolfers,
-          activeGolfers: stats.activeGolfers,
-          cutGolfers: stats.cutGolfers,
-          wdGolfers: stats.wdGolfers,
-          totalEntries: stats.totalEntries,
-        },
-        espnConnected: !!espnData,
-      });
-    }
-
-    // POST = actions
-    const body = await req.json();
-    const action = body.action;
-
-    if (action === 'status') {
-      let espnOk = false;
-      let phaseInfo = { phase: 'idle' };
-      try {
-        const res = await fetch(ESPN_SCOREBOARD_URL);
-        espnOk = res.ok;
-        if (espnOk) phaseInfo = await detectPhase(await res.json());
-      } catch (_) { /* */ }
-
-      const stats = await getPoolStats(base44, poolId);
-      const logs = await base44.asServiceRole.entities.AgentLog.filter({ pool_id: poolId });
-      const recentLogs = logs.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).slice(0, 10);
-
-      await log(base44, poolId, 'summary', 'Status report requested', 'info');
-
-      return Response.json({
-        pool: { id: pool.id, name: pool.name, status: pool.status },
-        phase: phaseInfo.phase,
-        phaseLabel: PHASE_CONFIG[phaseInfo.phase]?.label,
-        pollingInterval: PHASE_CONFIG[phaseInfo.phase]?.polling,
+        round: phaseInfo.round || null,
         espnConnected: espnOk,
         stats: {
           totalGolfers: stats.totalGolfers,
-          scoredGolfers: stats.scoredGolfers,
           activeGolfers: stats.activeGolfers,
+          scoredGolfers: stats.scoredGolfers,
           cutGolfers: stats.cutGolfers,
           wdGolfers: stats.wdGolfers,
           totalEntries: stats.totalEntries,
+          draftedEntries: stats.draftedEntries,
         },
-        recentLogs,
       });
     }
 
+    // ─── POLL NOW ───────────────────────────────────────
+    if (action === 'pollNow') {
+      const result = await base44.asServiceRole.functions.invoke('fetchMastersScores', {});
+      const scoreData = result?.data || {};
+
+      // Auto-recalc entries after score update
+      const recalc = await recalculateEntries(base44, poolId);
+
+      return Response.json({
+        success: true,
+        source: scoreData.source,
+        matched: scoreData.matched,
+        updated: scoreData.updated,
+        feedPlayers: scoreData.feed_players,
+        entriesRecalculated: recalc.entriesUpdated,
+        message: scoreData.message || null,
+      });
+    }
+
+    // ─── RECALCULATE ENTRIES ────────────────────────────
+    if (action === 'recalculate') {
+      const result = await recalculateEntries(base44, poolId);
+      return Response.json({
+        success: true,
+        ...result,
+      });
+    }
+
+    // ─── START (go live) ────────────────────────────────
     if (action === 'start') {
       await base44.asServiceRole.entities.Pool.update(poolId, { status: 'live' });
-      const result = await fetchAndUpdateScores(base44, poolId);
+
+      // Run initial score poll
+      const pollResult = await base44.asServiceRole.functions.invoke('fetchMastersScores', {});
+      const scoreData = pollResult?.data || {};
+
+      // Recalc entries
+      const recalc = await recalculateEntries(base44, poolId);
+
+      // Notify
       await base44.asServiceRole.entities.Notification.create({
-        pool_id: poolId, type: 'leaderboard_change',
-        title: '🟢 Tournament Agent Started',
-        message: `Live scoring is now active. Matched ${result.matched} golfers from ESPN.`,
+        pool_id: poolId,
+        type: 'leaderboard_change',
+        title: '🟢 Tournament Live!',
+        message: `Live scoring activated. Matched ${scoreData.matched || 0} golfers.`,
+        read_by: [],
       });
-      await log(base44, poolId, 'start', `Agent started. Pool set to live. Matched ${result.matched} golfers, updated ${result.updated}.`, 'info', result);
-      return Response.json({ success: true, message: 'Agent started', scoreResult: result });
+
+      return Response.json({
+        success: true,
+        message: 'Pool is now LIVE',
+        scoreResult: scoreData,
+        entriesRecalculated: recalc.entriesUpdated,
+      });
     }
 
+    // ─── STOP ───────────────────────────────────────────
     if (action === 'stop') {
       await base44.asServiceRole.entities.Pool.update(poolId, { status: 'setup' });
       await base44.asServiceRole.entities.Notification.create({
-        pool_id: poolId, type: 'leaderboard_change',
-        title: '🔴 Tournament Agent Stopped',
-        message: 'Live scoring has been paused by the pool admin.',
+        pool_id: poolId,
+        type: 'leaderboard_change',
+        title: '🔴 Scoring Paused',
+        message: 'Live scoring has been paused by the admin.',
+        read_by: [],
       });
-      await log(base44, poolId, 'stop', 'Agent stopped by admin. Pool status reset to setup.', 'warn');
-      return Response.json({ success: true, message: 'Agent stopped, pool reset to setup' });
+      return Response.json({ success: true, message: 'Pool paused (status: setup)' });
     }
 
-    if (action === 'pollNow') {
-      const result = await fetchAndUpdateScores(base44, poolId);
-      await log(base44, poolId, 'pollNow', `Manual poll: matched ${result.matched}, updated ${result.updated}.`, 'info', result);
-      return Response.json({ success: true, ...result });
-    }
-
+    // ─── DIAGNOSE ───────────────────────────────────────
     if (action === 'diagnose') {
       const stats = await getPoolStats(base44, poolId);
       const checks = [];
 
-      // Pool check
-      checks.push({ name: 'Pool Entity', status: 'ok', detail: `${pool.name} — status: ${pool.status}` });
+      // Pool
+      checks.push({ name: 'Pool', status: 'ok', detail: `${pool.name} — status: ${pool.status}` });
 
-      // Golfer check
+      // Golfers
       checks.push({
-        name: 'Golfer Records',
-        status: stats.totalGolfers > 0 ? 'ok' : 'warn',
-        detail: `${stats.totalGolfers} total, ${stats.scoredGolfers} scored, ${stats.cutGolfers} cut, ${stats.wdGolfers} WD/DQ`,
+        name: 'Golfers',
+        status: stats.totalGolfers > 0 ? 'ok' : 'error',
+        detail: `${stats.totalGolfers} total (${stats.activeGolfers} active, ${stats.cutGolfers} cut, ${stats.wdGolfers} WD)`,
       });
 
-      // ESPN check
-      let espnStatus = 'error';
-      let espnDetail = 'Failed to connect';
+      // Entries
+      checks.push({
+        name: 'Entries',
+        status: stats.draftedEntries > 0 ? 'ok' : stats.totalEntries > 0 ? 'warn' : 'error',
+        detail: `${stats.totalEntries} participants, ${stats.draftedEntries} with golfers assigned`,
+      });
+
+      // Score data
+      checks.push({
+        name: 'Score Data',
+        status: stats.scoredGolfers > 0 ? 'ok' : 'warn',
+        detail: `${stats.scoredGolfers} golfers have round data`,
+      });
+
+      // ESPN connectivity
+      let espnDetail = 'Not checked';
+      let espnStatus = 'warn';
       try {
         const res = await fetch(ESPN_SCOREBOARD_URL);
         if (res.ok) {
           const data = await res.json();
-          const phaseInfo = await detectPhase(data);
-          espnStatus = 'ok';
-          espnDetail = `Connected. ${phaseInfo.detail}`;
+          const phaseInfo = detectPhase(data);
+          espnStatus = phaseInfo.phase === 'no_tournament' ? 'warn' : 'ok';
+          espnDetail = phaseInfo.phase === 'no_tournament'
+            ? 'Connected but no Masters event found'
+            : `Connected — ${phaseInfo.eventName} ${phaseInfo.detail}`;
         } else {
+          espnStatus = 'error';
           espnDetail = `HTTP ${res.status}`;
         }
-      } catch (e) { espnDetail = e.message; }
-      checks.push({ name: 'ESPN API', status: espnStatus, detail: espnDetail });
+      } catch (e) {
+        espnStatus = 'error';
+        espnDetail = 'Unreachable: ' + e.message;
+      }
+      checks.push({ name: 'ESPN Feed', status: espnStatus, detail: espnDetail });
 
-      // Entries check
-      checks.push({
-        name: 'Pool Entries',
-        status: stats.totalEntries > 0 ? 'ok' : 'warn',
-        detail: `${stats.totalEntries} participants`,
-      });
+      // Masters.com feed
+      let mastersStatus = 'warn';
+      let mastersDetail = 'Not checked';
+      try {
+        const res = await fetch('https://www.masters.com/en_US/scores/feeds/2026/scores.json', {
+          headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const playerData = data?.data?.player || data?.data?.players || data?.data;
+          const count = playerData ? Object.keys(playerData).length : 0;
+          mastersStatus = count > 0 ? 'ok' : 'warn';
+          mastersDetail = count > 0 ? `Connected — ${count} players` : 'Connected but no player data yet (pre-tournament)';
+        } else {
+          mastersStatus = 'error';
+          mastersDetail = `HTTP ${res.status}`;
+        }
+      } catch (e) {
+        mastersStatus = 'error';
+        mastersDetail = 'Unreachable: ' + e.message;
+      }
+      checks.push({ name: 'Masters.com Feed', status: mastersStatus, detail: mastersDetail });
 
-      // Name matching check
-      if (stats.totalGolfers > 0 && espnStatus === 'ok') {
+      // Name matching
+      if (stats.totalGolfers > 0) {
         try {
           const espnRes = await fetch(ESPN_SCOREBOARD_URL);
-          const espnData = await espnRes.json();
-          const event = (espnData.events || []).find(e => e.name?.toLowerCase().includes('masters')) || (espnData.events || [])[0];
-          const competitors = event?.competitions?.[0]?.competitors || [];
-          const espnNames = new Set(competitors.map(c => normalizeName(c.athlete?.displayName || '')));
-          const poolNames = stats.golfers.map(g => normalizeName(g.name));
-          const matchedNames = poolNames.filter(n => espnNames.has(n));
-          checks.push({
-            name: 'Name Matching',
-            status: matchedNames.length > poolNames.length * 0.7 ? 'ok' : 'warn',
-            detail: `${matchedNames.length}/${poolNames.length} pool golfers matched to ESPN (${competitors.length} ESPN competitors)`,
-          });
+          if (espnRes.ok) {
+            const espnData = await espnRes.json();
+            const event = (espnData.events || []).find(e => e.name?.toLowerCase().includes('masters')) || (espnData.events || [])[0];
+            const competitors = event?.competitions?.[0]?.competitors || [];
+            const espnNames = new Set(competitors.map(c => normalizeName(c.athlete?.displayName || '')));
+            const poolActive = stats.golfers.filter(g => g.status === 'active');
+            const matched = poolActive.filter(g => espnNames.has(normalizeName(g.name)));
+            const unmatched = poolActive.filter(g => !espnNames.has(normalizeName(g.name))).map(g => g.name);
+            checks.push({
+              name: 'Name Matching',
+              status: matched.length > poolActive.length * 0.7 ? 'ok' : 'warn',
+              detail: `${matched.length}/${poolActive.length} active golfers match ESPN data${unmatched.length > 0 ? `. Unmatched: ${unmatched.slice(0, 5).join(', ')}${unmatched.length > 5 ? '...' : ''}` : ''}`,
+            });
+          }
         } catch (_) {
-          checks.push({ name: 'Name Matching', status: 'error', detail: 'Could not verify' });
+          checks.push({ name: 'Name Matching', status: 'warn', detail: 'Could not verify' });
         }
       }
 
-      await log(base44, poolId, 'diagnose', `Diagnostics run: ${checks.filter(c => c.status === 'ok').length}/${checks.length} passed`, 'info', { checks });
       return Response.json({ success: true, checks });
     }
 
+    // ─── SUMMARY ────────────────────────────────────────
     if (action === 'summary') {
       const stats = await getPoolStats(base44, poolId);
-      const entries = stats.entries;
-      const golfers = stats.golfers;
-
       const golferMap = {};
-      for (const g of golfers) golferMap[g.id] = g;
+      for (const g of stats.golfers) golferMap[g.id] = g;
 
-      const standings = entries.map(e => {
-        const gA = golferMap[e.golfer_a_id];
-        const gB = golferMap[e.golfer_b_id];
-        const scoreA = gA?.score_to_par ?? 0;
-        const scoreB = gB?.score_to_par ?? 0;
-        const total = scoreA + scoreB;
-        return {
-          name: e.team_name || e.participant_name,
-          golferA: gA?.name || '—',
-          golferB: gB?.name || '—',
-          scoreA, scoreB, total,
-        };
-      }).sort((a, b) => a.total - b.total);
+      const standings = stats.entries
+        .filter(e => e.golfer_a_id && e.golfer_b_id)
+        .map(e => {
+          const gA = golferMap[e.golfer_a_id];
+          const gB = golferMap[e.golfer_b_id];
+          return {
+            name: e.team_name || e.participant_name,
+            golferA: gA?.name || '—',
+            golferB: gB?.name || '—',
+            scoreA: gA?.score_to_par ?? 0,
+            scoreB: gB?.score_to_par ?? 0,
+            total: (gA?.score_to_par ?? 0) + (gB?.score_to_par ?? 0),
+          };
+        })
+        .sort((a, b) => a.total - b.total);
 
-      const lines = [`🏆 ${pool.name} — Leaderboard`, ''];
+      const lines = [`🏆 ${pool.name} Leaderboard`, ''];
       standings.forEach((s, i) => {
-        const score = s.total === 0 ? 'E' : (s.total > 0 ? '+' + s.total : s.total);
-        lines.push(`${i + 1}. ${s.name} (${score}) — ${s.golferA} + ${s.golferB}`);
+        lines.push(`${i + 1}. ${s.name} (${formatScore(s.total)}) — ${s.golferA} [${formatScore(s.scoreA)}] + ${s.golferB} [${formatScore(s.scoreB)}]`);
       });
       lines.push('');
-      lines.push(`📊 ${stats.totalGolfers} golfers | ${stats.activeGolfers} active | ${stats.cutGolfers} cut`);
+      lines.push(`📊 ${stats.totalGolfers} golfers | ${stats.activeGolfers} active | ${stats.cutGolfers} cut | ${stats.wdGolfers} WD`);
+      lines.push(`👥 ${stats.totalEntries} entries | ${stats.draftedEntries} drafted`);
 
-      const summaryText = lines.join('\n');
-      await log(base44, poolId, 'summary', 'Leaderboard summary generated', 'info');
-      return Response.json({ success: true, summary: summaryText, standings });
+      return Response.json({ success: true, summary: lines.join('\n') });
     }
 
-    if (action === 'setPhase') {
-      const newPhase = body.phase;
-      if (!PHASE_CONFIG[newPhase]) {
-        return Response.json({ error: 'Invalid phase: ' + newPhase }, { status: 400 });
+    // ─── RESET SCORES ───────────────────────────────────
+    if (action === 'resetScores') {
+      const stats = await getPoolStats(base44, poolId);
+      let reset = 0;
+      for (const g of stats.golfers) {
+        if (g.round_1 != null || g.score_to_par !== 0 || g.status !== 'active') {
+          await base44.asServiceRole.entities.Golfer.update(g.id, {
+            score_to_par: 0,
+            round_1: null,
+            round_2: null,
+            round_3: null,
+            round_4: null,
+            actual_scores: [],
+            status: g.status === 'cut' || g.status === 'disqualified' ? 'active' : g.status,
+            position: null,
+            thru: null,
+          });
+          reset++;
+        }
       }
-      await log(base44, poolId, 'phaseChange', `Manual phase override to: ${newPhase}`, 'warn', { phase: newPhase });
-      return Response.json({ success: true, phase: newPhase, config: PHASE_CONFIG[newPhase] });
+      // Also reset entry scores
+      const recalc = await recalculateEntries(base44, poolId);
+      return Response.json({ success: true, golfersReset: reset, entriesReset: recalc.entriesUpdated });
     }
 
-    return Response.json({ error: 'Unknown action: ' + action }, { status: 400 });
+    return Response.json({ error: `Unknown action: ${action}` }, { status: 400 });
 
   } catch (error) {
     console.error('masterAgent error:', error.message);

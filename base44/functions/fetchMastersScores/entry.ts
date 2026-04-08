@@ -277,6 +277,31 @@ Deno.serve(async (req) => {
 
     console.log(`Source: ${source} | Matched: ${matched} | Updated: ${updated}`);
 
+    // Auto-recalculate entry scores after golfer updates
+    let entriesUpdated = 0;
+    if (updated > 0) {
+      const entries = await base44.asServiceRole.entities.PoolEntry.filter({ pool_id: poolId });
+      const golferMap = {};
+      const allGolfers = await base44.asServiceRole.entities.Golfer.filter({ pool_id: poolId });
+      for (const g of allGolfers) golferMap[g.id] = g;
+
+      for (const entry of entries) {
+        const gA = golferMap[entry.golfer_a_id];
+        const gB = golferMap[entry.golfer_b_id];
+        if (!gA && !gB) continue;
+        const scoreA = gA?.score_to_par ?? 0;
+        const scoreB = gB?.score_to_par ?? 0;
+        const total = scoreA + scoreB;
+        if (entry.score_a !== scoreA || entry.score_b !== scoreB || entry.total_score !== total) {
+          await base44.asServiceRole.entities.PoolEntry.update(entry.id, {
+            score_a: scoreA, score_b: scoreB, total_score: total,
+          });
+          entriesUpdated++;
+        }
+      }
+      console.log(`Recalculated ${entriesUpdated} entries`);
+    }
+
     return Response.json({
       source,
       tournament: tournamentName,
@@ -284,6 +309,7 @@ Deno.serve(async (req) => {
       pool_golfers: golfers.length,
       matched,
       updated,
+      entries_updated: entriesUpdated,
       timestamp: new Date().toISOString(),
     });
 
