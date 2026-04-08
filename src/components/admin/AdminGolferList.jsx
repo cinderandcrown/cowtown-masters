@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Pencil, X, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminGolferList({ poolId }) {
   const queryClient = useQueryClient();
@@ -17,12 +18,14 @@ export default function AdminGolferList({ poolId }) {
     queryKey: ['adminGolfers', poolId],
     queryFn: () => base44.entities.Golfer.filter({ pool_id: poolId }),
     enabled: !!poolId,
+    retry: 2,
   });
 
   const { data: entries = [] } = useQuery({
     queryKey: ['poolEntries', poolId],
     queryFn: () => base44.entities.PoolEntry.filter({ pool_id: poolId }),
     enabled: !!poolId,
+    retry: 2,
   });
 
   const golfers = assignGroups(rawGolfers, entries.length);
@@ -34,6 +37,7 @@ export default function AdminGolferList({ poolId }) {
       queryClient.invalidateQueries({ queryKey: ['poolGolfers', poolId] });
       setEditingId(null);
     },
+    onError: (err) => toast.error('Failed to update golfer: ' + (err?.message || 'Unknown error')),
   });
 
   const startEdit = (golfer) => {

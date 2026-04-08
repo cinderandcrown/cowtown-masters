@@ -15,6 +15,7 @@ import usePullToRefresh from '@/hooks/usePullToRefresh.jsx';
 import AddToHomeScreen from '@/components/pool/AddToHomeScreen';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import ScoreFlashOverlay from '@/components/pool/ScoreFlashOverlay';
+import { Button } from '@/components/ui/button';
 
 const VALID_TABS = ['leaderboard', 'teams', 'golfers', 'draw', 'messages', 'history', 'rules'];
 
@@ -25,11 +26,12 @@ export default function PoolDashboard() {
   const [selectedEntry, setSelectedEntry] = useState(null);
   const queryClient = useQueryClient();
 
-  const { data: pool } = useQuery({
+  const { data: pool, isError: poolError, refetch: refetchPool, isLoading: poolLoading } = useQuery({
     queryKey: ['pool', poolId],
     queryFn: () => base44.entities.Pool.filter({ id: poolId }),
     enabled: !!poolId,
     select: (data) => data[0],
+    retry: 2,
   });
 
   // Redirect to /pool/:poolId/leaderboard if no valid tab
@@ -87,7 +89,22 @@ export default function PoolDashboard() {
     queryFn: () => base44.entities.Golfer.filter({ pool_id: poolId }),
     enabled: !!poolId,
     refetchInterval: 60000,
+    retry: 2,
   });
+
+  if (poolError && !pool) {
+    return (
+      <PoolLayout>
+        <div className="px-4 pt-20 pb-8 text-center">
+          <div className="bg-card rounded-xl border border-destructive/20 p-8 max-w-sm mx-auto">
+            <p className="text-lg font-bold text-foreground mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>Unable to Load Pool</p>
+            <p className="text-sm text-muted-foreground mb-4">We couldn't reach the server. Check your connection and try again.</p>
+            <Button onClick={() => refetchPool()} className="bg-primary text-white">Try Again</Button>
+          </div>
+        </div>
+      </PoolLayout>
+    );
+  }
 
   return (
     <PoolLayout>

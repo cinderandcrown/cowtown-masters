@@ -14,6 +14,7 @@ import AddEntryForm from '@/components/admin/AddEntryForm';
 import PoolSettingsCard from '@/components/admin/PoolSettingsCard';
 import AdminExcelDownloads from '@/components/admin/AdminExcelDownloads';
 import { useParticipant } from '@/lib/ParticipantContext';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 export default function PoolAdmin() {
   const { poolId } = useParams();
@@ -26,6 +27,7 @@ export default function PoolAdmin() {
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
+    retry: 2,
   });
 
   const { data: pool, isLoading: loadingPool } = useQuery({
@@ -33,6 +35,7 @@ export default function PoolAdmin() {
     queryFn: () => base44.entities.Pool.filter({ id: poolId }),
     enabled: !!poolId,
     select: (data) => data[0],
+    retry: 2,
   });
 
   const { isLoggedIn: participantLoggedIn, participant } = useParticipant();
@@ -148,20 +151,26 @@ export default function PoolAdmin() {
 
         {/* Content */}
         {activeSection === 'agent' && (
-          <AgentDashboard poolId={poolId} />
+          <ErrorBoundary fallbackMessage="Scoring dashboard couldn't load. Try refreshing.">
+            <AgentDashboard poolId={poolId} />
+          </ErrorBoundary>
         )}
         {activeSection === 'golfers' && (
-          <div className="space-y-4">
-            <AdminExcelDownloads poolId={poolId} />
-            <AddGolferForm poolId={poolId} />
-            <AdminGolferList poolId={poolId} />
-          </div>
+          <ErrorBoundary fallbackMessage="Golfer management couldn't load. Try refreshing.">
+            <div className="space-y-4">
+              <AdminExcelDownloads poolId={poolId} />
+              <AddGolferForm poolId={poolId} />
+              <AdminGolferList poolId={poolId} />
+            </div>
+          </ErrorBoundary>
         )}
         {activeSection === 'participants' && (
-          <div className="space-y-4">
-            <AddEntryForm poolId={poolId} />
-            <AdminEntryList poolId={poolId} />
-          </div>
+          <ErrorBoundary fallbackMessage="Entry management couldn't load. Try refreshing.">
+            <div className="space-y-4">
+              <AddEntryForm poolId={poolId} />
+              <AdminEntryList poolId={poolId} />
+            </div>
+          </ErrorBoundary>
         )}
       </div>
     </div>

@@ -65,6 +65,7 @@ export default function ChatTab({ poolId, participantIdentity }) {
     queryKey: ['poolEntries', poolId],
     queryFn: () => base44.entities.PoolEntry.filter({ pool_id: poolId }),
     enabled: !!poolId,
+    retry: 2,
   });
 
   const { data: messages = [], isLoading } = useQuery({
@@ -75,6 +76,7 @@ export default function ChatTab({ poolId, participantIdentity }) {
     },
     enabled: !!poolId,
     refetchInterval: 10000,
+    retry: 2,
   });
 
   const sendMutation = useMutation({
@@ -84,6 +86,7 @@ export default function ChatTab({ poolId, participantIdentity }) {
       setMessage('');
       hapticTap();
     },
+    onError: (err) => toast.error('Failed to send message: ' + (err?.message || 'Unknown error')),
   });
 
   // Auto-scroll to bottom on new messages

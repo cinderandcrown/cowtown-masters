@@ -93,12 +93,14 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
     queryFn: () => base44.entities.Pool.filter({ id: poolId }),
     enabled: !!poolId,
     select: (data) => data[0],
+    retry: 2,
   });
 
   const { data: entries = [], isLoading: loadingEntries } = useQuery({
     queryKey: ['poolEntries', poolId],
     queryFn: () => base44.entities.PoolEntry.filter({ pool_id: poolId }),
     enabled: !!poolId,
+    retry: 2,
   });
 
   const queryClient = useQueryClient();
@@ -108,6 +110,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
     queryFn: () => base44.entities.Golfer.filter({ pool_id: poolId }),
     enabled: !!poolId,
     refetchInterval: 60000,
+    retry: 2,
   });
 
   // Real-time subscription: auto-refresh when golfer scores update

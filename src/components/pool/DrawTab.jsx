@@ -40,6 +40,7 @@ export default function DrawTab({ poolId }) {
     queryFn: () => base44.entities.Pool.filter({ id: poolId }),
     enabled: !!poolId,
     select: (data) => data[0],
+    retry: 2,
   });
 
   const isAdmin = user?.role === 'admin' || user?.email === pool?.admin_user_id || user?.email === pool?.created_by || (participantLoggedIn && participant?.email && (participant.email === pool?.admin_user_id || participant.email === pool?.created_by));
@@ -48,12 +49,14 @@ export default function DrawTab({ poolId }) {
     queryKey: ['poolEntries', poolId],
     queryFn: () => base44.entities.PoolEntry.filter({ pool_id: poolId }),
     enabled: !!poolId,
+    retry: 2,
   });
 
   const { data: rawGolfers = [], isLoading: loadingGolfers } = useQuery({
     queryKey: ['poolGolfers', poolId],
     queryFn: () => base44.entities.Golfer.filter({ pool_id: poolId }),
     enabled: !!poolId,
+    retry: 2,
   });
 
   const golfers = assignGroups(rawGolfers, entries.length);
