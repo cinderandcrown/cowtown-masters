@@ -188,7 +188,7 @@ Deno.serve(async (req) => {
 
     // ─── POLL NOW ───────────────────────────────────────
     if (action === 'pollNow') {
-      const result = await base44.asServiceRole.functions.invoke('fetchMastersScores', {});
+      const result = await base44.asServiceRole.functions.invoke('fetchMastersScores', { force: true });
       const scoreData = result?.data || {};
 
       // Auto-recalc entries after score update
@@ -218,8 +218,8 @@ Deno.serve(async (req) => {
     if (action === 'start') {
       await base44.asServiceRole.entities.Pool.update(poolId, { status: 'live' });
 
-      // Run initial score poll
-      const pollResult = await base44.asServiceRole.functions.invoke('fetchMastersScores', {});
+      // Run initial score poll (force=true bypasses date gate for pre-tournament testing)
+      const pollResult = await base44.asServiceRole.functions.invoke('fetchMastersScores', { force: true });
       const scoreData = pollResult?.data || {};
 
       // Recalc entries
@@ -244,7 +244,11 @@ Deno.serve(async (req) => {
 
     // ─── STOP ───────────────────────────────────────────
     if (action === 'stop') {
-      await base44.asServiceRole.entities.Pool.update(poolId, { status: 'setup' });
+      // If entries are drafted, go back to 'draft' not 'setup'
+      const stopEntries = await base44.asServiceRole.entities.PoolEntry.filter({ pool_id: poolId });
+      const hasDrafted = stopEntries.some(e => e.golfer_a_id && e.golfer_b_id);
+      const newStatus = hasDrafted ? 'draft' : 'setup';
+      await base44.asServiceRole.entities.Pool.update(poolId, { status: newStatus });
       await base44.asServiceRole.entities.Notification.create({
         pool_id: poolId,
         type: 'leaderboard_change',

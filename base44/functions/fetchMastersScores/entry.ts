@@ -44,7 +44,9 @@ function parseMastersFeed(feedData) {
   for (const p of playerList) {
     const firstName = p.first_name || p.firstName || '';
     const lastName = p.last_name || p.lastName || '';
-    const displayName = p.display_name || p.displayName || `${firstName} ${lastName}`;
+    // Masters.com uses display_name for last name only (e.g. 'KEEFER')
+    // full_name has the complete name (e.g. 'John Keefer')
+    const displayName = p.full_name || p.fullName || `${firstName} ${lastName}`;
     const normalized = normalizeName(displayName);
 
     if (!normalized) continue;
@@ -86,8 +88,12 @@ function parseMastersFeed(feedData) {
     // Thru
     const thru = p.thru || p.today_thru || null;
 
+    // Calculate cumulative score only from rounds actually played
+    const roundScores = [round1, round2, round3, round4].filter(r => r != null);
+    const calculatedTotal = roundScores.length > 0 ? roundScores.reduce((a, b) => a + b, 0) : null;
+
     scoreMap[normalized] = {
-      score_to_par: topar ?? (round1 || 0) + (round2 || 0) + (round3 || 0) + (round4 || 0),
+      score_to_par: topar ?? calculatedTotal ?? 0,
       round_1: round1,
       round_2: round2,
       round_3: round3,
@@ -159,9 +165,22 @@ Deno.serve(async (req) => {
     // Hard gate: do NOT poll before the Masters actually starts
     // 2026 Masters Round 1 tees off Thursday April 9, ~8am ET (12:00 UTC)
     const MASTERS_START = new Date('2026-04-09T12:00:00Z');
-    if (new Date() < MASTERS_START) {
+    // Parse force flag from request body (may be nested under SDK wrapper)
+    let force = false;
+    try {
+      const rawBody = await req.text();
+      if (rawBody) {
+        const parsed = JSON.parse(rawBody);
+        force = parsed?.force === true || parsed?.data?.force === true;
+      }
+    } catch (_) { /* no body or not JSON */ }
+    // Also check URL param as fallback
+    const url = new URL(req.url);
+    if (url.searchParams.get('force') === 'true') force = true;
+
+    if (!force && new Date() < MASTERS_START) {
       return Response.json({
-        message: 'Masters has not started yet. Polling disabled until April 10.',
+        message: 'Pre-tournament: scoring starts April 9. Use force=true to override.',
         starts: MASTERS_START.toISOString(),
         updated: 0,
       });
