@@ -139,19 +139,25 @@ Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
 
   try {
-    // Auth: require admin user
+    // Auth: require platform admin OR pool admin (participant)
     const user = await base44.auth.me();
-    if (!user || user.role !== 'admin') {
-      return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
-    }
+    const body = await req.json().catch(() => ({}));
+    const action = body.action || 'status';
 
     const pools = await base44.asServiceRole.entities.Pool.filter({});
     const pool = pools[0];
     if (!pool) return Response.json({ error: 'No pool found' }, { status: 404 });
     const poolId = pool.id;
 
-    const body = await req.json().catch(() => ({}));
-    const action = body.action || 'status';
+    // Allow access if: platform admin, pool admin_user_id matches user email, or participant_email matches pool admin
+    const isPlatformAdmin = user?.role === 'admin';
+    const isPoolAdminByEmail = user?.email && (user.email === pool.admin_user_id || user.email === pool.created_by);
+    const participantEmail = body.participant_email?.toLowerCase?.();
+    const isPoolAdminByParticipant = participantEmail && (participantEmail === pool.admin_user_id?.toLowerCase?.() || participantEmail === pool.created_by?.toLowerCase?.());
+
+    if (!isPlatformAdmin && !isPoolAdminByEmail && !isPoolAdminByParticipant) {
+      return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+    }
 
     // ─── STATUS ─────────────────────────────────────────
     if (action === 'status') {

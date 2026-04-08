@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
+import { useParticipant } from '@/lib/ParticipantContext';
 import {
   Play, Square, Zap, RefreshCw, Calculator, ChevronDown, ChevronUp,
   CheckCircle2, AlertTriangle, XCircle, Loader2, FileText, Copy, RotateCcw,
@@ -37,6 +38,7 @@ function DiagnosticRow({ check }) {
 
 export default function AgentDashboard({ poolId }) {
   const queryClient = useQueryClient();
+  const { participant } = useParticipant();
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [diagnostics, setDiagnostics] = useState(null);
@@ -47,7 +49,7 @@ export default function AgentDashboard({ poolId }) {
   const { data: status, isLoading } = useQuery({
     queryKey: ['agentStatus', poolId],
     queryFn: async () => {
-      const res = await base44.functions.invoke('masterAgent', { action: 'status' });
+      const res = await base44.functions.invoke('masterAgent', { action: 'status', participant_email: participant?.email });
       return res.data;
     },
     refetchInterval: 30000,
@@ -56,7 +58,7 @@ export default function AgentDashboard({ poolId }) {
   // Generic action mutation
   const runAction = useMutation({
     mutationFn: async ({ action, ...rest }) => {
-      const res = await base44.functions.invoke('masterAgent', { action, ...rest });
+      const res = await base44.functions.invoke('masterAgent', { action, participant_email: participant?.email, ...rest });
       return res.data;
     },
     onSuccess: (data, variables) => {
@@ -88,7 +90,7 @@ export default function AgentDashboard({ poolId }) {
     setShowDiagnostics(true);
     setDiagnostics(null);
     try {
-      const res = await base44.functions.invoke('masterAgent', { action: 'diagnose' });
+      const res = await base44.functions.invoke('masterAgent', { action: 'diagnose', participant_email: participant?.email });
       setDiagnostics(res.data.checks);
     } catch (err) {
       setDiagnostics([{ name: 'Diagnostics Failed', status: 'error', detail: err?.response?.data?.error || err.message || 'Could not run diagnostics.' }]);
@@ -99,7 +101,7 @@ export default function AgentDashboard({ poolId }) {
     setShowSummary(true);
     setSummaryText(null);
     try {
-      const res = await base44.functions.invoke('masterAgent', { action: 'summary' });
+      const res = await base44.functions.invoke('masterAgent', { action: 'summary', participant_email: participant?.email });
       setSummaryText(res.data.summary);
     } catch (err) {
       setSummaryText('⚠ Failed to generate summary: ' + (err?.response?.data?.error || err.message || 'Unknown error'));
