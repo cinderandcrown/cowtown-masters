@@ -39,6 +39,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useParticipant } from '@/lib/ParticipantContext';
 import { Button } from '@/components/ui/button';
 import { formatScore, scoreColor, enrichEntries, assignPositions } from '@/lib/scoreUtils';
+import TournamentInsights from '@/components/pool/TournamentInsights';
 
 function LeaderboardSkeleton() {
   return (
@@ -308,6 +309,9 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
           </div>
         </div>
       )}
+
+      {/* Tournament Insights */}
+      <TournamentInsights standings={standings} entries={entries} golfers={golfers} />
 
       {/* Pool Standings Table */}
       <div className="bg-card rounded-xl shadow-sm border border-primary/10 overflow-hidden">
