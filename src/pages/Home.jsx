@@ -217,10 +217,10 @@ export default function Home() {
                       <span className="text-xs text-muted-foreground">{pool.year}</span>
                       <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
                       <span className="text-xs font-mono text-muted-foreground/70 tracking-wider">{pool.invite_code}</span>
-                      <button onClick={(e) => handleCopyCode(pool.invite_code, e)} className="p-0.5 hover:bg-muted rounded transition" aria-label="Copy invite code">
+                      <button onClick={(e) => handleCopyCode(pool.invite_code, e)} className="min-h-8 min-w-8 flex items-center justify-center hover:bg-muted rounded transition" aria-label="Copy invite code">
                         {copiedCode === pool.invite_code ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3 text-muted-foreground/50" />}
                       </button>
-                      <button onClick={(e) => handleSharePool(pool, e)} className="p-0.5 hover:bg-muted rounded transition" aria-label="Share pool">
+                      <button onClick={(e) => handleSharePool(pool, e)} className="min-h-8 min-w-8 flex items-center justify-center hover:bg-muted rounded transition" aria-label="Share pool">
                         <Share2 className="w-3 h-3 text-muted-foreground/50" />
                       </button>
                     </div>

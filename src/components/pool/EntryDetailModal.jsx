@@ -92,7 +92,7 @@ export default function EntryDetailModal({ entry, open, onOpenChange, rank, tota
       <DialogContent className="bg-card rounded-2xl max-w-sm w-full max-h-[85vh] overflow-y-auto p-0">
         <div className="space-y-4">
           {/* Hero Header */}
-          <div className="bg-gradient-to-br from-[#0a3d0a] to-primary rounded-t-2xl p-5 text-center relative overflow-hidden">
+          <div className="bg-gradient-to-br from-[#0a3d0a] to-primary rounded-t-2xl pt-4 pb-3 px-4 sm:p-5 text-center relative overflow-hidden">
             <div className="absolute inset-0 animate-shimmer pointer-events-none opacity-20" />
             <div className="relative">
               {isLeader && (
@@ -126,13 +126,14 @@ export default function EntryDetailModal({ entry, open, onOpenChange, rank, tota
               <div className={`text-4xl font-black ${entry.total_score < 0 ? 'text-red-400' : entry.total_score > 0 ? 'text-primary-foreground' : 'text-accent'}`}>{formatScore(entry.total_score)}</div>
               <p className="text-[10px] text-primary-foreground/50 mt-1">Combined Score to Par</p>
               <button
-                onClick={() => {
-                  const text = `${entry.team_name || entry.participant_name} is #${rank} with ${formatScore(entry.total_score)} in Cowtown Masters!`;
-                  navigator.share ? navigator.share({ title: 'Cowtown Masters', text }) : navigator.clipboard.writeText(text);
-                }}
-                className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-bold text-accent bg-white/10 px-3 py-1.5 rounded-full border border-white/15 hover:bg-white/20 transition"
+              onClick={() => {
+                const text = `${entry.team_name || entry.participant_name} is #${rank} with ${formatScore(entry.total_score)} in Cowtown Masters!`;
+                navigator.share ? navigator.share({ title: 'Cowtown Masters', text }) : navigator.clipboard.writeText(text);
+              }}
+              className="mt-2 sm:mt-3 min-h-8 inline-flex items-center gap-1.5 text-[10px] font-bold text-accent bg-white/10 px-3 py-1.5 rounded-full border border-white/15 hover:bg-white/20 transition"
+              aria-label="Share standing"
               >
-                <Share2 className="w-3 h-3" /> Share Standing
+              <Share2 className="w-3 h-3" /> Share Standing
               </button>
             </div>
           </div>

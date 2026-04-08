@@ -25,10 +25,10 @@ export default function NotificationBell({ poolId }) {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="relative p-1.5 hover:bg-white/10 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-accent"
+        className="relative min-h-11 min-w-11 p-2 flex items-center justify-center hover:bg-white/10 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-accent"
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
       >
-        <Bell className="w-4 h-4 text-primary-foreground" />
+        <Bell className="w-4.5 h-4.5 text-primary-foreground" />
         {unreadCount > 0 && (
           <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center animate-live-pulse">
             {unreadCount > 9 ? '9+' : unreadCount}

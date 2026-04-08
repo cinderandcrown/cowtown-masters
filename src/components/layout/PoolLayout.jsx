@@ -235,10 +235,10 @@ export function PoolHeader() {
                   navigate('/');
                 }
               }}
-              className="p-1.5 hover:bg-white/10 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-accent"
+              className="min-h-11 min-w-11 flex items-center justify-center hover:bg-white/10 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-accent"
               aria-label="Go back"
             >
-              <ArrowLeft className="w-4 h-4 text-primary-foreground" />
+              <ArrowLeft className="w-5 h-5 text-primary-foreground" />
             </button>
             <img src="https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/1752bc3ba_CowtownMastersLogo.png" alt="Cowtown Masters logo" className="w-8 h-8 object-contain" />
             <div>
@@ -335,7 +335,7 @@ export function PoolBottomNav({ poolId }) {
   return (
     <>
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-secondary to-primary border-t border-accent/30 backdrop-blur-lg" role="navigation" aria-label="Pool navigation">
-      <div className="max-w-lg mx-auto grid grid-cols-6 px-1 py-1 pb-[env(safe-area-inset-bottom,0.5rem)]">
+      <div className="max-w-lg mx-auto grid grid-cols-6 px-1 py-1 pb-[env(safe-area-inset-bottom,1.5rem)]">
         {TABS.map((tab) => (
           tab.id === 'more' ? (
             <button
@@ -450,8 +450,10 @@ export default function PoolLayout({ children }) {
         Skip to main content
       </a>
       <PoolHeader />
-      <main id="main-content" className="max-w-lg mx-auto px-0 w-full pb-20" role="main">
-        {children}
+      <main id="main-content" className="max-w-lg mx-auto px-0 w-full pb-28" role="main">
+        <div className="animate-fade-in-up">
+          {children}
+        </div>
       </main>
       <CinderCrownFooter />
       <PoolBottomNav poolId={poolId} />

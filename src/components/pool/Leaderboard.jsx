@@ -222,13 +222,15 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
             <Trophy className="w-4 h-4 text-accent" />
             <span className="text-[10px] font-black text-accent tracking-widest uppercase">Prize Pot</span>
           </div>
-          <div className="flex items-center gap-2.5 text-xs font-bold relative">
+          <div className="flex items-center gap-2 relative">
             <span className="text-accent text-sm font-black">${totalPot}</span>
-            <span className="text-muted-foreground/80 text-[10px]">1st ${Math.round(totalPot * (payout.first ?? 60) / 100)}</span>
-            <span className="text-muted-foreground/60 text-[10px]">2nd ${Math.round(totalPot * (payout.second ?? 25) / 100)}</span>
-            {(payout.third ?? 15) > 0 && (
-              <span className="text-muted-foreground/60 text-[10px]">3rd ${Math.round(totalPot * payout.third / 100)}</span>
-            )}
+            <div className="flex flex-col sm:flex-row sm:gap-2 gap-0.5 text-xs font-bold">
+              <span className="text-muted-foreground/80">1st ${Math.round(totalPot * (payout.first ?? 60) / 100)}</span>
+              <span className="text-muted-foreground/60">2nd ${Math.round(totalPot * (payout.second ?? 25) / 100)}</span>
+              {(payout.third ?? 15) > 0 && (
+                <span className="text-muted-foreground/60">3rd ${Math.round(totalPot * payout.third / 100)}</span>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -242,7 +244,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
             <p className="text-[10px] text-muted-foreground">#{myEntry.displayRank} of {standings.length}</p>
           </div>
           <span className={`text-lg font-black tabular-nums ${scoreColor(myEntry.total_score)}`}>{formatScore(myEntry.total_score)}</span>
-          <button onClick={handleShare} className="p-1.5 hover:bg-accent/10 rounded-lg transition" aria-label="Share standing">
+          <button onClick={handleShare} className="min-h-11 min-w-11 flex items-center justify-center hover:bg-accent/10 rounded-lg transition" aria-label="Share standing">
             <Share2 className="w-3.5 h-3.5 text-accent" />
           </button>
         </div>
@@ -312,7 +314,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
           </span>
           <div className="flex items-center gap-2">
             <LeaderboardSearch value={search} onChange={setSearch} />
-            <button onClick={handleExport} className="p-1 hover:bg-white/10 rounded transition" aria-label="Export CSV">
+            <button onClick={handleExport} className="min-h-8 min-w-8 flex items-center justify-center hover:bg-white/10 rounded transition" aria-label="Export leaderboard">
               <Download className="w-3.5 h-3.5 text-accent" />
             </button>
             <span className="text-[10px] text-accent font-semibold">{standings.length} ENTRIES</span>

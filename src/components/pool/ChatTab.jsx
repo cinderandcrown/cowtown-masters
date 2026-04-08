@@ -274,8 +274,8 @@ export default function ChatTab({ poolId, participantIdentity }) {
           <div className="bg-card rounded-lg border border-accent/30 shadow-lg p-2 max-h-32 overflow-y-auto">
             <div className="flex items-center justify-between mb-1">
               <span className="text-[10px] font-bold text-accent tracking-widest uppercase">Mention someone</span>
-              <button onClick={() => setShowMentionPicker(false)} aria-label="Close mention picker">
-                <X className="w-3 h-3 text-muted-foreground" />
+              <button onClick={() => setShowMentionPicker(false)} className="min-h-8 min-w-8 flex items-center justify-center hover:bg-muted rounded transition" aria-label="Close mention picker">
+                <X className="w-3.5 h-3.5 text-muted-foreground" />
               </button>
             </div>
             {participantNames.filter(n => n !== identity).map((name) => (
