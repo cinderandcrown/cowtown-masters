@@ -295,7 +295,7 @@ export default function DrawTab({ poolId }) {
               const gB = rawGolfers.find(g => g.id === e.golfer_b_id);
               return (
                 <div key={e.id} className="flex items-center justify-between bg-primary/5 rounded-lg px-3 py-2 border border-primary/10">
-                  <span className="font-bold text-sm text-foreground">{e.participant_name}</span>
+                  <span className="font-bold text-sm text-foreground truncate">{e.participant_name}</span>
                   <div className="text-xs text-right">
                     <span className="text-primary font-semibold">{gA?.name || '—'}</span>
                     <span className="text-muted-foreground mx-1">&</span>
@@ -572,18 +572,18 @@ export default function DrawTab({ poolId }) {
               <div className="flex items-center justify-between px-4 py-3 bg-primary/5">
                 <div className="flex items-center gap-2">
                   <span className="font-black text-primary">{i + 1}.</span>
-                  <span className="font-bold text-foreground">{pair.participantName}</span>
+                  <span className="font-bold text-foreground truncate">{pair.participantName}</span>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2 p-3">
               <div className="bg-primary/10 rounded-lg p-2 border border-primary/20">
                 <p className="text-xs font-bold text-primary tracking-widest">TOP TIER</p>
-                <p className="text-sm font-bold text-foreground">{pair.golferA.name}</p>
+                <p className="text-sm font-bold text-foreground truncate">{pair.golferA.name}</p>
                 <p className="text-xs text-muted-foreground">{pair.golferA.betting_odds || ''}</p>
               </div>
                 <div className="bg-accent/10 rounded-lg p-2 border border-accent/20">
                   <p className="text-xs font-bold text-accent tracking-widest">BTM TIER</p>
-                  <p className="text-sm font-bold text-foreground">{pair.golferB.name}</p>
+                  <p className="text-sm font-bold text-foreground truncate">{pair.golferB.name}</p>
                   <p className="text-xs text-muted-foreground">{pair.golferB.betting_odds || ''}</p>
                 </div>
               </div>
@@ -614,7 +614,7 @@ export default function DrawTab({ poolId }) {
           <div className="space-y-2">
             {assignments.map((pair) => (
               <div key={pair.entryId} className="flex items-center justify-between bg-primary/5 rounded-lg px-3 py-2 border border-primary/10">
-                <span className="font-bold text-sm">{pair.participantName}</span>
+                <span className="font-bold text-sm truncate">{pair.participantName}</span>
                 <div className="text-xs text-right">
                   <span className="text-primary font-semibold">{pair.golferA.name}</span>
                   <span className="text-muted-foreground mx-1">&</span>

@@ -52,22 +52,28 @@ export default function EntryDetailModal({ entry, open, onOpenChange, rank, tota
   const golferB = entry.golferB;
 
   const GolferCard = ({ golfer, group }) => {
-  if (!golfer) return <div className="flex-1 bg-muted/50 rounded-lg p-3 border border-dashed text-center text-xs text-muted-foreground">No {group === 'A' ? 'Top Tier' : 'Btm Tier'} golfer</div>;
+  if (!golfer) return (
+    <div className="flex-1 bg-muted/50 rounded-xl p-3 border border-dashed border-muted-foreground/30 text-center">
+      <p className="text-[11px] font-bold text-muted-foreground tracking-widest uppercase mb-1">{group === 'A' ? 'TOP TIER' : 'BTM TIER'}</p>
+      <p className="text-sm font-semibold text-muted-foreground">TBD</p>
+      <p className="text-[11px] text-muted-foreground mt-1">Awaiting Draft</p>
+    </div>
+  );
 
     const rounds = [golfer.round_1, golfer.round_2, golfer.round_3, golfer.round_4];
 
     return (
       <div
-        className={`flex-1 bg-card rounded-lg p-3 cursor-pointer hover:border-accent/40 hover:shadow-md transition-all active:scale-[0.98] ${group === 'A' ? 'border-l-[3px] border-l-primary border border-primary/20' : 'border-l-[3px] border-l-accent border border-accent/20'}`}
+        className={`flex-1 bg-card rounded-xl p-3 cursor-pointer hover:border-primary/30 hover:shadow-md transition-all active:scale-[0.98] ${group === 'A' ? 'border-l-[3px] border-l-primary border border-primary/20' : 'border-l-[3px] border-l-accent border border-accent/20'}`}
         onClick={() => setSelectedGolfer(golfer)}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedGolfer(golfer); } }}
         aria-label={`View details for ${golfer.name}`}
       >
-        <p className="text-sm font-bold text-foreground mb-1 hover:text-accent transition">{golfer.name}</p>
+        <p className="text-sm font-bold text-foreground mb-1 hover:text-accent transition truncate" title={golfer.name}>{golfer.name}</p>
         {golfer.status !== 'active' && (
-          <span className="text-[10px] font-bold text-destructive uppercase">{golfer.status}</span>
+          <span className="text-[11px] font-bold text-destructive uppercase">{golfer.status}</span>
         )}
         <div className="grid grid-cols-4 gap-1 mt-2">
           {['R1', 'R2', 'R3', 'R4'].map((r, i) => (
@@ -108,7 +114,7 @@ export default function EntryDetailModal({ entry, open, onOpenChange, rank, tota
                 </span>
               </div>
               <div className="flex items-center justify-center gap-2 mb-1">
-                <h2 className="text-2xl font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
+                <h2 className="text-2xl font-bold text-primary-foreground truncate" style={{ fontFamily: "'Playfair Display', serif" }}>
                   {entry.team_name || entry.participant_name}
                 </h2>
                 {getChampionYears(entry.participant_name) && (
@@ -116,7 +122,7 @@ export default function EntryDetailModal({ entry, open, onOpenChange, rank, tota
                 )}
               </div>
               {entry.team_name && (
-                <p className="text-xs text-primary-foreground/60 mb-1">{entry.participant_name}</p>
+                <p className="text-xs text-primary-foreground/60 mb-1 truncate">{entry.participant_name}</p>
               )}
               {getChampionYears(entry.participant_name) && (
                 <p className="text-[10px] font-bold text-accent tracking-widest uppercase mb-1">
@@ -124,7 +130,7 @@ export default function EntryDetailModal({ entry, open, onOpenChange, rank, tota
                 </p>
               )}
               <div className={`text-4xl font-black ${entry.total_score < 0 ? 'text-red-400' : entry.total_score > 0 ? 'text-primary-foreground' : 'text-accent'}`}>{formatScore(entry.total_score)}</div>
-              <p className="text-[10px] text-primary-foreground/50 mt-1">Combined Score to Par</p>
+              <p className="text-[11px] text-primary-foreground/60 mt-1">Combined Score to Par</p>
               <button
               onClick={() => {
                 const text = `${entry.team_name || entry.participant_name} is #${rank} with ${formatScore(entry.total_score)} in Cowtown Masters!`;

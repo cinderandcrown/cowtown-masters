@@ -198,20 +198,20 @@ export default function GolfersTab({ poolId }) {
                 </span>
               )}
               <div className="min-w-0">
-                <p className={`text-xs font-semibold text-foreground truncate ${isCut || isWD ? 'line-through' : ''}`}>{g.name}</p>
+                <p className={`text-xs font-semibold text-foreground truncate ${isCut || isWD ? 'line-through' : ''}`} title={g.name}>{g.name}</p>
                 <div className="flex items-center gap-1">
                   <span className={`text-[9px] font-bold tracking-wider ${g.group === 'A' ? 'text-primary' : 'text-accent'}`}>
                     {g.group === 'A' ? 'TOP' : 'BTM'}
                   </span>
-                  {g.betting_odds && <span className="text-[9px] text-muted-foreground">{g.betting_odds}</span>}
+                  {g.betting_odds && <span className="text-[11px] text-muted-foreground">{g.betting_odds}</span>}
                   {g.masters_history?.wins > 0 && (
                     <span className="text-[8px] font-black text-accent bg-accent/15 px-1 rounded">🏆{g.masters_history.wins > 1 ? `×${g.masters_history.wins}` : ''}</span>
                   )}
                   {g.masters_history?.appearances > 0 && !g.masters_history?.wins && (
-                    <span className="text-[8px] text-muted-foreground/70">{g.masters_history.appearances}x</span>
+                   <span className="text-[11px] text-muted-foreground">{g.masters_history.appearances}x</span>
                   )}
                   {(!g.masters_history || g.masters_history.appearances === 0) && (
-                    <span className="text-[8px] text-muted-foreground/50 italic">debut</span>
+                   <span className="text-[11px] text-muted-foreground italic">debut</span>
                   )}
                 </div>
               </div>

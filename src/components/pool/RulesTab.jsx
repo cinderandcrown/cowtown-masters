@@ -112,7 +112,7 @@ export default function RulesTab() {
 
           {rule.example && (
             <div className="ml-[42px] mt-2 bg-primary/5 rounded-md px-2.5 py-1.5 border border-primary/10">
-              <span className="text-[10px] font-bold text-primary/60 tracking-widest uppercase">Example</span>
+              <span className="text-[11px] font-bold text-primary/60 tracking-widest uppercase">Example</span>
               <p className="text-xs text-foreground font-medium">{rule.example}</p>
             </div>
           )}

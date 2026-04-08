@@ -10,15 +10,15 @@ import { formatScore, scoreColor, parseTeamEmails } from '@/lib/scoreUtils';
 function GolferCard({ golfer, group, onTap }) {
   if (!golfer) {
     return (
-      <div className="bg-muted/50 rounded-lg p-3 border border-dashed border-muted-foreground/30 text-center">
-        <p className="text-xs text-muted-foreground">No Group {group} golfer drafted</p>
+      <div className="bg-muted/50 rounded-xl p-3 border border-dashed border-muted-foreground/30 text-center">
+        <p className="text-xs text-muted-foreground">TBD — Awaiting Draft</p>
       </div>
     );
   }
 
   return (
     <div
-      className={`bg-card rounded-lg p-3 shadow-sm cursor-pointer hover:shadow-md transition-all active:scale-[0.98] ${group === 'A' ? 'border-l-4 border-l-primary border border-primary/10' : 'border-l-4 border-l-accent border border-accent/15'}`}
+      className={`bg-card rounded-xl p-3 shadow-sm cursor-pointer hover:border-primary/30 hover:shadow-md transition-all active:scale-[0.98] ${group === 'A' ? 'border-l-4 border-l-primary border border-primary/10' : 'border-l-4 border-l-accent border border-accent/15'}`}
       onClick={() => onTap && onTap(golfer)}
       role="button"
       tabIndex={0}
@@ -33,7 +33,7 @@ function GolferCard({ golfer, group, onTap }) {
           <span className="text-xs font-semibold text-muted-foreground">Pos: {golfer.position}</span>
         )}
       </div>
-      <p className="text-sm font-bold text-foreground truncate">{golfer.name}</p>
+      <p className="text-sm font-bold text-foreground truncate" title={golfer.name}>{golfer.name}</p>
       <div className="flex items-center justify-between mt-1.5">
         <div className="flex gap-2">
           {[golfer.round_1, golfer.round_2, golfer.round_3, golfer.round_4].map((r, i) => (
@@ -76,10 +76,10 @@ function TeamCard({ entry, golferA, golferB, rank, onGolferTap, isMyTeam }) {
           <div>
             <p className={`font-bold flex items-center gap-1.5 ${rank === 1 ? 'text-primary-foreground text-lg' : 'text-foreground'}`}>
               {isMyTeam && <Star className="w-3.5 h-3.5 text-accent flex-shrink-0" />}
-              {entry.team_name || entry.participant_name}
+              <span className="truncate">{entry.team_name || entry.participant_name}</span>
             </p>
             {entry.team_name && (
-              <p className={`text-xs ${rank === 1 ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>{entry.participant_name}</p>
+              <p className={`text-xs truncate ${rank === 1 ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>{entry.participant_name}</p>
             )}
             {(() => {
               const teamEmails = parseTeamEmails(entry.user_id);
@@ -193,7 +193,7 @@ export default function TeamsTab({ poolId }) {
   return (
     <div className="px-3 pt-3 pb-0 space-y-3">
       <div className="text-center mb-2">
-        <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <h2 className="text-2xl font-bold text-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
           Team Standings
         </h2>
         <p className="text-xs text-muted-foreground">{teams.length} teams · Combined score-to-par</p>

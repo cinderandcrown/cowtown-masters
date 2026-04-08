@@ -246,7 +246,7 @@ export default function ChatTab({ poolId, participantIdentity }) {
               {!isMe && sameAsPrev && <div className="w-6 mr-1.5 flex-shrink-0" />}
               <div className={`max-w-[80%] ${isMe ? 'items-end' : 'items-start'}`}>
                 {!isMe && !sameAsPrev && (
-                  <p className="text-[10px] font-bold text-primary ml-0.5 mb-0.5">
+                  <p className="text-[11px] font-bold text-primary ml-0.5 mb-0.5 truncate">
                     {entryByName[msg.user_name]?.team_name || msg.user_name}
                   </p>
                 )}
@@ -258,7 +258,7 @@ export default function ChatTab({ poolId, participantIdentity }) {
                   <p className="text-sm">{renderMessageWithMentions(msg.message)}</p>
                 </div>
                 <div className={`flex items-center gap-1 mt-0.5 ${isMe ? 'flex-row-reverse mr-2' : 'ml-0.5'}`}>
-                  <p className="text-[9px] text-muted-foreground">
+                  <p className="text-[11px] text-muted-foreground">
                     {msg.created_date ? timeAgo(msg.created_date) : ''}
                   </p>
                 </div>

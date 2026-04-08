@@ -48,7 +48,7 @@ export default function ScoreFlashOverlay({ poolId, golfers }) {
   if (!flash) return null;
 
   return (
-    <div className="fixed top-16 left-1/2 -translate-x-1/2 z-[100] animate-bounce-in pointer-events-none">
+    <div className="fixed top-16 left-1/2 -translate-x-1/2 z-[60] animate-bounce-in pointer-events-none">
       <div className={`px-8 py-4 rounded-2xl shadow-2xl border border-white/30 text-center ${
         flash.isEagle
           ? 'bg-gradient-to-r from-yellow-500 via-accent to-yellow-500 shadow-yellow-500/50'
@@ -56,7 +56,7 @@ export default function ScoreFlashOverlay({ poolId, golfers }) {
       }`}>
         <p className="text-2xl font-black text-white tracking-wider animate-pulse">{flash.label}</p>
         <p className="text-sm font-bold text-white/90 mt-1">{flash.name}</p>
-        <p className="text-[10px] text-white/60 mt-0.5 tracking-widest uppercase">
+        <p className="text-[11px] text-white/80 mt-0.5 tracking-widest uppercase">
           {flash.isEagle ? '2 under on the hole!' : 'Dropped a shot!'}
         </p>
       </div>

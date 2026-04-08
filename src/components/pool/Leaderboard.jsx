@@ -241,7 +241,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
           <Star className="w-4 h-4 text-accent flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-xs font-bold text-foreground truncate">{myEntry.team_name || myEntry.participant_name}</p>
-            <p className="text-[10px] text-muted-foreground">#{myEntry.displayRank} of {standings.length}</p>
+            <p className="text-[11px] text-muted-foreground">#{myEntry.displayRank} of {standings.length}</p>
           </div>
           <span className={`text-lg font-black tabular-nums ${scoreColor(myEntry.total_score)}`}>{formatScore(myEntry.total_score)}</span>
           <button onClick={handleShare} className="min-h-11 min-w-11 flex items-center justify-center hover:bg-accent/10 rounded-lg transition" aria-label="Share standing">
@@ -273,7 +273,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
                 {standings[0].team_name || standings[0].participant_name}
               </h2>
               {standings[0].team_name && (
-                <p className="text-xs text-primary-foreground/60">{standings[0].participant_name}</p>
+                <p className="text-xs text-primary-foreground/60 truncate">{standings[0].participant_name}</p>
               )}
             </div>
             <div className="text-right">
@@ -281,7 +281,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
                 {formatScore(standings[0].total_score)}
               </div>
               {standings.length > 1 && (
-                <p className="text-[9px] text-primary-foreground/40 mt-0.5">
+                <p className="text-[11px] text-primary-foreground/60 mt-0.5">
                   {standings[0].total_score < standings[1].total_score
                     ? `${standings[1].total_score - standings[0].total_score} ahead`
                     : standings[0].total_score === standings[1].total_score
@@ -294,12 +294,12 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
           <div className="grid grid-cols-2 gap-2 relative">
             <div className="bg-white/10 rounded-lg p-2 border border-white/10">
               <p className="text-[10px] font-bold text-accent tracking-widest">TOP TIER</p>
-              <p className="text-sm font-semibold text-primary-foreground truncate">{standings[0].golferA?.name || 'TBD'}</p>
+              <p className="text-sm font-semibold text-primary-foreground truncate">{standings[0].golferA?.name || 'Awaiting Draft'}</p>
               <p className={`text-lg font-bold tabular-nums ${standings[0].score_a < 0 ? 'text-red-400' : 'text-primary-foreground'}`}>{formatScore(standings[0].score_a)}</p>
             </div>
             <div className="bg-white/10 rounded-lg p-2 border border-white/10">
               <p className="text-[10px] font-bold text-accent tracking-widest">BTM TIER</p>
-              <p className="text-sm font-semibold text-primary-foreground truncate">{standings[0].golferB?.name || 'TBD'}</p>
+              <p className="text-sm font-semibold text-primary-foreground truncate">{standings[0].golferB?.name || 'Awaiting Draft'}</p>
               <p className={`text-lg font-bold tabular-nums ${standings[0].score_b < 0 ? 'text-red-400' : 'text-primary-foreground'}`}>{formatScore(standings[0].score_b)}</p>
             </div>
           </div>
@@ -317,7 +317,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
             <button onClick={handleExport} className="min-h-8 min-w-8 flex items-center justify-center hover:bg-white/10 rounded transition" aria-label="Export leaderboard">
               <Download className="w-3.5 h-3.5 text-accent" />
             </button>
-            <span className="text-[10px] text-accent font-semibold">{standings.length} ENTRIES</span>
+            <span className="text-[11px] text-accent font-semibold">{standings.length} ENTRIES</span>
           </div>
         </div>
 
@@ -386,7 +386,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
               <div className="min-w-0">
                 <div className="flex items-center gap-1">
                   {myEntry?.id === entry.id && <Star className="w-3 h-3 text-accent flex-shrink-0" />}
-                  <span className="text-sm font-semibold text-foreground truncate">
+                  <span className="text-sm font-semibold text-foreground truncate block">
                     {entry.team_name || entry.participant_name}
                   </span>
                   {getChampionYears(entry.participant_name) && (
@@ -401,15 +401,15 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
                   {hasWD && <span className="text-[8px] font-bold text-orange-600 bg-orange-500/15 px-1 rounded">WD</span>}
                 </div>
                 {entry.team_name && (
-                  <p className="text-[10px] text-muted-foreground truncate">{entry.participant_name}</p>
+                  <p className="text-[11px] text-muted-foreground truncate">{entry.participant_name}</p>
                 )}
-                <p className="text-[10px] text-muted-foreground truncate">
+                <p className="text-[11px] text-muted-foreground truncate">
                   {entry.golferA?.name || 'TBD'} &amp; {entry.golferB?.name || 'TBD'}
                 </p>
               </div>
-              <span className={`text-center font-bold text-xs tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.score_a)} ${entry.score_a < 0 ? 'bg-red-500/10' : ''}`}>{formatScore(entry.score_a)}</span>
-              <span className={`text-center font-bold text-xs tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.score_b)} ${entry.score_b < 0 ? 'bg-red-500/10' : ''}`}>{formatScore(entry.score_b)}</span>
-              <span className={`text-center font-black text-sm tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(getRoundScore(entry))} ${getRoundScore(entry) < 0 ? 'bg-red-500/10' : ''}`}>
+              <span className={`text-center font-bold text-sm tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.score_a)} ${entry.score_a < 0 ? 'bg-red-500/10' : ''}`}>{formatScore(entry.score_a)}</span>
+              <span className={`text-center font-bold text-sm tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.score_b)} ${entry.score_b < 0 ? 'bg-red-500/10' : ''}`}>{formatScore(entry.score_b)}</span>
+              <span className={`text-center font-black text-xl tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(getRoundScore(entry))} ${getRoundScore(entry) < 0 ? 'bg-red-500/10' : ''}`}>
                 {formatScore(getRoundScore(entry))}
               </span>
             </div>
@@ -419,7 +419,7 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
 
       {/* Last Updated */}
       {lastUpdated && (
-        <div className="animate-fade-in-up flex items-center justify-center gap-2 mt-3 text-[10px] text-muted-foreground/70">
+        <div className="animate-fade-in-up flex items-center justify-center gap-2 mt-3 text-[11px] text-muted-foreground">
           <RefreshCw className="w-3 h-3" />
           <span>Scores updated {timeAgoLabel}</span>
           <span className="w-1 h-1 rounded-full bg-green-500" />
