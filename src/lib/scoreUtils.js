@@ -19,6 +19,21 @@ export function buildGolferMap(golfers) {
   return map;
 }
 
+/** Get a golfer's effective score, treating null/undefined as 0 (pre-tournament). */
+function getGolferScore(golfer) {
+  if (!golfer) return 0;
+  if (golfer.status === 'withdrawn' || golfer.status === 'disqualified') {
+    // Use their last recorded score, or 0 if they never started
+    return golfer.score_to_par ?? 0;
+  }
+  return golfer.score_to_par ?? 0;
+}
+
+/** Check if an entry has at least one drafted golfer. */
+function hasDraftedGolfers(entry) {
+  return !!(entry.golfer_a_id || entry.golfer_b_id);
+}
+
 /** Enrich entries with golfer scores and sort by total (lowest wins). */
 export function enrichEntries(entries, golfers) {
   const golferMap = buildGolferMap(golfers);
@@ -27,8 +42,8 @@ export function enrichEntries(entries, golfers) {
     .map((entry) => {
       const golferA = entry.golfer_a_id ? golferMap[entry.golfer_a_id] : null;
       const golferB = entry.golfer_b_id ? golferMap[entry.golfer_b_id] : null;
-      const scoreA = golferA?.score_to_par || 0;
-      const scoreB = golferB?.score_to_par || 0;
+      const scoreA = getGolferScore(golferA);
+      const scoreB = getGolferScore(golferB);
       return {
         ...entry,
         golferA,
@@ -36,9 +51,15 @@ export function enrichEntries(entries, golfers) {
         score_a: scoreA,
         score_b: scoreB,
         total_score: scoreA + scoreB,
+        hasDraft: hasDraftedGolfers(entry),
       };
     })
-    .sort((a, b) => a.total_score - b.total_score);
+    .sort((a, b) => {
+      // Undrafted entries sort to the bottom
+      if (a.hasDraft && !b.hasDraft) return -1;
+      if (!a.hasDraft && b.hasDraft) return 1;
+      return a.total_score - b.total_score;
+    });
 }
 
 /** Assign tie-aware positions (T1, T2, etc.) to a sorted standings array. */

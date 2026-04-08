@@ -58,9 +58,14 @@ export default function ParticipantLogin() {
       } else {
         setStep('register');
       }
-    } catch {
-      // Entity might not exist yet — treat as new registration
-      setStep('register');
+    } catch (err) {
+      // If the entity table doesn't exist yet, treat as new registration.
+      // For other errors (network), show an error so user retries.
+      if (err?.response?.status === 404) {
+        setStep('register');
+      } else {
+        setError('Unable to check account status. Please try again.');
+      }
     }
   };
 
@@ -100,7 +105,6 @@ export default function ParticipantLogin() {
 
       navigate(`/pool/${poolId}`);
     } catch (err) {
-      console.error('Registration error:', err);
       setError(err?.message || 'Failed to create account. Please try again.');
     }
     setLoading(false);

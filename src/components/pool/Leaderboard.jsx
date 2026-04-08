@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { base44 } from '@/api/base44Client';
-import { Trophy, RefreshCw, Star, Share2, Download, TrendingUp, TrendingDown, Flame } from 'lucide-react';
+import { Trophy, RefreshCw, Star, Share2, Download } from 'lucide-react';
 import { POOL_HISTORY } from '@/lib/poolHistoryData';
 
 const MASTERS_PATCH = 'https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/444bc63fb_AugustaGolfMasterGreenJacketPatch.png';
@@ -32,12 +32,9 @@ import LeaderboardRoundTabs from '@/components/pool/LeaderboardRoundTabs';
 import LeaderboardSearch from '@/components/pool/LeaderboardSearch';
 import ScoringAlertBanner from '@/components/pool/ScoringAlertBanner';
 import { toast } from 'sonner';
-import { hapticTap, hapticSuccess, hapticDoubleTap } from '@/lib/haptics';
-import { soundPop, soundSweepUp, soundCashRegister, soundJackpot, soundTap } from '@/lib/sounds';
-import { fireGoldRain, fireMoneyZone, firePop } from '@/lib/useConfetti';
+import { hapticTap, hapticSuccess } from '@/lib/haptics';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useParticipant } from '@/lib/ParticipantContext';
-import { Button } from '@/components/ui/button';
 import { formatScore, scoreColor, enrichEntries, assignPositions } from '@/lib/scoreUtils';
 
 function LeaderboardSkeleton() {

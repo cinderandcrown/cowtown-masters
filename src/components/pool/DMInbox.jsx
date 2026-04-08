@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Search, MessageSquare, ChevronRight, Circle } from 'lucide-react';
+import { Search, MessageSquare, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import DMConversation from '@/components/pool/DMConversation';
 

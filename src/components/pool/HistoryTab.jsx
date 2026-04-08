@@ -70,8 +70,8 @@ function getPastChampions() {
 }
 import { POOL_HISTORY } from '@/lib/poolHistoryData';
 import { fireGoldRain, fireJackpot, fireMoneyZone } from '@/lib/useConfetti';
-import { hapticTap, hapticSuccess, hapticDoubleTap } from '@/lib/haptics';
-import { soundChampion, soundJackpot, soundShimmer } from '@/lib/sounds';
+import { hapticDoubleTap } from '@/lib/haptics';
+import { soundChampion, soundJackpot } from '@/lib/sounds';
 
 const formatScore = (s) => (s === 0 ? 'E' : s > 0 ? `+${s}` : `${s}`);
 const scoreColor = (s) => {

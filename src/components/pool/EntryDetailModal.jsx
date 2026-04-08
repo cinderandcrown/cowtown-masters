@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { formatScore, scoreColor } from '@/lib/scoreUtils';
 import GolferDetailModal from '@/components/pool/GolferDetailModal';
-import { Share2, Crown, TrendingUp } from 'lucide-react';
+import { Share2, Crown } from 'lucide-react';
 import { POOL_HISTORY } from '@/lib/poolHistoryData';
 
 const MASTERS_PATCH = 'https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/444bc63fb_AugustaGolfMasterGreenJacketPatch.png';
@@ -24,9 +24,9 @@ function getChampionYears(name) {
   }
   return years.length > 0 ? years : null;
 }
-import { fireGoldRain, fireMoneyZone, fireJackpot } from '@/lib/useConfetti';
-import { soundJackpot, soundCashRegister, soundSweepUp } from '@/lib/sounds';
-import { hapticSuccess, hapticTripleBuzz } from '@/lib/haptics';
+import { fireJackpot } from '@/lib/useConfetti';
+import { soundJackpot } from '@/lib/sounds';
+import { hapticTripleBuzz } from '@/lib/haptics';
 import { useEffect } from 'react';
 
 export default function EntryDetailModal({ entry, open, onOpenChange, rank, totalEntries }) {

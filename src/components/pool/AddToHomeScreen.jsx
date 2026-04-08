@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Smartphone, X, Download } from 'lucide-react';
+import { Smartphone, X } from 'lucide-react';
 
 export default function AddToHomeScreen() {
   const [dismissed, setDismissed] = useState(false);

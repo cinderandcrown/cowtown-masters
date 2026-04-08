@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { fireBirdie, fireEagle } from '@/lib/useConfetti';
 import { hapticSuccess, hapticTripleBuzz } from '@/lib/haptics';
 import { soundBirdie, soundEagle } from '@/lib/sounds';

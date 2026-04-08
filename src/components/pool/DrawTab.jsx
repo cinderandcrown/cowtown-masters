@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Shuffle, PenLine, Check, RotateCcw, Lock, ShieldAlert, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import { hapticPulse, hapticDoubleTap, hapticDrumroll, hapticRatchet, hapticSuccess } from '@/lib/haptics';
-import { fireConfetti, fireJackpot, firePop } from '@/lib/useConfetti';
+import { fireJackpot, firePop } from '@/lib/useConfetti';
 import { soundTick, soundReveal, soundDrumroll, soundJackpot, soundLock } from '@/lib/sounds';
 import { useParticipant } from '@/lib/ParticipantContext';
 

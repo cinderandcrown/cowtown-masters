@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { hapticTap, hapticSuccess } from '@/lib/haptics';
 import { fireJackpot } from '@/lib/useConfetti';
 import MastersCountdown from '@/components/MastersCountdown';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -33,18 +34,23 @@ export default function Home() {
   const handleCreatePool = async () => {
     if (!poolName.trim()) return;
     setCreating(true);
-    const response = await base44.functions.invoke('initializePool', {
-      poolName,
-      year: poolYear,
-      entryFee,
-      maxEntries: 30,
-    });
-    setCreating(false);
-    setShowCreatePool(false);
-    if (response.data?.pool?.id) {
-      fireJackpot();
-      hapticSuccess();
-      navigate(`/pool/${response.data.pool.id}`);
+    try {
+      const response = await base44.functions.invoke('initializePool', {
+        poolName,
+        year: poolYear,
+        entryFee,
+        maxEntries: 30,
+      });
+      setShowCreatePool(false);
+      if (response.data?.pool?.id) {
+        fireJackpot();
+        hapticSuccess();
+        navigate(`/pool/${response.data.pool.id}`);
+      }
+    } catch (err) {
+      toast.error(err?.message || 'Failed to create pool. Please try again.');
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -185,6 +191,7 @@ export default function Home() {
       </div>
 
       {/* Your Pools Section */}
+      <ErrorBoundary fallbackMessage="Failed to load pools. Pull down to refresh.">
       <div className="relative z-10 px-4 max-w-md mx-auto w-full -mt-4">
         {pools.length > 0 && (
           <div className="mb-8">
@@ -351,6 +358,8 @@ export default function Home() {
           </a>
         </div>
       </div>
+
+      </ErrorBoundary>
 
       {/* Create Pool Dialog */}
       <Dialog open={showCreatePool} onOpenChange={setShowCreatePool}>

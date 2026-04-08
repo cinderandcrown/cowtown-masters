@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trophy, Award, Scissors, TrendingUp, Calendar, Target } from 'lucide-react';
+import { Trophy, Award, TrendingUp, Calendar, Target } from 'lucide-react';
 import { formatScore, scoreColor } from '@/lib/scoreUtils';
 
 export default function GolferHistorySection({ history }) {

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import {
   Play, Square, Zap, RefreshCw, Calculator, ChevronDown, ChevronUp,
   CheckCircle2, AlertTriangle, XCircle, Loader2, FileText, Copy, RotateCcw,
-  Radio, Wifi, WifiOff, Timer, Users, Activity
+  Radio, Wifi, WifiOff, Users, Activity
 } from 'lucide-react';
 import { toast } from 'sonner';
 import AutoPollingControl from '@/components/admin/AutoPollingControl';
@@ -87,15 +87,23 @@ export default function AgentDashboard({ poolId }) {
   const handleDiagnose = useCallback(async () => {
     setShowDiagnostics(true);
     setDiagnostics(null);
-    const res = await base44.functions.invoke('masterAgent', { action: 'diagnose' });
-    setDiagnostics(res.data.checks);
+    try {
+      const res = await base44.functions.invoke('masterAgent', { action: 'diagnose' });
+      setDiagnostics(res.data.checks);
+    } catch (err) {
+      setDiagnostics([{ name: 'Diagnostics Failed', status: 'error', detail: err?.message || 'Could not reach master agent.' }]);
+    }
   }, []);
 
   const handleSummary = useCallback(async () => {
     setShowSummary(true);
     setSummaryText(null);
-    const res = await base44.functions.invoke('masterAgent', { action: 'summary' });
-    setSummaryText(res.data.summary);
+    try {
+      const res = await base44.functions.invoke('masterAgent', { action: 'summary' });
+      setSummaryText(res.data.summary);
+    } catch (err) {
+      setSummaryText('Failed to generate summary: ' + (err?.message || 'Unknown error'));
+    }
   }, []);
 
   if (isLoading) {

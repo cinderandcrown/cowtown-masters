@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useParams, useNavigate, useLocation, NavLink } from 'react-router-dom';
-import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, LogIn, LogOut, Pencil, Check, X, ArrowLeft, MoreHorizontal, Share2, Copy, Link2, Moon, Sun } from 'lucide-react';
+import { useParams, useNavigate, NavLink } from 'react-router-dom';
+import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, LogIn, LogOut, Pencil, Check, X, ArrowLeft, MoreHorizontal, Copy, Link2, Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/lib/ThemeProvider';
 import { toast } from 'sonner';
 import { hapticTap } from '@/lib/haptics';

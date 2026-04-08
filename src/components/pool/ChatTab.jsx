@@ -4,7 +4,6 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Send, MessageCircle, AtSign, X } from 'lucide-react';
 import ChatReactions from '@/components/pool/ChatReactions';
-import { toast } from 'sonner';
 import { hapticTap } from '@/lib/haptics';
 
 const IDENTITY_KEY = (poolId) => `cowtown_chat_identity_${poolId}`;

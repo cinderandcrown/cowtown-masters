@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Timer, Play, Square, Loader2, RefreshCw } from 'lucide-react';
-import { toast } from 'sonner';
-import { base44 } from '@/api/base44Client';
+import { Timer } from 'lucide-react';
 
 const AUTOMATION_ID = '69bd9ffeeb89f2505ecfb15d'; // "Auto-fetch Masters Scores" automation
 
