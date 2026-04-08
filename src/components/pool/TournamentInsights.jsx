@@ -195,8 +195,10 @@ function CutLineSection({ standings, golfers }) {
 export default function TournamentInsights({ standings, entries, golfers }) {
   const [expanded, setExpanded] = useState(false);
 
+  // Show as long as there are golfers in the pool
+  if (golfers.length === 0) return null;
+
   const hasDraftedEntries = entries.some(e => e.golfer_a_id || e.golfer_b_id);
-  if (!hasDraftedEntries || golfers.length === 0) return null;
 
   return (
     <div className="animate-fade-in-up bg-card rounded-xl border border-border overflow-hidden mb-4">
