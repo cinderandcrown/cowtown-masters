@@ -79,10 +79,10 @@ function ParticipantBadge({ poolId }) {
           aria-expanded={showPanel}
           aria-haspopup="dialog"
           aria-label={`Account menu for ${participant.participant_name}`}
-          className="flex items-center gap-1.5 text-[10px] font-bold text-primary-foreground bg-white/15 rounded-lg px-2 py-1 border border-white/20 hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 transition truncate max-w-[120px]"
+          className="flex items-center gap-1.5 text-[10px] font-bold text-primary-foreground bg-white/15 rounded-lg px-2 py-1 border border-white/20 hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 transition truncate max-w-[100px] sm:max-w-[120px]"
         >
           <span className="w-5 h-5 rounded-full bg-accent/30 flex items-center justify-center text-[8px] font-black text-accent flex-shrink-0">{initials}</span>
-          {displayTeamName}
+          <span className="hidden sm:inline">{displayTeamName}</span>
         </button>
 
         {showPanel && (
@@ -260,16 +260,6 @@ export function PoolHeader() {
                 Admin
               </button>
             )}
-            {isLive ? (
-              <div className="flex items-center gap-1 bg-black/20 rounded-lg px-1.5 py-1 border border-red-500/30" role="status" aria-label="Tournament is live">
-                <span className="text-[9px] font-black tracking-widest text-red-400 uppercase">LIVE</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-live-pulse" aria-hidden="true" />
-              </div>
-            ) : pool?.status === 'complete' ? (
-              <div className="flex items-center gap-1 bg-black/20 rounded-lg px-1.5 py-1 border border-accent/30" role="status" aria-label="Tournament complete">
-                <span className="text-[9px] font-black tracking-widest text-accent uppercase">FINAL</span>
-              </div>
-            ) : null}
             <ParticipantBadge poolId={poolId} />
           </div>
         </div>
@@ -278,6 +268,19 @@ export function PoolHeader() {
       {/* Tournament Status Banner */}
       <div className="bg-gradient-to-r from-primary via-secondary to-primary border-b-2 border-accent" role="status" aria-label="Tournament round information">
         <div className="max-w-lg mx-auto flex items-center justify-center gap-2 px-4 py-1">
+          {isLive && (
+            <>
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-live-pulse" aria-hidden="true" />
+              <span className="text-[10px] font-black tracking-widest text-red-400 uppercase">LIVE</span>
+              <span className="w-1 h-1 rounded-full bg-accent/40" aria-hidden="true" />
+            </>
+          )}
+          {pool?.status === 'complete' && (
+            <>
+              <span className="text-[10px] font-black tracking-widest text-accent uppercase">FINAL</span>
+              <span className="w-1 h-1 rounded-full bg-accent/40" aria-hidden="true" />
+            </>
+          )}
           {roundInfo ? (
             <>
               <span className="text-[10px] font-black tracking-widest text-accent">{roundInfo.round}</span>
