@@ -240,12 +240,12 @@ export function PoolHeader() {
             >
               <ArrowLeft className="w-5 h-5 text-primary-foreground" />
             </button>
-            <img src="https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/1752bc3ba_CowtownMastersLogo.png" alt="Cowtown Masters logo" className="w-7 h-7 object-contain flex-shrink-0" />
-            <div className="min-w-0">
-              <h1 className="text-base sm:text-xl font-bold text-primary-foreground truncate" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <img src="https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/1752bc3ba_CowtownMastersLogo.png" alt="Cowtown Masters logo" className="w-8 h-8 object-contain flex-shrink-0" />
+            <div className="min-w-0 hidden sm:block">
+              <h1 className="text-xl font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
                 COWTOWN MASTERS
               </h1>
-              <p className="text-[9px] sm:text-[10px] tracking-[0.15em] sm:tracking-[0.2em] text-accent uppercase font-medium truncate" aria-label="Tagline: A Tradition Unlike Any Other">A Tradition Unlike Any Other</p>
+              <p className="text-[10px] tracking-[0.2em] text-accent uppercase font-medium" aria-label="Tagline: A Tradition Unlike Any Other">A Tradition Unlike Any Other</p>
             </div>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
