@@ -340,7 +340,7 @@ export function PoolBottomNav({ poolId }) {
   };
 
   const MORE_ITEMS = [
-    { id: 'caddyshack-report', label: '📋 The Caddyshack Report', Icon: ScrollText },
+    { id: 'caddyshack-report', label: 'The Caddyshack Report', Icon: ScrollText },
     { id: 'news', label: 'Golfer News', Icon: Newspaper },
     { id: 'history', label: 'Champions Wall', Icon: Trophy },
     { id: 'rules', label: 'Pool Rules', Icon: BookOpen },

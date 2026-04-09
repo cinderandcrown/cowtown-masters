@@ -22,12 +22,12 @@ export default function RecapRoundTabs({ activeRound, onRoundChange }) {
             key={r.id}
             onClick={() => !isFuture && onRoundChange(r.id)}
             disabled={isFuture}
-            className={`flex items-center gap-1 px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
               isActive
-                ? 'bg-[#d4a574] text-black'
+                ? 'bg-primary text-primary-foreground'
                 : isFuture
-                ? 'bg-white/5 text-white/20 cursor-not-allowed'
-                : 'bg-white/10 text-white/60 hover:bg-white/15 hover:text-white/80'
+                ? 'bg-muted/50 text-muted-foreground/40 cursor-not-allowed'
+                : 'bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary'
             }`}
           >
             {r.label}

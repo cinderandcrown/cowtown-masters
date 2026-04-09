@@ -17,8 +17,9 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import ScoreFlashOverlay from '@/components/pool/ScoreFlashOverlay';
 import { Button } from '@/components/ui/button';
 import GolferNewsTab from '@/components/pool/GolferNewsTab';
+import CaddyshackTab from '@/components/pool/CaddyshackTab';
 
-const VALID_TABS = ['leaderboard', 'teams', 'golfers', 'draw', 'messages', 'news', 'history', 'rules'];
+const VALID_TABS = ['leaderboard', 'teams', 'golfers', 'draw', 'messages', 'news', 'history', 'rules', 'caddyshack-report'];
 
 export default function PoolDashboard() {
   const { poolId, activeTab: tabParam } = useParams();
@@ -70,6 +71,7 @@ export default function PoolDashboard() {
       news: 'News',
       rules: 'Rules',
       history: 'History',
+      'caddyshack-report': 'Caddyshack Report',
     };
     document.title = `Cowtown Masters - ${tabNames[activeTab] || 'Pool'}`;
   }, [activeTab]);
@@ -152,6 +154,11 @@ export default function PoolDashboard() {
         {activeTab === 'rules' && (
           <ErrorBoundary fallbackMessage="Rules couldn't load.">
             <RulesTab pool={pool} />
+          </ErrorBoundary>
+        )}
+        {activeTab === 'caddyshack-report' && (
+          <ErrorBoundary fallbackMessage="Caddyshack Report couldn't load.">
+            <CaddyshackTab poolId={poolId} />
           </ErrorBoundary>
         )}
       </div>

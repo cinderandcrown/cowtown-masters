@@ -6,7 +6,7 @@ import PoolDashboard from '@/pages/PoolDashboard';
 
 import PoolAdmin from '@/pages/PoolAdmin';
 import AccountSettings from '@/pages/AccountSettings';
-import CaddyshackReport from '@/pages/CaddyshackReport';
+
 
 import ParticipantLogin from '@/pages/ParticipantLogin';
 import PageNotFound from '@/lib/PageNotFound';
@@ -62,7 +62,7 @@ export default function AnimatedRoutes() {
           <Route path="/pool/:poolId/:activeTab" element={<PoolWrapper><PoolDashboard /></PoolWrapper>} />
           <Route path="/pool/:poolId/login" element={<PoolWrapper><ParticipantLogin /></PoolWrapper>} />
           <Route path="/pool/:poolId/admin" element={<PoolWrapper><PoolAdmin /></PoolWrapper>} />
-          <Route path="/pool/:poolId/caddyshack-report" element={<PoolWrapper><CaddyshackReport /></PoolWrapper>} />
+
 
 
           <Route path="/account" element={<AccountSettings />} />
