@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import GolferDetailModal from './GolferDetailModal';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -35,7 +35,7 @@ function GolfersSkeleton() {
       {/* Row skeletons */}
       <div className="bg-card rounded-b-xl border-x border-b border-primary/10 overflow-hidden">
         {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="grid grid-cols-[28px_1fr_36px_36px_36px_36px_44px] gap-1 px-3 py-1.5 border-b border-primary/5">
+          <div key={i} className="grid grid-cols-[24px_1fr_28px_28px_28px_28px_26px_36px] gap-1 px-3 py-1.5 border-b border-primary/5">
             <div className="h-5 w-5 rounded-full bg-muted animate-pulse mx-auto" />
             <div className="space-y-1">
               <div className="h-3.5 w-28 rounded bg-muted animate-pulse" />
@@ -45,6 +45,7 @@ function GolfersSkeleton() {
             <div className="h-3.5 w-6 rounded bg-muted/40 animate-pulse mx-auto" />
             <div className="h-3.5 w-6 rounded bg-muted/40 animate-pulse mx-auto" />
             <div className="h-3.5 w-6 rounded bg-muted/40 animate-pulse mx-auto" />
+            <div className="h-3.5 w-5 rounded bg-muted/40 animate-pulse mx-auto" />
             <div className="h-4 w-9 rounded bg-muted animate-pulse mx-auto" />
           </div>
         ))}
@@ -71,6 +72,15 @@ export default function GolfersTab({ poolId }) {
   });
 
   const golfers = assignGroups(rawGolfers, entries.length);
+
+  // Determine the active (current) round
+  const activeRound = useMemo(() => {
+    if (golfers.some(g => g.round_4 != null)) return 4;
+    if (golfers.some(g => g.round_3 != null)) return 3;
+    if (golfers.some(g => g.round_2 != null)) return 2;
+    if (golfers.some(g => g.round_1 != null)) return 1;
+    return 0;
+  }, [golfers]);
 
   const sorted = golfers
     .filter((g) => filter === 'all' || g.group === filter)
@@ -138,13 +148,15 @@ export default function GolfersTab({ poolId }) {
       </div>
 
       {/* Column headers */}
-      <div className="grid grid-cols-[28px_1fr_36px_36px_36px_36px_44px] gap-1 px-3 py-1.5 border border-primary/10 bg-primary/5 text-[9px] font-bold text-primary uppercase tracking-wider">
+      <div className="grid grid-cols-[24px_1fr_28px_28px_28px_28px_26px_36px] gap-1 px-3 py-1.5 border border-primary/10 bg-primary/5 text-[9px] font-bold text-primary uppercase tracking-wider">
         <span className="text-center">POS</span>
         <span>Player</span>
-        <span className="text-center">R1</span>
-        <span className="text-center">R2</span>
-        <span className="text-center">R3</span>
-        <span className="text-center">R4</span>
+        {[1, 2, 3, 4].map(r => (
+          <span key={r} className={`text-center rounded-sm px-0.5 ${r === activeRound ? 'bg-accent/20 text-accent' : ''}`}>
+            R{r}
+          </span>
+        ))}
+        <span className="text-center">THRU</span>
         <span className="text-center">TOT</span>
       </div>
 
@@ -181,7 +193,7 @@ export default function GolfersTab({ poolId }) {
               tabIndex={0}
               onClick={() => setSelectedGolfer(g)}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedGolfer(g); } }}
-              className={`animate-fade-in-up grid grid-cols-[28px_1fr_36px_36px_36px_36px_44px] gap-1 px-3 py-1.5 border-b border-primary/5 transition-all hover:bg-accent/5 cursor-pointer ${
+              className={`animate-fade-in-up grid grid-cols-[24px_1fr_28px_28px_28px_28px_26px_36px] gap-1 px-3 py-1.5 border-b border-primary/5 transition-all hover:bg-accent/5 cursor-pointer ${
                 isCut || isWD ? 'opacity-40' : i < 3 ? 'bg-accent/5' : ''
               } ${!isCut && !isWD && i < 3 ? 'border-l-2 border-l-accent' : 'border-l-2 border-l-transparent'}`}
               style={{ animationDelay: `${Math.min(i * 40, 600)}ms` }}
@@ -216,10 +228,15 @@ export default function GolfersTab({ poolId }) {
                 </div>
               </div>
               {[g.round_1, g.round_2, g.round_3, g.round_4].map((r, j) => (
-                <span key={j} className={`text-center text-xs font-semibold tabular-nums ${scoreColor(r)}`}>
+                <span key={j} className={`text-center text-xs font-semibold tabular-nums rounded-sm ${scoreColor(r)} ${j + 1 === activeRound ? 'bg-accent/10' : ''}`}>
                   {formatScore(r)}
                 </span>
               ))}
+              <span className={`text-center text-[10px] font-bold tabular-nums ${
+                g.thru && g.thru !== 'F' && g.thru !== '—' ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'
+              }`}>
+                {g.thru === 'F' ? 'F' : g.thru === '18' ? 'F' : g.thru || '–'}
+              </span>
               <span className={`text-center font-black text-sm tabular-nums rounded px-0.5 ${scoreColor(g.round_1 == null && g.round_2 == null && g.round_3 == null && g.round_4 == null ? null : g.score_to_par)} ${(g.score_to_par || 0) < 0 ? 'bg-red-500/10' : ''}`}>
                 {g.round_1 == null && g.round_2 == null && g.round_3 == null && g.round_4 == null ? '–' : formatScore(g.score_to_par)}
               </span>
