@@ -456,8 +456,17 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
                   <LiveBadge golfer={entry.golferB} />
                 </div>
               </div>
-              <span className={`text-center font-bold text-sm tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.score_a)} ${entry.score_a < 0 ? 'bg-red-500/10' : ''}`}>{formatScore(entry.score_a)}</span>
-              <span className={`text-center font-bold text-sm tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(entry.score_b)} ${entry.score_b < 0 ? 'bg-red-500/10' : ''}`}>{formatScore(entry.score_b)}</span>
+              {(() => {
+                const rKey = activeRound !== 'total' ? { r1: 'round_1', r2: 'round_2', r3: 'round_3', r4: 'round_4' }[activeRound] : null;
+                const displayA = rKey ? entry.golferA?.[rKey] ?? null : entry.score_a;
+                const displayB = rKey ? entry.golferB?.[rKey] ?? null : entry.score_b;
+                return (
+                  <>
+                    <span className={`text-center font-bold text-sm tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(displayA)} ${displayA != null && displayA < 0 ? 'bg-red-500/10' : ''}`}>{formatScore(displayA)}</span>
+                    <span className={`text-center font-bold text-sm tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(displayB)} ${displayB != null && displayB < 0 ? 'bg-red-500/10' : ''}`}>{formatScore(displayB)}</span>
+                  </>
+                );
+              })()}
               <span className={`text-center font-black text-lg tabular-nums self-center rounded px-1 py-0.5 ${scoreColor(getRoundScore(entry))} ${getRoundScore(entry) < 0 ? 'bg-red-500/10' : ''}`}>
                 {formatScore(getRoundScore(entry))}
               </span>
