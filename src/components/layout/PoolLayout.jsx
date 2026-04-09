@@ -240,7 +240,16 @@ export function PoolHeader() {
             >
               <ArrowLeft className="w-5 h-5 text-primary-foreground" />
             </button>
-            <img src="https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/1752bc3ba_CowtownMastersLogo.png" alt="Cowtown Masters logo" className="w-8 h-8 object-contain flex-shrink-0" />
+            <img
+              src="https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/1752bc3ba_CowtownMastersLogo.png"
+              alt="Cowtown Masters logo"
+              className="w-8 h-8 object-contain flex-shrink-0 cursor-pointer"
+              onClick={() => navigate('/')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter') navigate('/'); }}
+              aria-label="Go to home page"
+            />
             <div className="min-w-0 hidden sm:block">
               <h1 className="text-xl font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
                 COWTOWN MASTERS
