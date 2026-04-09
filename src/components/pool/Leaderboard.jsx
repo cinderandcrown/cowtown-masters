@@ -160,8 +160,15 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
     if (activeRound !== 'total') {
       const rKey = { r1: 'round_1', r2: 'round_2', r3: 'round_3', r4: 'round_4' }[activeRound];
       list.sort((a, b) => {
-        const aScore = (a.golferA?.[rKey] || 0) + (a.golferB?.[rKey] || 0);
-        const bScore = (b.golferA?.[rKey] || 0) + (b.golferB?.[rKey] || 0);
+        const aA = a.golferA?.[rKey]; const aB = a.golferB?.[rKey];
+        const bA = b.golferA?.[rKey]; const bB = b.golferB?.[rKey];
+        const aNull = aA == null && aB == null;
+        const bNull = bA == null && bB == null;
+        if (aNull && bNull) return 0;
+        if (aNull) return 1;
+        if (bNull) return -1;
+        const aScore = (aA ?? 0) + (aB ?? 0);
+        const bScore = (bA ?? 0) + (bB ?? 0);
         return aScore - bScore;
       });
     }
@@ -225,7 +232,10 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
   const getRoundScore = (entry) => {
     if (activeRound === 'total') return entry.total_score;
     const rKey = { r1: 'round_1', r2: 'round_2', r3: 'round_3', r4: 'round_4' }[activeRound];
-    return (entry.golferA?.[rKey] || 0) + (entry.golferB?.[rKey] || 0);
+    const a = entry.golferA?.[rKey];
+    const b = entry.golferB?.[rKey];
+    if (a == null && b == null) return null;
+    return (a ?? 0) + (b ?? 0);
   };
 
   return (
