@@ -94,7 +94,7 @@ export default function NotificationPanel({ poolId, notifications, participantNa
                       {n.title}
                     </p>
                     <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">{n.message}</p>
-                    <p className="text-[9px] text-muted-foreground/50 mt-1">{moment(n.created_date).fromNow()}</p>
+                    <p className="text-[9px] text-muted-foreground/50 mt-1">{moment.utc(n.created_date).fromNow()}</p>
                   </div>
                   {!isRead && (
                     <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-2" />
