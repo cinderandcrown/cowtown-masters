@@ -73,12 +73,15 @@ export default function GolfersTab({ poolId }) {
 
   const golfers = assignGroups(rawGolfers, entries.length);
 
-  // Determine the active (current) round
+  // Determine the active (current) round based on available data
   const activeRound = useMemo(() => {
+    // Check round data first, then fall back to score_to_par + thru for in-progress rounds
     if (golfers.some(g => g.round_4 != null)) return 4;
     if (golfers.some(g => g.round_3 != null)) return 3;
     if (golfers.some(g => g.round_2 != null)) return 2;
     if (golfers.some(g => g.round_1 != null)) return 1;
+    // If no round data but golfers have scores (in-progress R1), it's Round 1
+    if (golfers.some(g => g.score_to_par != null && g.score_to_par !== 0 && g.thru)) return 1;
     return 0;
   }, [golfers]);
 

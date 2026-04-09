@@ -69,11 +69,14 @@ function parseMastersFeed(feedData) {
     for (const rKey of roundKeys) {
       const roundObj = p[rKey];
       if (roundObj && typeof roundObj === 'object') {
-        // Round has data if roundStatus is not 'Pre' and has scores
-        const isPlayed = roundObj.roundStatus === 'Finished';
-        const hasScores = Array.isArray(roundObj.scores) && roundObj.scores.some(s => s != null);
+        const isFinished = roundObj.roundStatus === 'Finished';
+        const isPre = roundObj.roundStatus === 'Pre' || roundObj.roundStatus === 'Not Started';
+        const hasScores = Array.isArray(roundObj.scores) && roundObj.scores.some(s => s != null && s > 0);
         
-        if (isPlayed && roundObj.fantasy != null) {
+        // Skip rounds that haven't started yet
+        if (isPre || (!isFinished && !hasScores && roundObj.fantasy == null)) {
+          roundsToPar.push(null);
+        } else if (isFinished && roundObj.fantasy != null) {
           // Finished round — use fantasy (score to par) directly
           roundsToPar.push(parseScoreToPar(roundObj.fantasy));
         } else if (hasScores && roundPars[rKey]) {
@@ -89,13 +92,19 @@ function parseMastersFeed(feedData) {
             }
           }
           roundsToPar.push(holesPlayed > 0 ? rScore : null);
+        } else if (roundObj.fantasy != null && parseScoreToPar(roundObj.fantasy) !== 0) {
+          // Round has a non-zero fantasy score — use it
+          roundsToPar.push(parseScoreToPar(roundObj.fantasy));
         } else {
           roundsToPar.push(null);
         }
 
-        // Actual strokes for the round
-        if (roundObj.total != null) {
+        // Actual strokes for the round — only for played rounds
+        if (!isPre && roundObj.total != null && Number(roundObj.total) > 0) {
           actualScores.push(Number(roundObj.total));
+        } else if (isFinished && hasScores) {
+          const sum = roundObj.scores.filter(s => s != null).reduce((a, b) => a + b, 0);
+          if (sum > 0) actualScores.push(sum);
         }
       } else {
         // Fallback: flat field (unlikely in masters.com feed but safe)
