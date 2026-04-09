@@ -226,7 +226,7 @@ export function PoolHeader() {
       <div className="bg-gradient-to-r from-[#0a3d0a] to-primary border-b border-accent/40 px-4 py-3 md:py-4 relative overflow-hidden">
         <div className="absolute inset-0 animate-shimmer pointer-events-none" aria-hidden="true" />
         <div className="max-w-lg mx-auto flex items-center justify-between relative">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
             <button
               onClick={() => {
                 if (window.history.length > 1) {
@@ -235,20 +235,20 @@ export function PoolHeader() {
                   navigate('/');
                 }
               }}
-              className="min-h-11 min-w-11 flex items-center justify-center hover:bg-white/10 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-accent"
+              className="min-h-11 min-w-11 flex items-center justify-center hover:bg-white/10 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-accent flex-shrink-0"
               aria-label="Go back"
             >
               <ArrowLeft className="w-5 h-5 text-primary-foreground" />
             </button>
-            <img src="https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/1752bc3ba_CowtownMastersLogo.png" alt="Cowtown Masters logo" className="w-8 h-8 object-contain" />
-            <div>
-              <h1 className="text-xl font-bold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <img src="https://media.base44.com/images/public/69bd90cf71e1b676eaaeb41f/1752bc3ba_CowtownMastersLogo.png" alt="Cowtown Masters logo" className="w-7 h-7 object-contain flex-shrink-0" />
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-xl font-bold text-primary-foreground truncate" style={{ fontFamily: "'Playfair Display', serif" }}>
                 COWTOWN MASTERS
               </h1>
-              <p className="text-[10px] tracking-[0.2em] text-accent uppercase font-medium" aria-label="Tagline: A Tradition Unlike Any Other">A Tradition Unlike Any Other</p>
+              <p className="text-[9px] sm:text-[10px] tracking-[0.15em] sm:tracking-[0.2em] text-accent uppercase font-medium truncate" aria-label="Tagline: A Tradition Unlike Any Other">A Tradition Unlike Any Other</p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1 flex-shrink-0">
             <ThemeToggle />
             <NotificationBell poolId={poolId} />
             {(user?.role === 'admin' || user?.email === pool?.admin_user_id || user?.email === pool?.created_by || (isLoggedIn && participant?.email && (participant.email === pool?.admin_user_id || participant.email === pool?.created_by))) && (
@@ -261,13 +261,13 @@ export function PoolHeader() {
               </button>
             )}
             {isLive ? (
-              <div className="flex items-center gap-1.5 bg-black/20 rounded-lg px-2 py-1 border border-red-500/30" role="status" aria-label="Tournament is live">
-                <span className="text-[10px] font-black tracking-widest text-red-400 uppercase">LIVE</span>
-                <span className="w-2 h-2 rounded-full bg-red-500 animate-live-pulse" aria-hidden="true" />
+              <div className="flex items-center gap-1 bg-black/20 rounded-lg px-1.5 py-1 border border-red-500/30" role="status" aria-label="Tournament is live">
+                <span className="text-[9px] font-black tracking-widest text-red-400 uppercase">LIVE</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-live-pulse" aria-hidden="true" />
               </div>
             ) : pool?.status === 'complete' ? (
-              <div className="flex items-center gap-1.5 bg-black/20 rounded-lg px-2 py-1 border border-accent/30" role="status" aria-label="Tournament complete">
-                <span className="text-[10px] font-black tracking-widest text-accent uppercase">FINAL</span>
+              <div className="flex items-center gap-1 bg-black/20 rounded-lg px-1.5 py-1 border border-accent/30" role="status" aria-label="Tournament complete">
+                <span className="text-[9px] font-black tracking-widest text-accent uppercase">FINAL</span>
               </div>
             ) : null}
             <ParticipantBadge poolId={poolId} />
