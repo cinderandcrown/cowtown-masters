@@ -72,26 +72,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create notification records
+    // Create notification records (pool-wide only, no per-entry duplicates)
     if (notifications.length > 0) {
-      // Find entries that drafted this golfer
-      const entries = await base44.asServiceRole.entities.PoolEntry.filter({ pool_id: poolId });
-      const draftedBy = entries.filter(e => e.golfer_a_id === golferId || e.golfer_b_id === golferId);
-
-      // Add entry_id for targeted notifications
-      const allNotifications = [];
-      for (const notif of notifications) {
-        if (draftedBy.length > 0) {
-          for (const entry of draftedBy) {
-            allNotifications.push({ ...notif, entry_id: entry.id });
-          }
-        }
-        // Also create a pool-wide notification (no entry_id)
-        allNotifications.push({ ...notif });
-      }
-
-      await base44.asServiceRole.entities.Notification.bulkCreate(allNotifications);
-      console.log(`Created ${allNotifications.length} notifications for ${golferName}`);
+      await base44.asServiceRole.entities.Notification.bulkCreate(notifications);
+      console.log(`Created ${notifications.length} notifications for ${golferName}`);
     }
 
     return Response.json({ created: notifications.length, golfer: golferName });
