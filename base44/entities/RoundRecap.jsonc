@@ -1,0 +1,95 @@
+{
+  "name": "RoundRecap",
+  "type": "object",
+  "properties": {
+    "pool_id": {
+      "type": "string",
+      "description": "Reference to Pool entity"
+    },
+    "entry_id": {
+      "type": "string",
+      "description": "Reference to PoolEntry entity"
+    },
+    "participant_name": {
+      "type": "string",
+      "description": "Participant display name"
+    },
+    "tournament_year": {
+      "type": "number",
+      "description": "Tournament year e.g. 2026"
+    },
+    "round_number": {
+      "type": "number",
+      "description": "Round 1-4"
+    },
+    "round_date": {
+      "type": "string",
+      "description": "Date of the round"
+    },
+    "team_snapshot": {
+      "type": "array",
+      "description": "Array of golfer objects with round scores",
+      "items": {
+        "type": "object"
+      }
+    },
+    "team_total_to_par": {
+      "type": "number",
+      "description": "Team combined score for the round"
+    },
+    "team_rank_for_round": {
+      "type": "number",
+      "description": "Rank among participants for that round"
+    },
+    "overall_rank": {
+      "type": "number",
+      "description": "Leaderboard position after round"
+    },
+    "rank_change": {
+      "type": "number",
+      "description": "Positions gained/lost vs previous round"
+    },
+    "best_golfer": {
+      "type": "object",
+      "description": "{ name, score, note }"
+    },
+    "worst_golfer": {
+      "type": "object",
+      "description": "{ name, score, note }"
+    },
+    "recap_headline": {
+      "type": "string",
+      "description": "Snarky headline"
+    },
+    "recap_body": {
+      "type": "string",
+      "description": "Full roast/recap 200-350 words"
+    },
+    "recap_tone": {
+      "type": "string",
+      "enum": [
+        "roast_heavy",
+        "praise_heavy",
+        "balanced",
+        "tragic_comedy"
+      ],
+      "description": "Tone of the recap"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When recap was generated"
+    },
+    "generated_by": {
+      "type": "string",
+      "description": "automation or manual"
+    }
+  },
+  "required": [
+    "pool_id",
+    "entry_id",
+    "participant_name",
+    "tournament_year",
+    "round_number"
+  ]
+}

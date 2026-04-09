@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate, useLocation, NavLink } from 'react-router-dom';
-import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, LogIn, LogOut, Pencil, Check, X, ArrowLeft, MoreHorizontal, Share2, Copy, Link2, Moon, Sun, Newspaper } from 'lucide-react';
+import { Trophy, Users, Flag, Shuffle, MessageCircle, BookOpen, LogIn, LogOut, Pencil, Check, X, ArrowLeft, MoreHorizontal, Share2, Copy, Link2, Moon, Sun, Newspaper, ScrollText } from 'lucide-react';
 import { useTheme } from '@/lib/ThemeProvider';
 import { toast } from 'sonner';
 import { hapticTap } from '@/lib/haptics';
@@ -340,6 +340,7 @@ export function PoolBottomNav({ poolId }) {
   };
 
   const MORE_ITEMS = [
+    { id: 'caddyshack-report', label: '📋 The Caddyshack Report', Icon: ScrollText },
     { id: 'news', label: 'Golfer News', Icon: Newspaper },
     { id: 'history', label: 'Champions Wall', Icon: Trophy },
     { id: 'rules', label: 'Pool Rules', Icon: BookOpen },
