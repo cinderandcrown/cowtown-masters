@@ -66,15 +66,34 @@ Deno.serve(async (req) => {
     });
 
     if (existingRecaps.length > 0) {
+      // If round 4 is done and recaps exist, check if tournament recaps need generating
+      if (roundNumber === 4) {
+        const tourneyRecaps = await base44.asServiceRole.entities.RoundRecap.filter({
+          pool_id: poolId, round_number: 5, tournament_year: 2026,
+        });
+        if (tourneyRecaps.length === 0) {
+          const tourneyResult = await base44.asServiceRole.functions.invoke('generateTournamentRecaps', {
+            tournament_year: 2026, force_regenerate: false,
+          });
+          return Response.json({ message: 'Round 4 recaps exist, triggered tournament recaps', result: tourneyResult.data || tourneyResult });
+        }
+      }
       return Response.json({ message: `Recaps for round ${roundNumber} already exist`, count: existingRecaps.length });
     }
 
-    // Trigger generation
+    // Trigger round generation
     const result = await base44.asServiceRole.functions.invoke('generateRoundRecaps', {
-      round_number: roundNumber,
-      tournament_year: 2026,
-      force_regenerate: false,
+      round_number: roundNumber, tournament_year: 2026, force_regenerate: false,
     });
+
+    // If this is round 4, also trigger tournament recaps
+    if (roundNumber === 4) {
+      try {
+        await base44.asServiceRole.functions.invoke('generateTournamentRecaps', {
+          tournament_year: 2026, force_regenerate: false,
+        });
+      } catch (e) { console.error('Tournament recap trigger error:', e.message); }
+    }
 
     return Response.json({ message: `Triggered recap generation for round ${roundNumber}`, result: result.data || result });
   } catch (error) {

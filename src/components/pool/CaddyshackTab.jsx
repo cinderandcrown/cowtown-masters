@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
-import { ScrollText, RefreshCw, Loader2 } from 'lucide-react';
+import { ScrollText, RefreshCw, Loader2, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import RecapCard from '@/components/pool/RecapCard';
 import RecapRoundTabs from '@/components/pool/RecapRoundTabs';
@@ -82,14 +82,18 @@ export default function CaddyshackTab({ poolId }) {
     return [...recaps].sort((a, b) => (a.team_rank_for_round || 999) - (b.team_rank_for_round || 999));
   }, [recaps]);
 
+  const isFinalTab = activeRound === 5;
+
   const handleRegenerate = async () => {
     setShowConfirm(false);
     setGenerating(true);
     try {
-      await base44.functions.invoke('generateRoundRecaps', {
-        round_number: activeRound, tournament_year: 2026, force_regenerate: true,
-      });
-      toast.success(`Round ${activeRound} reports regenerated!`);
+      const fn = isFinalTab ? 'generateTournamentRecaps' : 'generateRoundRecaps';
+      const payload = isFinalTab
+        ? { tournament_year: 2026, force_regenerate: true }
+        : { round_number: activeRound, tournament_year: 2026, force_regenerate: true };
+      await base44.functions.invoke(fn, payload);
+      toast.success(isFinalTab ? 'Tournament reports regenerated!' : `Round ${activeRound} reports regenerated!`);
       refetch();
     } catch (e) {
       toast.error('Failed to regenerate: ' + (e.message || 'Unknown error'));
@@ -101,10 +105,12 @@ export default function CaddyshackTab({ poolId }) {
   const handleGenerate = async () => {
     setGenerating(true);
     try {
-      await base44.functions.invoke('generateRoundRecaps', {
-        round_number: activeRound, tournament_year: 2026, force_regenerate: false,
-      });
-      toast.success(`Round ${activeRound} reports generated!`);
+      const fn = isFinalTab ? 'generateTournamentRecaps' : 'generateRoundRecaps';
+      const payload = isFinalTab
+        ? { tournament_year: 2026, force_regenerate: false }
+        : { round_number: activeRound, tournament_year: 2026, force_regenerate: false };
+      await base44.functions.invoke(fn, payload);
+      toast.success(isFinalTab ? 'Tournament reports generated!' : `Round ${activeRound} reports generated!`);
       refetch();
     } catch (e) {
       toast.error('Failed to generate: ' + (e.message || 'Unknown error'));
@@ -178,9 +184,9 @@ export default function CaddyshackTab({ poolId }) {
       <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle style={{ fontFamily: "'Playfair Display', serif" }}>Regenerate Round {activeRound}?</DialogTitle>
+            <DialogTitle style={{ fontFamily: "'Playfair Display', serif" }}>Regenerate {isFinalTab ? 'Tournament' : `Round ${activeRound}`} Reports?</DialogTitle>
             <DialogDescription>
-              This will re-roll ALL recaps for Round {activeRound} using AI. Current roasts will be replaced. Takes about 30-60 seconds.
+              This will re-roll ALL {isFinalTab ? 'tournament' : `Round ${activeRound}`} recaps using AI. Current roasts will be replaced. Takes about 30-60 seconds.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
