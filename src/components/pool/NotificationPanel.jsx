@@ -28,14 +28,17 @@ export default function NotificationPanel({ poolId, notifications, participantNa
 
   const markAllRead = useMutation({
     mutationFn: async () => {
-      const unread = notifications.filter(n => !n.read_by?.includes(participantName) && participantName);
-      for (const n of unread) {
-        await base44.entities.Notification.update(n.id, {
+      if (!participantName) return;
+      const unread = notifications.filter(n => !n.read_by?.includes(participantName));
+      const updates = unread.map(n =>
+        base44.entities.Notification.update(n.id, {
           read_by: [...(n.read_by || []), participantName],
-        });
-      }
+        }).catch(() => {}) // ignore individual failures
+      );
+      await Promise.all(updates);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications', poolId] }),
+    onError: () => {},
   });
 
   return (

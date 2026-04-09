@@ -36,51 +36,83 @@ function normalizeName(name) {
 // round1, round2, round3, round4 (scores), etc.
 function parseMastersFeed(feedData) {
   const players = feedData?.data?.player || feedData?.data?.players || {};
+  const pars = feedData?.data?.pars || {};
   const scoreMap = {};
 
   // Masters feed can be an object keyed by player ID or an array
   const playerList = Array.isArray(players) ? players : Object.values(players);
 
+  // Build par totals per round for calculating round score-to-par from hole-by-hole scores
+  const roundPars = {};
+  for (const rKey of ['round1', 'round2', 'round3', 'round4']) {
+    const parArr = pars[rKey];
+    if (Array.isArray(parArr) && parArr.length > 0) {
+      roundPars[rKey] = parArr; // array of par per hole
+    }
+  }
+
   for (const p of playerList) {
     const firstName = p.first_name || p.firstName || '';
     const lastName = p.last_name || p.lastName || '';
-    // Masters.com uses display_name for last name only (e.g. 'KEEFER')
-    // full_name has the complete name (e.g. 'John Keefer')
     const displayName = p.full_name || p.fullName || `${firstName} ${lastName}`;
     const normalized = normalizeName(displayName);
 
     if (!normalized) continue;
 
-    // Parse round scores to par
-    const round1 = parseScoreToPar(p.round1 || p.round1_to_par);
-    const round2 = parseScoreToPar(p.round2 || p.round2_to_par);
-    const round3 = parseScoreToPar(p.round3 || p.round3_to_par);
-    const round4 = parseScoreToPar(p.round4 || p.round4_to_par);
-
-    // Parse actual stroke scores
+    // Parse round data from the nested round objects
+    // Masters.com format: round1: { fantasy: -3, total: 69, scores: [4,3,4,...], roundStatus: "Finished" }
+    // fantasy = round score to par, total = round strokes
+    const roundKeys = ['round1', 'round2', 'round3', 'round4'];
+    const roundsToPar = [];
     const actualScores = [];
-    for (const key of ['round1_strokes', 'round1Score', 'r1']) {
-      if (p[key] != null) { actualScores.push(Number(p[key])); break; }
-    }
-    for (const key of ['round2_strokes', 'round2Score', 'r2']) {
-      if (p[key] != null) { actualScores.push(Number(p[key])); break; }
-    }
-    for (const key of ['round3_strokes', 'round3Score', 'r3']) {
-      if (p[key] != null) { actualScores.push(Number(p[key])); break; }
-    }
-    for (const key of ['round4_strokes', 'round4Score', 'r4']) {
-      if (p[key] != null) { actualScores.push(Number(p[key])); break; }
+
+    for (const rKey of roundKeys) {
+      const roundObj = p[rKey];
+      if (roundObj && typeof roundObj === 'object') {
+        // Round has data if roundStatus is not 'Pre' and has scores
+        const isPlayed = roundObj.roundStatus === 'Finished';
+        const hasScores = Array.isArray(roundObj.scores) && roundObj.scores.some(s => s != null);
+        
+        if (isPlayed && roundObj.fantasy != null) {
+          // Finished round — use fantasy (score to par) directly
+          roundsToPar.push(parseScoreToPar(roundObj.fantasy));
+        } else if (hasScores && roundPars[rKey]) {
+          // In-progress round — calculate score to par from hole-by-hole scores vs par
+          const scores = roundObj.scores;
+          const parHoles = roundPars[rKey];
+          let rScore = 0;
+          let holesPlayed = 0;
+          for (let h = 0; h < scores.length; h++) {
+            if (scores[h] != null && parHoles[h] != null) {
+              rScore += scores[h] - parHoles[h];
+              holesPlayed++;
+            }
+          }
+          roundsToPar.push(holesPlayed > 0 ? rScore : null);
+        } else {
+          roundsToPar.push(null);
+        }
+
+        // Actual strokes for the round
+        if (roundObj.total != null) {
+          actualScores.push(Number(roundObj.total));
+        }
+      } else {
+        // Fallback: flat field (unlikely in masters.com feed but safe)
+        roundsToPar.push(parseScoreToPar(roundObj));
+      }
     }
 
-    // Total score to par
+    // Total score to par — use topar field from feed as primary
     const topar = parseScoreToPar(p.topar || p.to_par || p.total);
 
     // Status mapping
     let status = 'active';
-    const pStatus = (p.status || '').toLowerCase();
-    if (pStatus === 'cut' || pStatus === 'mc') status = 'cut';
-    else if (pStatus === 'wd' || pStatus === 'withdrawn') status = 'withdrawn';
-    else if (pStatus === 'dq' || pStatus === 'disqualified') status = 'disqualified';
+    const pStatus = (p.status || '').toUpperCase();
+    // Masters.com status: 'F' = finished, 'A' = active/playing, 'C' = cut, 'W' = withdrawn
+    if (pStatus === 'C' || pStatus === 'CUT' || pStatus === 'MC') status = 'cut';
+    else if (pStatus === 'W' || pStatus === 'WD' || pStatus === 'WITHDRAWN') status = 'withdrawn';
+    else if (pStatus === 'DQ' || pStatus === 'DISQUALIFIED') status = 'disqualified';
 
     // Position
     const position = p.pos || p.position || p.place || null;
@@ -89,15 +121,15 @@ function parseMastersFeed(feedData) {
     const thru = p.thru || p.today_thru || null;
 
     // Calculate cumulative score only from rounds actually played
-    const roundScores = [round1, round2, round3, round4].filter(r => r != null);
-    const calculatedTotal = roundScores.length > 0 ? roundScores.reduce((a, b) => a + b, 0) : null;
+    const playedRounds = roundsToPar.filter(r => r != null);
+    const calculatedTotal = playedRounds.length > 0 ? playedRounds.reduce((a, b) => a + b, 0) : null;
 
     scoreMap[normalized] = {
       score_to_par: topar ?? calculatedTotal ?? 0,
-      round_1: round1,
-      round_2: round2,
-      round_3: round3,
-      round_4: round4,
+      round_1: roundsToPar[0] ?? null,
+      round_2: roundsToPar[1] ?? null,
+      round_3: roundsToPar[2] ?? null,
+      round_4: roundsToPar[3] ?? null,
       actual_scores: actualScores.length > 0 ? actualScores : undefined,
       status,
       position: position ? String(position) : null,
