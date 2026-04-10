@@ -99,18 +99,17 @@ Deno.serve(async (req) => {
 
     let generated = 0, skipped = 0, errors = 0;
 
-    for (const entry of entryRoundScores) {
-      // Skip if already has recap and not forcing
-      if (!forceRegenerate && existingByEntry[entry.id]) {
-        skipped++;
-        continue;
-      }
+    // Process entries in parallel batches of 5 to avoid timeout
+    const BATCH_SIZE = 5;
+    const toProcess = entryRoundScores.filter(entry => {
+      if (!forceRegenerate && existingByEntry[entry.id]) { skipped++; return false; }
+      if (!entry.hasRoundData && !entry.gA && !entry.gB) { skipped++; return false; }
+      return true;
+    });
 
-      if (!entry.hasRoundData && !entry.gA && !entry.gB) {
-        skipped++;
-        continue;
-      }
-
+    for (let i = 0; i < toProcess.length; i += BATCH_SIZE) {
+      const batch = toProcess.slice(i, i + BATCH_SIZE);
+      const results = await Promise.allSettled(batch.map(async (entry) => {
       const gA = entry.gA;
       const gB = entry.gB;
 
@@ -124,7 +123,6 @@ Deno.serve(async (req) => {
         group: g.group,
       }));
 
-      // Best and worst golfer for the round
       const golferRoundScores = teamGolfers.map(g => ({ name: g.name, score: g[rKey] ?? 999 }));
       golferRoundScores.sort((a, b) => a.score - b.score);
       const bestGolfer = golferRoundScores[0] ? { name: golferRoundScores[0].name, score: formatScoreToPar(golferRoundScores[0].score === 999 ? null : golferRoundScores[0].score) } : { name: 'N/A', score: '?' };
@@ -132,9 +130,8 @@ Deno.serve(async (req) => {
 
       const overallRank = overallRankMap[entry.id] || entries.length;
       const prevRank = prevRankMap[entry.id] || overallRank;
-      const rankChange = prevRank - overallRank; // positive = improved
+      const rankChange = prevRank - overallRank;
 
-      // Build prompt
       const golferLines = teamGolfers.map(g =>
         `- ${g.name} (${g.group === 'A' ? 'Top Tier' : 'Bottom Tier'}): Round score ${formatScoreToPar(g[rKey])}, overall ${formatScoreToPar(g.score_to_par)}, position ${g.position || '?'}, status: ${g.status}`
       ).join('\n');
@@ -179,7 +176,6 @@ Return ONLY valid JSON in this exact format:
 
 DO NOT include markdown, code fences, or commentary outside the JSON.`;
 
-      try {
         const llmResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
           prompt: `${systemPrompt}\n\n---\n\n${userPrompt}`,
           response_json_schema: {
@@ -191,7 +187,6 @@ DO NOT include markdown, code fences, or commentary outside the JSON.`;
             },
             required: ['headline', 'body', 'tone'],
           },
-          model: 'claude_sonnet_4_6',
         });
 
         const recapData = {
@@ -215,31 +210,17 @@ DO NOT include markdown, code fences, or commentary outside the JSON.`;
           generated_by: forceRegenerate ? 'manual' : 'automation',
         };
 
-        // Update existing or create new
         if (existingByEntry[entry.id]) {
           await base44.asServiceRole.entities.RoundRecap.update(existingByEntry[entry.id].id, recapData);
         } else {
           await base44.asServiceRole.entities.RoundRecap.create(recapData);
         }
-        generated++;
-      } catch (e) {
-        console.error(`Error generating recap for ${entry.participant_name}: ${e.message}`);
-        errors++;
-      }
-    }
+        return 'ok';
+      }));
 
-    // Send notification if this is an automation run and we generated recaps
-    if (!forceRegenerate && generated > 0) {
-      try {
-        await base44.asServiceRole.entities.Notification.create({
-          pool_id: poolId,
-          type: 'round_finish',
-          title: `📋 Caddyshack Report: Round ${roundNumber}`,
-          message: `The Caddyshack Report for Round ${roundNumber} is live. Brace yourselves.`,
-          read_by: [],
-        });
-      } catch (e) {
-        console.error('Failed to create notification:', e.message);
+      for (const r of results) {
+        if (r.status === 'fulfilled') generated++;
+        else { errors++; console.error('Recap batch error:', r.reason?.message); }
       }
     }
 
