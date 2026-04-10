@@ -21,13 +21,22 @@ function parseScoreToPar(val) {
   return null;
 }
 
+// Map of common nickname/alias → canonical feed name
+// Normalized (no accents, lowercase) pool name → normalized feed name
+const NAME_ALIASES = {
+  'nico echavarria': 'nicolas echavarria',
+  'sam stevens': 'samuel stevens',
+  'johnny keefer': 'john keefer',
+};
+
 function normalizeName(name) {
-  return name
+  const base = name
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-zA-Z\s]/g, '')
     .toLowerCase()
     .trim();
+  return NAME_ALIASES[base] || base;
 }
 
 // Parse Masters.com feed format
@@ -306,10 +315,15 @@ Deno.serve(async (req) => {
 
     let updated = 0;
     let matched = 0;
+    const unmatchedGolfers = [];
 
     for (const golfer of golfers) {
       const normalized = normalizeName(golfer.name);
       const data = scoreMap[normalized];
+
+      if (!data) {
+        unmatchedGolfers.push({ name: golfer.name, normalized });
+      }
 
       if (data) {
         matched++;
