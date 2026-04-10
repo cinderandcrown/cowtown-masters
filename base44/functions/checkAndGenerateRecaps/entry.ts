@@ -35,7 +35,13 @@ Deno.serve(async (req) => {
 
     // Check if all golfers have finished the round
     const golfers = await base44.asServiceRole.entities.Golfer.filter({ pool_id: poolId });
-    const activeGolfers = golfers.filter(g => g.status === 'active');
+    // Only consider golfers who are actually in the tournament feed (have any score data, thru, or position)
+    // Golfers with no data at all were likely withdrawn pre-tournament or not in the masters.com feed
+    const activeGolfers = golfers.filter(g => g.status === 'active' && (g.round_1 != null || g.thru || g.position));
+    
+    if (activeGolfers.length === 0) {
+      return Response.json({ message: 'No participating golfers found yet' });
+    }
     
     // A golfer has finished the round if they have a round score and thru is 'F' or '18' or they have the next round's data
     const allFinished = activeGolfers.every(g => {

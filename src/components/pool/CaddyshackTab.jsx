@@ -57,22 +57,30 @@ export default function CaddyshackTab({ poolId }) {
   const roundStatus = useMemo(() => {
     const todayStr = (() => { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`; })();
     const roundDate = ROUND_DATES[activeRound];
+    if (activeRound === 5 || !roundDate) return todayStr > '2026-04-12' ? 'complete' : 'not_started';
     if (todayStr < roundDate) return 'not_started';
     const rKey = `round_${activeRound}`;
-    const activeG = golfers.filter(g => g.status === 'active');
-    const finished = activeG.filter(g => {
+    // Only consider golfers who have ANY tournament data (score, thru, or position)
+    // Golfers with no data at all are not in the feed (withdrawn before tournament / not participating)
+    const participatingGolfers = golfers.filter(g => g.status === 'active' && (g.round_1 != null || g.thru || g.position));
+    if (participatingGolfers.length === 0) return 'not_started';
+    const finished = participatingGolfers.filter(g => {
       if (g[rKey] == null) return false;
       const thru = (g.thru || '').toUpperCase();
       return thru === 'F' || thru === '18' || thru === 'FINISHED';
     });
-    if (finished.length < activeG.length && activeG.length > 0) return 'in_progress';
+    if (finished.length < participatingGolfers.length) return 'in_progress';
     return 'complete';
   }, [activeRound, golfers]);
 
   const golfersOnCourse = useMemo(() => {
+    if (activeRound === 5) return 0;
     const rKey = `round_${activeRound}`;
+    // Only count golfers who are actually participating in the tournament
     return golfers.filter(g => {
       if (g.status !== 'active') return false;
+      // Skip golfers with no tournament data at all (not in feed)
+      if (g.round_1 == null && !g.thru && !g.position) return false;
       const thru = (g.thru || '').toUpperCase();
       return g[rKey] == null || (thru !== 'F' && thru !== '18' && thru !== 'FINISHED');
     }).length;
