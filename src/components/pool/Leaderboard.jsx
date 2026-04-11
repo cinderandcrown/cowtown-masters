@@ -442,15 +442,15 @@ export default function Leaderboard({ poolId, onSelectEntry }) {
                       title={`Champion: ${getChampionYears(entry.participant_name).join(', ')}`}
                     />
                   )}
-                  {hasCut && <span className="text-[8px] font-bold text-destructive bg-destructive/10 px-1 rounded">CUT</span>}
-                  {hasWD && <span className="text-[8px] font-bold text-orange-600 bg-orange-500/15 px-1 rounded">WD</span>}
                 </div>
                 {entry.team_name && (
                   <p className="text-[11px] text-muted-foreground truncate">{entry.participant_name}</p>
                 )}
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <p className="text-[11px] text-muted-foreground truncate">
-                    {entry.golferA?.name || 'TBD'} & {entry.golferB?.name || 'TBD'}
+                    {entry.golferA?.name || 'TBD'}{entry.golferA?.status === 'cut' ? <span className="text-[8px] font-bold text-destructive bg-destructive/10 px-1 rounded ml-0.5">CUT</span> : entry.golferA?.status === 'withdrawn' ? <span className="text-[8px] font-bold text-orange-600 bg-orange-500/15 px-1 rounded ml-0.5">WD</span> : null}
+                    {' & '}
+                    {entry.golferB?.name || 'TBD'}{entry.golferB?.status === 'cut' ? <span className="text-[8px] font-bold text-destructive bg-destructive/10 px-1 rounded ml-0.5">CUT</span> : entry.golferB?.status === 'withdrawn' ? <span className="text-[8px] font-bold text-orange-600 bg-orange-500/15 px-1 rounded ml-0.5">WD</span> : null}
                   </p>
                   <LiveBadge golfer={entry.golferA} />
                   <LiveBadge golfer={entry.golferB} />
