@@ -75,9 +75,15 @@ Deno.serve(async (req) => {
 
     let generated = 0, skipped = 0, errors = 0;
 
-    for (const entry of standings) {
-      if (!forceRegenerate && existingByEntry[entry.id]) { skipped++; continue; }
+    const toProcess = standings.filter(entry => {
+      if (!forceRegenerate && existingByEntry[entry.id]) { skipped++; return false; }
+      return true;
+    });
 
+    const BATCH_SIZE = 5;
+    for (let i = 0; i < toProcess.length; i += BATCH_SIZE) {
+      const batch = toProcess.slice(i, i + BATCH_SIZE);
+      const results = await Promise.allSettled(batch.map(async (entry) => {
       const gA = entry.gA;
       const gB = entry.gB;
       const teamGolfers = [gA, gB].filter(Boolean);
@@ -88,17 +94,14 @@ Deno.serve(async (req) => {
         round_1: g.round_1, round_2: g.round_2, round_3: g.round_3, round_4: g.round_4,
       }));
 
-      // Best and worst by total tournament score
       const golferScores = teamGolfers.map(g => ({ name: g.name, score: g.score_to_par ?? 0 }));
       golferScores.sort((a, b) => a.score - b.score);
       const bestGolfer = golferScores[0] || { name: 'N/A', score: 0 };
       const worstGolfer = golferScores[golferScores.length - 1] || bestGolfer;
 
-      // Trajectory string
       const ranks = roundRanks[entry.id] || {};
-      const trajectory = [1, 2, 3, 4].map(r => `R${r}: #${ranks[r] || '?'}`).join(' → ');
+      const trajectory = [1, 2, 3, 4].map(r => `R${r}: #${ranks[r] || '?'}`).join(' \u2192 ');
 
-      // Best and worst individual rounds
       let bestRound = null, worstRound = null;
       for (const g of teamGolfers) {
         for (let r = 1; r <= 4; r++) {
@@ -129,20 +132,20 @@ Tournament Disaster: ${worstGolfer.name} (${fmt(worstGolfer.score)} total)
 
 Generate the full tournament recap.`;
 
-      const systemPrompt = `You are the snarky sportswriter behind "The Caddyshack Report," writing the FINAL TOURNAMENT RECAP for the Cowtown Masters pool — a tight-knit Texas friend group. This is the big one: the season finale, the full four-round retrospective. Your voice is Bill Simmons meets Caddyshack meets a roast at the 19th hole.
+      const systemPrompt = `You are the snarky sportswriter behind "The Caddyshack Report," writing the FINAL TOURNAMENT RECAP for the Cowtown Masters pool \u2014 a tight-knit Texas friend group. This is the big one: the season finale, the full four-round retrospective. Your voice is Bill Simmons meets Caddyshack meets a roast at the 19th hole.
 
-This is NOT a single-round recap. This covers their ENTIRE tournament arc — the highs, the lows, the collapses, the comebacks, the steady mediocrity. Tell the story of their week.
+This is NOT a single-round recap. This covers their ENTIRE tournament arc \u2014 the highs, the lows, the collapses, the comebacks, the steady mediocrity. Tell the story of their week.
 
 RULES:
 - Affectionate, never cruel. Punch the picks, not the person.
-- Reference ALL FOUR ROUNDS. Call out their trajectory — did they start hot and collapse? Steady the whole way? Rally on Sunday?
+- Reference ALL FOUR ROUNDS. Call out their trajectory \u2014 did they start hot and collapse? Steady the whole way? Rally on Sunday?
 - Reference specific golfers, specific rounds, specific scores. No generic fluff.
 - If they won the pool, give them their moment but immediately undercut it with something funny.
 - If they finished last, this is the eulogy. Make it legendary.
-- If a golfer got cut, missed the weekend, or withdrew — that's comedy gold, USE IT.
+- If a golfer got cut, missed the weekend, or withdrew \u2014 that\u2019s comedy gold, USE IT.
 - Length: 250-400 words. This is the finale, you get a little more room.
-- Headline should feel like a season finale episode title — dramatic, funny, quotable.
-- End with a "final verdict" one-liner that sums up their entire tournament in one sentence.
+- Headline should feel like a season finale episode title \u2014 dramatic, funny, quotable.
+- End with a \u201cfinal verdict\u201d one-liner that sums up their entire tournament in one sentence.
 
 Return ONLY valid JSON:
 {
@@ -151,7 +154,6 @@ Return ONLY valid JSON:
   "tone": "roast_heavy" | "praise_heavy" | "balanced" | "tragic_comedy"
 }`;
 
-      try {
         const llmResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
           prompt: `${systemPrompt}\n\n---\n\n${userPrompt}`,
           response_json_schema: {
@@ -163,7 +165,6 @@ Return ONLY valid JSON:
             },
             required: ['headline', 'body', 'tone'],
           },
-          model: 'claude_sonnet_4_6',
         });
 
         const recapData = {
@@ -192,10 +193,12 @@ Return ONLY valid JSON:
         } else {
           await base44.asServiceRole.entities.RoundRecap.create(recapData);
         }
-        generated++;
-      } catch (e) {
-        console.error(`Error generating tournament recap for ${entry.participant_name}: ${e.message}`);
-        errors++;
+        return 'ok';
+      }));
+
+      for (const r of results) {
+        if (r.status === 'fulfilled') generated++;
+        else { errors++; console.error('Tournament recap batch error:', r.reason?.message); }
       }
     }
 
