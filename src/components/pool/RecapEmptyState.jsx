@@ -2,6 +2,9 @@ import React from 'react';
 import { Clock, Loader2, CircleDashed } from 'lucide-react';
 
 export default function RecapEmptyState({ roundNumber, status, golfersOnCourse }) {
+  const isFinal = roundNumber === 5;
+  const roundLabel = isFinal ? 'Tournament Recap' : `Round ${roundNumber}`;
+
   if (status === 'not_started') {
     return (
       <div className="text-center py-16 px-6">
@@ -9,10 +12,10 @@ export default function RecapEmptyState({ roundNumber, status, golfersOnCourse }
           <Clock className="w-7 h-7 text-primary/40" />
         </div>
         <h3 className="text-base font-bold text-foreground mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-          Round {roundNumber} Hasn't Teed Off Yet
+          {isFinal ? 'Tournament Not Complete Yet' : `${roundLabel} Hasn't Teed Off Yet`}
         </h3>
         <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-          The roasts are loading… check back once the round begins.
+          {isFinal ? 'The final roasts drop after the last round wraps up.' : 'The roasts are loading… check back once the round begins.'}
         </p>
       </div>
     );
@@ -25,7 +28,7 @@ export default function RecapEmptyState({ roundNumber, status, golfersOnCourse }
           <CircleDashed className="w-7 h-7 text-green-500 animate-spin" style={{ animationDuration: '3s' }} />
         </div>
         <h3 className="text-base font-bold text-foreground mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-          Round {roundNumber} Still In Progress
+          {isFinal ? 'Tournament Still In Progress' : `${roundLabel} Still In Progress`}
         </h3>
         <p className="text-sm text-muted-foreground max-w-xs mx-auto">
           The Caddyshack Report drops when the last putt falls.
@@ -59,7 +62,7 @@ export default function RecapEmptyState({ roundNumber, status, golfersOnCourse }
       <h3 className="text-base font-bold text-foreground mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
         No Reports Yet
       </h3>
-      <p className="text-sm text-muted-foreground">Reports will appear after the round is complete.</p>
+      <p className="text-sm text-muted-foreground">{isFinal ? 'Tournament recaps will appear after the final round is complete.' : 'Reports will appear after the round is complete.'}</p>
     </div>
   );
 }

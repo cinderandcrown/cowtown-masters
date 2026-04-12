@@ -21,9 +21,11 @@ function RankChangeArrow({ change }) {
 export default function RecapCard({ recap, totalEntries, roundNumber }) {
   const cardRef = useRef(null);
   const [exporting, setExporting] = useState(false);
+  const isFinal = roundNumber === 5;
+  const roundLabel = isFinal ? 'Tournament' : `Round ${roundNumber}`;
 
   const handleCopy = () => {
-    const text = `THE CADDYSHACK REPORT\nRound ${roundNumber} — ${recap.participant_name}\n\n${recap.recap_headline}\n\n${recap.recap_body}\n\nMVP: ${recap.best_golfer?.name} (${recap.best_golfer?.score})\nDisaster: ${recap.worst_golfer?.name} (${recap.worst_golfer?.score})`;
+    const text = `THE CADDYSHACK REPORT\n${roundLabel} — ${recap.participant_name}\n\n${recap.recap_headline}\n\n${recap.recap_body}\n\nMVP: ${recap.best_golfer?.name} (${recap.best_golfer?.score})\nDisaster: ${recap.worst_golfer?.name} (${recap.worst_golfer?.score})`;
     navigator.clipboard.writeText(text);
     toast.success('Recap copied!');
   };
@@ -38,7 +40,7 @@ export default function RecapCard({ recap, totalEntries, roundNumber }) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `caddyshack-r${roundNumber}-${recap.participant_name.replace(/\s/g, '-').toLowerCase()}.png`;
+        a.download = `caddyshack-${isFinal ? 'final' : `r${roundNumber}`}-${recap.participant_name.replace(/\s/g, '-').toLowerCase()}.png`;
         a.click();
         URL.revokeObjectURL(url);
         toast.success('Card saved as image!');
@@ -75,7 +77,7 @@ export default function RecapCard({ recap, totalEntries, roundNumber }) {
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-px mx-4 mb-3 bg-border rounded-lg overflow-hidden">
         <div className="bg-card p-2 text-center">
-          <p className="text-[9px] font-bold text-muted-foreground tracking-widest uppercase">Round</p>
+          <p className="text-[9px] font-bold text-muted-foreground tracking-widest uppercase">{isFinal ? 'Total' : 'Round'}</p>
           <p className="text-base font-black text-foreground tabular-nums">{formatScore(recap.team_total_to_par)}</p>
         </div>
         <div className="bg-card p-2 text-center">
