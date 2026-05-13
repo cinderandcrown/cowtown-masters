@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 // In-memory store for SSE clients (in production, use Redis for multi-server setup)
 const clients = new Map();
@@ -63,9 +63,15 @@ Deno.serve(async (req) => {
     }
   }
 
-  // POST /scoreBroadcast — Broadcast score updates to all clients
+  // POST /scoreBroadcast — Broadcast score updates to all clients (admin only)
   if (req.method === 'POST') {
     try {
+      const base44Post = createClientFromRequest(req);
+      const postUser = await base44Post.auth.me();
+      if (!postUser || postUser.role !== 'admin') {
+        return Response.json({ error: 'Admin only' }, { status: 403 });
+      }
+
       const body = await req.json();
       const { poolId, golfers } = body;
 

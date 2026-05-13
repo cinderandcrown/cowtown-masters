@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 // VERIFIED Masters History data — sourced from masters.com official results
 // 2025 Masters: Won by Rory McIlroy (-11, playoff over Justin Rose)
@@ -137,9 +137,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    const pools = await base44.asServiceRole.entities.Pool.filter({});
+    // Only backfill pools this admin owns
+    const allPools = await base44.asServiceRole.entities.Pool.filter({});
+    const pools = allPools.filter(p => p.admin_user_id === user.email);
     if (pools.length === 0) {
-      return Response.json({ error: 'No pools found' }, { status: 404 });
+      return Response.json({ error: 'No pools found that you own' }, { status: 404 });
     }
 
     // Build a normalized lookup map

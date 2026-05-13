@@ -1,43 +1,12 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 /**
- * Applies the hat draw assignments from the spreadsheet.
+ * Applies the hat draw assignments from a payload.
  * Matches participant names to entries and golfer names to golfer records,
  * then updates each entry with the correct golfer_a_id and golfer_b_id.
+ * 
+ * Payload: { poolId: string, assignments: [{ participant, golferA, golferB }] }
  */
-
-const DRAW_ASSIGNMENTS = [
-  { participant: 'Robert Carlyle', golferA: 'Ludvig Åberg', golferB: 'Sungjae Im' },
-  { participant: 'Charlie Brown', golferA: 'Jon Rahm', golferB: 'Gary Woodland' },
-  { participant: 'Austin and Chase', golferA: 'Jason Day', golferB: 'Aaron Rai' },
-  { participant: 'Matt Fleske', golferA: 'Jordan Spieth', golferB: 'Casey Jarvis' },
-  { participant: 'Jonathon Tobias', golferA: 'Tommy Fleetwood', golferB: 'Tom McKibbin' },
-  { participant: 'Matt Powell', golferA: 'Rory McIlroy', golferB: 'Rasmus Højgaard' },
-  { participant: 'James Pool', golferA: 'Si Woo Kim', golferB: 'Ben Griffin' },
-  { participant: 'Cary Lott', golferA: 'Bryson DeChambeau', golferB: 'Sergio Garcia' },
-  { participant: 'Mark Palmieri', golferA: 'Tyrrell Hatton', golferB: 'Nico Echavarria' },
-  { participant: 'Jackson Vickers', golferA: 'Sepp Straka', golferB: 'Corey Conners' },
-  { participant: 'John Dowling', golferA: 'Viktor Hovland', golferB: 'Ryan Gerard' },
-  { participant: 'Nicholas Will', golferA: 'Robert MacIntyre', golferB: 'Jacob Bridgeman' },
-  { participant: 'Daniel Kelley', golferA: 'Jake Knapp', golferB: 'Matt McCarty' },
-  { participant: 'Andrew Audet', golferA: 'Scottie Scheffler', golferB: 'Ryan Fox' },
-  { participant: 'Mitchell Belew', golferA: 'Hideki Matsuyama', golferB: 'Max Homa' },
-  { participant: 'Corey Platt', golferA: 'Collin Morikawa', golferB: 'Harry Hall' },
-  { participant: 'Gilbert Gamez', golferA: 'Xander Schauffele', golferB: 'Cameron Smith' },
-  { participant: 'Thomas Owings', golferA: 'Justin Rose', golferB: 'Daniel Berger' },
-  { participant: 'Howard Kane', golferA: 'Cameron Young', golferB: 'Dustin Johnson' },
-  { participant: 'Joseph Cook', golferA: 'Chris Gotterup', golferB: 'Wyndham Clark' },
-  { participant: 'Blake Watkins', golferA: 'Akshay Bhatia', golferB: 'Brian Harman' },
-  { participant: 'Christopher Costanza', golferA: 'Patrick Cantlay', golferB: 'Kurt Kitayama' },
-  { participant: 'Adam Tepe', golferA: 'Min Woo Lee', golferB: 'Harris English' },
-  { participant: 'Zac Gordon', golferA: 'Matt Fitzpatrick', golferB: 'Marco Penge' },
-  { participant: 'Tyler Page', golferA: 'Shane Lowry', golferB: 'Alex Norén' },
-  { participant: 'Zac Hansen', golferA: 'Patrick Reed', golferB: 'Nicolai Højgaard' },
-  { participant: 'Sanders Johnston', golferA: 'Adam Scott', golferB: 'Sam Burns' },
-  { participant: 'Clay Collier', golferA: 'Justin Thomas', golferB: 'Keegan Bradley' },
-  { participant: 'Colby Amescua', golferA: 'Brooks Koepka', golferB: 'J.J. Spaun' },
-  { participant: 'Wes Odom', golferA: 'Russell Henley', golferB: 'Maverick McNealy' },
-];
 
 function normalize(name) {
   return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
@@ -51,7 +20,18 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin only' }, { status: 403 });
     }
 
-    const poolId = '69bd9d27b34b8e72c31d7bf3';
+    const body = await req.json();
+    const { poolId, assignments } = body;
+
+    if (!poolId || !assignments || !Array.isArray(assignments)) {
+      return Response.json({ error: 'poolId and assignments array required' }, { status: 400 });
+    }
+
+    // Verify admin owns this pool
+    const pool = await base44.asServiceRole.entities.Pool.get(poolId);
+    if (!pool || pool.admin_user_id !== user.email) {
+      return Response.json({ error: 'Forbidden: you do not own this pool' }, { status: 403 });
+    }
 
     // Fetch all entries and golfers
     const entries = await base44.asServiceRole.entities.PoolEntry.filter({ pool_id: poolId });
@@ -71,7 +51,7 @@ Deno.serve(async (req) => {
     const results = [];
     const errors = [];
 
-    for (const assignment of DRAW_ASSIGNMENTS) {
+    for (const assignment of assignments) {
       const entry = entryMap[normalize(assignment.participant)];
       const golferA = golferMap[normalize(assignment.golferA)];
       const golferB = golferMap[normalize(assignment.golferB)];
