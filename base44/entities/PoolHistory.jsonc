@@ -1,0 +1,46 @@
+{
+  "name": "PoolHistory",
+  "type": "object",
+  "properties": {
+    "pool_id": {
+      "type": "string",
+      "description": "Reference to Pool"
+    },
+    "year": {
+      "type": "number",
+      "description": "Tournament year"
+    },
+    "winner_name": {
+      "type": "string",
+      "description": "Winning participant name"
+    },
+    "winning_score": {
+      "type": "number",
+      "description": "Final combined score"
+    },
+    "golfer_a_name": {
+      "type": "string",
+      "description": "Winning Group A golfer"
+    },
+    "golfer_b_name": {
+      "type": "string",
+      "description": "Winning Group B golfer"
+    },
+    "total_entries": {
+      "type": "number",
+      "description": "Number of pool participants"
+    },
+    "full_standings": {
+      "type": "array",
+      "description": "Final leaderboard data",
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "required": [
+    "pool_id",
+    "year",
+    "winner_name"
+  ]
+}

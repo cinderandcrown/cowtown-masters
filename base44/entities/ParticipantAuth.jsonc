@@ -1,0 +1,42 @@
+{
+  "name": "ParticipantAuth",
+  "properties": {
+    "created_date": {
+      "description": "Account creation timestamp",
+      "format": "date-time",
+      "type": "string"
+    },
+    "email": {
+      "description": "Participant email (lowercase)",
+      "type": "string"
+    },
+    "entry_id": {
+      "description": "Reference to PoolEntry entity",
+      "type": "string"
+    },
+    "participant_name": {
+      "description": "Participant display name",
+      "type": "string"
+    },
+    "password_hash": {
+      "description": "SHA-256 hashed password",
+      "type": "string"
+    },
+    "pool_id": {
+      "description": "Reference to Pool entity",
+      "type": "string"
+    },
+    "salt": {
+      "description": "Random salt for password hashing",
+      "type": "string"
+    }
+  },
+  "required": [
+    "pool_id",
+    "email",
+    "participant_name",
+    "password_hash",
+    "salt"
+  ],
+  "type": "object"
+}

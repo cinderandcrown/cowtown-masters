@@ -1,0 +1,59 @@
+{
+  "name": "Pool",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Pool name (e.g., 'Cowtown Masters 2026')"
+    },
+    "year": {
+      "type": "number",
+      "description": "Tournament year"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "setup",
+        "draft",
+        "live",
+        "complete"
+      ],
+      "default": "setup",
+      "description": "Pool lifecycle status"
+    },
+    "entry_fee": {
+      "type": "number",
+      "description": "Entry fee per participant"
+    },
+    "payout_structure": {
+      "type": "object",
+      "description": "Payout distribution (e.g., {1st: 60, 2nd: 25, 3rd: 15})"
+    },
+    "admin_user_id": {
+      "type": "string",
+      "description": "Email/ID of pool admin"
+    },
+    "invite_code": {
+      "type": "string",
+      "description": "6-char alphanumeric code for joining"
+    },
+    "draft_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Scheduled draft datetime"
+    },
+    "max_entries": {
+      "type": "number",
+      "description": "Maximum pool participants"
+    },
+    "golfers_per_group": {
+      "type": "number",
+      "description": "Number of golfers assigned to each group (A & B)"
+    }
+  },
+  "required": [
+    "name",
+    "year",
+    "admin_user_id"
+  ]
+}

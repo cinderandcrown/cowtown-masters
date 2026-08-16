@@ -1,0 +1,41 @@
+{
+  "name": "DraftPick",
+  "type": "object",
+  "properties": {
+    "pool_id": {
+      "type": "string",
+      "description": "Reference to Pool"
+    },
+    "pick_number": {
+      "type": "number",
+      "description": "Order in draft sequence"
+    },
+    "group": {
+      "type": "string",
+      "enum": [
+        "A",
+        "B"
+      ],
+      "description": "Which group was being drafted"
+    },
+    "golfer_id": {
+      "type": "string",
+      "description": "Golfer selected"
+    },
+    "entry_id": {
+      "type": "string",
+      "description": "PoolEntry that received this pick"
+    },
+    "drawn_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of draw"
+    }
+  },
+  "required": [
+    "pool_id",
+    "pick_number",
+    "group",
+    "golfer_id"
+  ]
+}

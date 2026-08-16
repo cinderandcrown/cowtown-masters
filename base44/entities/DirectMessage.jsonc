@@ -1,0 +1,38 @@
+{
+  "name": "DirectMessage",
+  "type": "object",
+  "properties": {
+    "pool_id": {
+      "type": "string",
+      "description": "Reference to Pool entity"
+    },
+    "sender_name": {
+      "type": "string",
+      "description": "Sender participant name"
+    },
+    "receiver_name": {
+      "type": "string",
+      "description": "Receiver participant name"
+    },
+    "message": {
+      "type": "string",
+      "description": "Message text content"
+    },
+    "created_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Message timestamp"
+    },
+    "read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether message has been read"
+    }
+  },
+  "required": [
+    "pool_id",
+    "sender_name",
+    "receiver_name",
+    "message"
+  ]
+}
